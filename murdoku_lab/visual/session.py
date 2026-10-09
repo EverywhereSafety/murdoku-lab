@@ -176,3 +176,19 @@ class VisualSession:
             },
             "steps": deepcopy(self.events),
         }
+
+    def continue_attempt(self):
+        """Open a new player attempt with the edits preceding a failed submission."""
+        with self.lock:
+            if not self.done or self.terminal.get("score", {}).get("solved"):
+                raise SessionError("Only an incorrect submission can be continued.")
+            continued = VisualSession(
+                self.entry,
+                allow_check=self.allow_check,
+                reward_config=self.reward_config,
+            )
+            for event in self.events[:-1]:
+                continued.act(
+                    event["action"], note=event["note"], source=event["source"]
+                )
+            return continued

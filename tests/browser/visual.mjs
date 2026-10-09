@@ -9,12 +9,22 @@ const browser = await chromium.launch({
   args: ["--no-sandbox"],
 });
 const errors = [];
+const externalRequests = [];
+const trackExternalRequests = (context) =>
+  context.on("request", (request) => {
+    const url = new URL(request.url());
+    if (/^https?:$/.test(url.protocol) && url.origin !== new URL(base).origin)
+      externalRequests.push(url.href);
+  });
 const checks = [];
 const context = await browser.newContext({
   viewport: { width: 1440, height: 1120 },
   deviceScaleFactor: 1,
 });
+trackExternalRequests(context);
 const page = await context.newPage();
+page.setDefaultNavigationTimeout(120000);
+page.setDefaultTimeout(120000);
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("response", (r) => {
   if (r.url().startsWith(base) && r.status() >= 400)
@@ -94,6 +104,13 @@ try {
   await revision(3);
   assert.deepEqual((await state()).placements, { A: "b1" });
   checks.push("click placement / undo / redo");
+  await page
+    .getByRole("button", { name: "Open the casebook", exact: true })
+    .click();
+  await page.locator(".case-card.current").click();
+  assert.equal((await state()).revision, 3);
+  assert.equal((await state()).placements.A, "b1");
+  checks.push("return to current case without losing progress");
 
   await page.getByRole("button", { name: "Select Basil", exact: true }).click();
   await page
@@ -221,6 +238,41 @@ try {
     V: "a2",
   }))
     await action({ action: "place", person, cell });
+  await action({ action: "note", text: "The chairs place Ada and Dorian." });
+  const beforeSubmission = await state();
+  await page.getByLabel("Choose murderer").selectOption("B");
+  await page.getByRole("button", { name: "Submit case", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .filter({ hasText: "Ready to close the case?" })
+    .getByRole("button", { name: "Submit case", exact: true })
+    .click();
+  await page
+    .getByRole("heading", { name: "There is more to this story." })
+    .waitFor();
+  await page
+    .getByRole("button", { name: "Close dialog", exact: true })
+    .filter({ visible: true })
+    .click();
+  await page.reload({ waitUntil: "networkidle" });
+  await page.locator('[data-cell="b1"]').waitFor();
+  assert.equal((await state()).done, true);
+  await page.getByRole("button", { name: "View result", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Keep investigating", exact: true })
+    .click();
+  await revision(beforeSubmission.revision);
+  assert.deepEqual((await state()).placements, beforeSubmission.placements);
+  assert.equal((await state()).notebook, beforeSubmission.notebook);
+  assert.equal((await state()).done, false);
+  await page.reload({ waitUntil: "networkidle" });
+  await page.locator('[data-cell="b1"]').waitFor();
+  assert.deepEqual((await state()).placements, beforeSubmission.placements);
+  assert.equal((await state()).notebook, beforeSubmission.notebook);
+  assert.equal((await state()).done, false);
+  checks.push(
+    "incorrect verdict / continue with board and notes / refresh recovery",
+  );
   await page.getByLabel("Choose murderer").selectOption("A");
   await page.getByRole("button", { name: "Submit case", exact: true }).click();
   await page
@@ -240,7 +292,10 @@ try {
     isMobile: true,
     hasTouch: true,
   });
+  trackExternalRequests(mobile);
   const phone = await mobile.newPage();
+  phone.setDefaultNavigationTimeout(120000);
+  phone.setDefaultTimeout(120000);
   phone.on("pageerror", (e) => errors.push(e.message));
   await phone.goto(base, { waitUntil: "networkidle" });
   await phone.locator('[data-cell="b1"]').waitFor();
@@ -278,6 +333,38 @@ try {
   assert.equal(touched.placements.A, "b1");
   await phone.screenshot({ path: "artifacts/mobile.png", fullPage: true });
   checks.push("390px mobile layout / touch placement / no page overflow");
+  await phone.evaluate(() => window.murdokuAgent.newSession("estate"));
+  await phone.locator('[data-cell="p16"]').waitFor();
+  assert.equal(await phone.locator("[data-cell]").count(), 256);
+  assert.equal(
+    await phone.locator(".zoom-controls > span").textContent(),
+    "200%",
+  );
+  const zoomButton = await phone
+    .getByRole("button", { name: "Zoom in", exact: true })
+    .boundingBox();
+  assert(zoomButton.width >= 44 && zoomButton.height >= 44);
+  assert(
+    await phone
+      .getByRole("button", { name: "Fit the board", exact: true })
+      .isVisible(),
+  );
+  assert(
+    await phone.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  );
+  await phone.locator('[data-cell="p16"]').tap();
+  await phone.waitForFunction(
+    () => document.querySelector(".scene-svg")?.dataset.revision === "1",
+  );
+  const largeMobile = await phone.evaluate(() => window.murdokuAgent.observe());
+  assert.deepEqual(largeMobile.marks.A, ["p16"]);
+  await phone.screenshot({
+    path: "artifacts/estate-mobile.png",
+    fullPage: true,
+  });
+  checks.push("16x16 mobile layout / scrolling and candidate placement");
   await mobile.close();
 
   await page.evaluate(() => window.murdokuAgent.newSession("lily-pond"));
@@ -309,7 +396,65 @@ try {
   await revision(1);
   assert.equal((await state()).placements.A, "p16");
   checks.push("16x16 scene / 200% zoom / stable cell action");
+  const estateCase = JSON.parse(
+    await fs.readFile(
+      new URL("../../murdoku_lab/visual/cases/estate.json", import.meta.url),
+      "utf8",
+    ),
+  ).murdoku_case;
+  const estatePlacements = Object.fromEntries(
+    Object.entries(estateCase.solution).map(([person, cell]) => [
+      person,
+      String.fromCharCode(97 + (cell % estateCase.scene.W)) +
+        (Math.floor(cell / estateCase.scene.W) + 1),
+    ]),
+  );
+  for (const [caseId, placements, label, answer] of [
+    [
+      "lily-pond",
+      {
+        A: "b1",
+        B: "d2",
+        C: "f3",
+        D: "h4",
+        E: "g6",
+        F: "e7",
+        G: "c8",
+        V: "a5",
+      },
+      "Choose murderer",
+      "G",
+    ],
+    [
+      "last-place",
+      { A: "b1", B: "e3", C: "c4", D: "f5", E: "d6", V: "a2" },
+      "Choose victim square",
+      "a2",
+    ],
+    ["estate", estatePlacements, "Choose murderer", "K"],
+  ]) {
+    await page.evaluate((id) => window.murdokuAgent.newSession(id), caseId);
+    await revision(0);
+    for (const [person, cell] of Object.entries(placements))
+      await action({ action: "place", person, cell });
+    await page.getByLabel(label).selectOption(answer);
+    await page
+      .getByRole("button", { name: "Submit case", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .filter({ hasText: "Ready to close the case?" })
+      .getByRole("button", { name: "Submit case", exact: true })
+      .click();
+    await page
+      .getByRole("heading", { name: "Case closed. Nicely deduced." })
+      .waitFor();
+    assert.equal((await state()).terminal.reward, 1);
+    checks.push(`${caseId} / complete arrangement and correct answer`);
+  }
   assert.deepEqual(errors, []);
+  assert.deepEqual(externalRequests, []);
+  checks.push("all gameplay resources hosted on the same origin");
   const receipt = {
     checks,
     passed: checks.length,

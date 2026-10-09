@@ -16,7 +16,8 @@ analysis of generated cases.
 
 Select a character, then tap a square to add or remove a candidate. Hold the
 square briefly or press Space to confirm the placement. Dragging a character
-onto the board also confirms it. Undo and redo work for both notes and placements.
+onto the board also confirms it. Undo and redo work for both notes and placements. An incorrect submission offers
+**Keep investigating**, preserving the board, candidates and notes in a new attempt.
 
 Use **Focus on the board** to expand the workspace, with the cast and clues
 alongside it. Zoom and scroll for larger boards; Escape returns to the page.
@@ -27,7 +28,8 @@ Observation exports and generated-sample review are under **For developers**.
 The [online casebook](https://everywheresafety.github.io/murdoku/play/) runs in
 your browser, with progress saved on this device. It uses the same Python
 sessions, actions, scoring and SVG renderer through Pyodide in a Web Worker.
-The first visit downloads the Python runtime; subsequent visits use the browser cache.
+The build includes the Python runtime, so gameplay needs no external CDN.
+The first visit downloads it from the game website; subsequent visits use the browser cache.
 
 Build it for GitHub Pages or any static host:
 

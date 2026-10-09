@@ -41,9 +41,11 @@ export function CasesDialog({
           <button
             className={`case-card ${c.id === live.case_id ? "current" : ""}`}
             key={c.id}
-            onClick={() =>
-              newSession(c.id).catch((e) => showMessage(e.message, "error"))
-            }
+            onClick={() => {
+              if (c.id === live.case_id) setDialog(null);
+              else
+                newSession(c.id).catch((e) => showMessage(e.message, "error"));
+            }}
             disabled={busy}
           >
             <div className={`case-art case-art-${i % 3}`}>
@@ -65,7 +67,7 @@ export function CasesDialog({
               <h3>{c.title}</h3>
               <p>{c.description}</p>
               <span className="case-open">
-                Open case
+                {c.id === live.case_id ? "Return to case" : "Open case"}
                 <ArrowRight size={16} />
               </span>
             </div>
@@ -324,8 +326,8 @@ export function SubmitDialog({
         .
       </p>
       <p>
-        Submitting ends this attempt. The full arrangement and the verdict will
-        be checked together.
+        The full arrangement and your verdict will be checked together. If you
+        need another try, you can keep your board and continue investigating.
       </p>
       <div className="dialog-buttons">
         <button className="secondary" onClick={() => setDialog(null)}>
@@ -355,6 +357,8 @@ export function SubmitDialog({
   );
 }
 export function ResultDialog({
+  continueAttempt,
+  busy,
   dialog,
   live,
   newSession,
@@ -383,13 +387,22 @@ export function ResultDialog({
       <p className="dialog-description">
         {live.terminal?.score?.solved
           ? "Every placement and your verdict agree with the case. The mystery is resolved."
-          : `This attempt has ended. ${live.terminal?.score?.placement_cells_correct ?? 0} of ${live.people.length} placements were correct; the complete arrangement and verdict are needed to solve the case.`}
+          : `Your board is saved. ${live.terminal?.score?.placement_cells_correct ?? 0} of ${live.people.length} placements were correct; the complete arrangement and verdict are needed to solve the case.`}
       </p>
       <div className="dialog-buttons">
         <button className="secondary" onClick={openJournal}>
           Review the journal
         </button>
-        <button className="primary" onClick={() => newSession(live.case_id)}>
+        {!live.terminal?.score?.solved && (
+          <button className="primary" disabled={busy} onClick={continueAttempt}>
+            Keep investigating
+            <ArrowRight size={16} />
+          </button>
+        )}
+        <button
+          className={live.terminal?.score?.solved ? "primary" : "secondary"}
+          onClick={() => newSession(live.case_id)}
+        >
           New attempt
           <ArrowRight size={16} />
         </button>

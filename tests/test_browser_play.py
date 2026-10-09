@@ -58,3 +58,33 @@ def test_bad_saved_progress_does_not_block_casebook():
         )
     )
     assert len(result["result"]["cases"]) == 4
+
+
+def test_continue_failed_attempt_keeps_edits_without_reopening_original():
+    import pytest
+    from murdoku_lab.visual.session import SessionError
+
+    game = BrowserGame()
+    state = game.request("/api/sessions", {"case_id": "glasshouse"})["result"]
+    path = f"/api/sessions/{state['session_id']}"
+    for action in (
+        {"action": "mark", "person": "B", "cell": "e3"},
+        {"action": "place", "person": "A", "cell": "b1"},
+        {"action": "note", "text": "Follow the chairs."},
+    ):
+        game.request(path + "/actions", {"action": action})
+    before = game.request(path)["result"]
+    game.request(path + "/actions", {"action": {"action": "submit", "murderer": "B"}})
+    resumed = game.request(path + "/retry", {})
+    state = resumed["result"]
+    assert state["session_id"] != before["session_id"]
+    assert state["placements"] == before["placements"]
+    assert state["marks"] == before["marks"]
+    assert state["notebook"] == before["notebook"]
+    assert not state["done"] and state["can_undo"]
+    assert game.request(path)["result"]["done"]
+    restored = BrowserGame()
+    restored.restore(json.loads(json.dumps(resumed["saved"])))
+    assert restored.request(f"/api/sessions/{state['session_id']}")["result"] == state
+    with pytest.raises(SessionError):
+        restored.sessions[state["session_id"]].continue_attempt()

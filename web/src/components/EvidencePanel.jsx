@@ -198,18 +198,20 @@ export function EvidencePanel({
         </div>
         <button
           className="primary submit-button"
-          disabled={!allPlaced || !verdict || viewOnly || busy}
-          onClick={() => setDialog("submit")}
+          disabled={
+            busy || (!state.done && (!allPlaced || !verdict || viewOnly))
+          }
+          onClick={() => setDialog(state.done ? "result" : "submit")}
         >
-          Submit case
+          {state.done ? "View result" : "Submit case"}
           <ArrowRight size={17} />
         </button>
         <p className="submit-hint">
           {state.done
-            ? "Submission recorded. Open a new case to play again."
+            ? "Review the result or open another case."
             : allPlaced
               ? "The full arrangement and your verdict will be checked."
-              : "Place everyone before making your final accusation."}
+              : "Place everyone before submitting your answer."}
         </p>
       </section>
     </aside>

@@ -1,9 +1,47 @@
 // The Python engine runs off the UI thread; no gameplay requests leave the browser.
+// GitHub Pages does not compress WASM automatically. Stream a precompressed
+// copy through the browser decompressor while keeping Pyodide itself unchanged.
+const fetchAsset = globalThis.fetch.bind(globalThis);
+if (typeof DecompressionStream !== "undefined") {
+  globalThis.fetch = async (input, options) => {
+    const url = new URL(
+      input instanceof Request ? input.url : input,
+      import.meta.url,
+    );
+    if (!url.pathname.endsWith("/python/pyodide.asm.wasm"))
+      return fetchAsset(input, options);
+    const response = await fetchAsset(url.href + ".gz", options);
+    if (!response.ok)
+      throw new Error("Could not load the casebook. Please reload to retry.");
+    return new Response(
+      response.body.pipeThrough(new DecompressionStream("gzip")),
+      {
+        headers: { "Content-Type": "application/wasm" },
+      },
+    );
+  };
+}
 const ready = (async () => {
+  const runtimeURL = new URL(/* @vite-ignore */ "../python/", import.meta.url)
+    .href;
   const { loadPyodide } = await import(
-    /* @vite-ignore */ "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.mjs"
+    /* @vite-ignore */ runtimeURL + "pyodide.mjs"
   );
-  const python = await loadPyodide();
+  let timer;
+  const python = await Promise.race([
+    loadPyodide({ indexURL: runtimeURL }),
+    new Promise((_, reject) => {
+      timer = setTimeout(
+        () =>
+          reject(
+            new Error(
+              "The casebook took too long to load. Please reload to retry.",
+            ),
+          ),
+        120000,
+      );
+    }),
+  ]).finally(() => clearTimeout(timer));
   const response = await fetch(
     new URL(/* @vite-ignore */ "../browser-engine.zip", import.meta.url),
   );

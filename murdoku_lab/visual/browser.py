@@ -52,14 +52,18 @@ class BrowserGame:
             result = session.observe()
         else:
             match = re.fullmatch(
-                r"/api/sessions/([a-f0-9]{32})(?:/(actions|trace|frames|scene\.svg|observation\.svg))?",
+                r"/api/sessions/([a-f0-9]{32})(?:/(actions|retry|trace|frames|scene\.svg|observation\.svg))?",
                 url.path,
             )
             if not match or match[1] not in self.sessions:
                 raise ValueError("Session not found. Start a new case.")
             session = self.sessions[match[1]]
             route = match[2]
-            if route == "actions" and body is not None:
+            if route == "retry" and body is not None:
+                session = session.continue_attempt()
+                self.sessions[session.id] = session
+                result = session.observe()
+            elif route == "actions" and body is not None:
                 result = session.act(
                     body["action"],
                     note=body.get("note"),

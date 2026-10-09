@@ -78,6 +78,14 @@ export default function App() {
     [],
   );
   const applyState = useCallback((data) => {
+    if (liveRef.current?.session_id !== data.session_id) {
+      setZoom(
+        window.matchMedia("(max-width: 600px)").matches &&
+          data.scene.width >= 12
+          ? 200
+          : 100,
+      );
+    }
     liveRef.current = data;
     setLive(data);
     localStorage.setItem(sessionStorageKey, data.session_id);
@@ -95,7 +103,6 @@ export default function App() {
         setSelected(data.people[0].id);
         setMode("mark");
         setVerdict("");
-        setZoom(100);
         setDialog(null);
         setHighlightedClues([]);
         setTrace(null);
@@ -133,6 +140,26 @@ export default function App() {
     })().catch((e) => setLoadError(e.message));
     return () => clearTimeout(toastTimer.current);
   }, [applyState, newSession]);
+  const continueAttempt = async () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    try {
+      const data = await api(
+        `/api/sessions/${liveRef.current.session_id}/retry`,
+        {},
+      );
+      applyState(data);
+      setReview(null);
+      setDialog(null);
+      showMessage("Your board and notes are ready. Keep investigating.");
+    } catch (error) {
+      showMessage(error.message, "error", true);
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
+  };
   const act = useCallback(
     async (action, note = null, source = "human") => {
       if (busyRef.current)
@@ -748,6 +775,8 @@ export default function App() {
       />
 
       <ResultDialog
+        continueAttempt={continueAttempt}
+        busy={busy}
         dialog={dialog}
         live={live}
         newSession={newSession}

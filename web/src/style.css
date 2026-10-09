@@ -2352,11 +2352,11 @@ button:not(:disabled):active {
     width: 27px;
   }
   .zoom-controls .icon-button {
-    width: 20px;
-    height: 22px;
+    width: 44px;
+    height: 44px;
   }
   .zoom-controls .icon-button:last-child {
-    display: none;
+    display: inline-flex;
   }
   .cast-panel {
     padding-top: 21px;

@@ -199,11 +199,21 @@ class Handler(BaseHTTPRequestHandler):
             session = VisualSession(self.server.catalogue[slug])
             self.server.sessions[session.id] = session
             return self.respond(session.observe(), 201)
-        match = re.fullmatch(r"/api/sessions/([a-f0-9]{32})/(actions|tools)", path)
+        match = re.fullmatch(
+            r"/api/sessions/([a-f0-9]{32})/(actions|tools|retry)", path
+        )
         if match:
             session = self.server.sessions.get(match[1])
             if session is None:
                 return self.respond({"error": "Session expired or unknown."}, 404)
+            if match[2] == "retry":
+                if len(self.server.sessions) >= 256:
+                    raise SessionError(
+                        "Session limit reached. Restart the viewer to clear sessions."
+                    )
+                session = session.continue_attempt()
+                self.server.sessions[session.id] = session
+                return self.respond(session.observe(), 201)
             if match[2] == "tools":
                 if data.get("tool") == "case_note":
                     return self.respond(
