@@ -15,6 +15,12 @@ export function browserRequest(path, body) {
       type: "module",
     });
     worker.onmessage = ({ data }) => {
+      if (data.loading) {
+        window.dispatchEvent(
+          new CustomEvent("murdoku-loading", { detail: data.loading }),
+        );
+        return;
+      }
       const task = pending.get(data.id);
       if (!task) return;
       pending.delete(data.id);

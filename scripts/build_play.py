@@ -61,11 +61,10 @@ def bundle_runtime(output):
     target.mkdir()
     for name in runtime_files:
         shutil.copy2(cache / name, target / name)
-    (target / "pyodide.asm.wasm.gz").write_bytes(
-        gzip.compress(
-            (cache / "pyodide.asm.wasm").read_bytes(), compresslevel=9, mtime=0
+    for name in ("pyodide.asm.wasm", "pyodide.asm.mjs"):
+        (target / (name + ".gz")).write_bytes(
+            gzip.compress((cache / name).read_bytes(), compresslevel=9, mtime=0)
         )
-    )
     for name, url in sources.items():
         cached = cache / name
         if not cached.exists():

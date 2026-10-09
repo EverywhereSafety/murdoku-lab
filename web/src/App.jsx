@@ -61,6 +61,12 @@ export default function App() {
   const [exportMenu, setExportMenu] = useState(false);
   const [stateText, setStateText] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [loadingStage, setLoadingStage] = useState("Loading the casebook…");
+  useEffect(() => {
+    const update = (event) => setLoadingStage(event.detail);
+    window.addEventListener("murdoku-loading", update);
+    return () => window.removeEventListener("murdoku-loading", update);
+  }, []);
   const [highlightedClues, setHighlightedClues] = useState([]);
   const sceneRef = useRef(null);
   const focusedCellRef = useRef(null);
@@ -496,7 +502,7 @@ export default function App() {
         <h1>
           {loadError ? "The casebook could not open." : "Opening the casebook…"}
         </h1>
-        <p>{loadError || "A little patience, detective."}</p>
+        <p>{loadError || loadingStage}</p>
         {loadError && (
           <button className="primary" onClick={() => location.reload()}>
             Try again
