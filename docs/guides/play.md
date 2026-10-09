@@ -1,5 +1,6 @@
 # Play, create and analyze puzzles
 
+[Play now](https://everywheresafety.github.io/murdoku/play/) ·
 [Website](https://everywheresafety.github.io/murdoku/) ·
 [Blog](https://everywheresafety.github.io/blog/murdoku-as-vhd/) · [Project](../../README.md) · [Code](https://github.com/EverywhereSafety/murdoku-lab) ·
 [Data](data.md) · [Training](https://github.com/EverywhereSafety/agent-horizon)
@@ -20,6 +21,24 @@ onto the board also confirms it. Undo and redo work for both notes and placement
 Use **Focus on the board** to expand the workspace, with the cast and clues
 alongside it. Zoom and scroll for larger boards; Escape returns to the page.
 Observation exports and generated-sample review are under **For developers**.
+
+## Static hosting
+
+The [online casebook](https://everywheresafety.github.io/murdoku/play/) runs in
+your browser, with progress saved on this device. It uses the same Python
+sessions, actions, scoring and SVG renderer through Pyodide in a Web Worker.
+The first visit downloads the Python runtime; subsequent visits use the browser cache.
+
+Build it for GitHub Pages or any static host:
+
+```bash
+npm ci
+python scripts/build_play.py
+# Publish dist/ at /murdoku/play/ or another directory.
+```
+
+Static play bundles the demo cases and their answer keys. Training and evaluation
+continue to use the Python environment independently.
 
 ## Run locally
 

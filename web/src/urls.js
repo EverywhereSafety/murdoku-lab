@@ -4,6 +4,11 @@
 const applicationBase = new URL(".", window.location.href);
 
 export function appUrl(path) {
+  if (
+    import.meta.env.VITE_STATIC_PLAY === "true" &&
+    path.startsWith("/api/art/")
+  )
+    path = path.replace("/api/art/", "art/");
   return new URL(path.replace(/^\/+/, ""), applicationBase).href;
 }
 

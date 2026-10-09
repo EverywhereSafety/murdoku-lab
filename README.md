@@ -6,7 +6,7 @@
 
 [![Queries](https://img.shields.io/badge/Queries-Text_%2B_Vision-0F766E?style=flat-square)](#export-text-and-vision-queries) [![Models](https://img.shields.io/badge/Trained_solver-4B-D97706?style=flat-square)](docs/guides/model.md)
 
-[Website](https://everywheresafety.github.io/murdoku/) · [Blog](https://everywheresafety.github.io/blog/murdoku-as-vhd/) · [Generate](#generate-and-solve) · [Data](docs/guides/data.md) · [Trained example](#trained-example-a-small-model-solving-larger-puzzles) · [Agent Horizon](https://github.com/EverywhereSafety/agent-horizon)
+[Play now](https://everywheresafety.github.io/murdoku/play/) · [Website](https://everywheresafety.github.io/murdoku/) · [Blog](https://everywheresafety.github.io/blog/murdoku-as-vhd/) · [Generate](#generate-and-solve) · [Data](docs/guides/data.md) · [Trained example](#trained-example-a-small-model-solving-larger-puzzles) · [Agent Horizon](https://github.com/EverywhereSafety/agent-horizon)
 
 </div>
 

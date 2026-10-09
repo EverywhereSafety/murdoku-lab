@@ -34,7 +34,7 @@ import {
   sessionStorageKey,
   projectLinks,
 } from "./urls.js";
-import { api } from "./lib/api.js";
+import { api, fetchResource } from "./lib/api.js";
 import { download, svgToPng } from "./lib/export.js";
 import { IconButton } from "./components/Controls.jsx";
 export default function App() {
@@ -191,7 +191,7 @@ export default function App() {
         style: renderStyle,
       });
       if (frame !== null) params.set("frame", frame);
-      const response = await fetch(
+      const response = await fetchResource(
         appUrl(
           `/api/sessions/${current.session_id}/${scope === "scene" ? "scene" : "observation"}.svg?${params}`,
         ),
@@ -272,9 +272,12 @@ export default function App() {
     if (review) params.set("frame", review.revision);
     const focus = state.last_event?.note?.focus_cells;
     if (review && focus?.length) params.set("focus", focus.join(","));
-    fetch(appUrl(`/api/sessions/${state.session_id}/scene.svg?${params}`), {
-      signal: controller.signal,
-    })
+    fetchResource(
+      appUrl(`/api/sessions/${state.session_id}/scene.svg?${params}`),
+      {
+        signal: controller.signal,
+      },
+    )
       .then((r) => {
         if (!r.ok) throw new Error("Scene render failed");
         return r.text();

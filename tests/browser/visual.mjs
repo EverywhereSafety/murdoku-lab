@@ -179,6 +179,7 @@ try {
   checks.push("browser PNG export");
 
   await page.reload({ waitUntil: "networkidle" });
+  await page.locator('[data-cell="b1"]').waitFor();
   assert.equal((await state()).revision, before);
   assert.deepEqual((await state()).placements, { A: "b1", B: "e3" });
   checks.push("refresh preserves session");
