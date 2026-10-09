@@ -1,0 +1,11 @@
+{
+  "base_url": "http://127.0.0.1:8000/v1",
+  "api_key_var": "MURDOKU_API_KEY",
+  "env_file": "",
+  "models": {
+    "default": "YOUR_SERVED_MODEL",
+    "setter": "YOUR_SERVED_MODEL"
+  },
+  "timeout_s": 180,
+  "max_retries": 2
+}

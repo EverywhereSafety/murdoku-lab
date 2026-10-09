@@ -1,0 +1,57 @@
+{
+  "pack": "Microsoft Fluent Emoji Flat",
+  "license": "MIT",
+  "status": "style gallery; production board assets are in murdoku_lab/visual/assets/fluent",
+  "assets": [
+    {
+      "name": "Lion",
+      "file": "lion_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Lion/Flat/lion_flat.svg"
+    },
+    {
+      "name": "Elephant",
+      "file": "elephant_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Elephant/Flat/elephant_flat.svg"
+    },
+    {
+      "name": "Penguin",
+      "file": "penguin_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Penguin/Flat/penguin_flat.svg"
+    },
+    {
+      "name": "Crocodile",
+      "file": "crocodile_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Crocodile/Flat/crocodile_flat.svg"
+    },
+    {
+      "name": "Chair",
+      "file": "chair_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Chair/Flat/chair_flat.svg"
+    },
+    {
+      "name": "Bed",
+      "file": "bed_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bed/Flat/bed_flat.svg"
+    },
+    {
+      "name": "Potted plant",
+      "file": "potted_plant_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Potted%20plant/Flat/potted_plant_flat.svg"
+    },
+    {
+      "name": "Rock",
+      "file": "rock_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rock/Flat/rock_flat.svg"
+    },
+    {
+      "name": "Automobile",
+      "file": "automobile_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Automobile/Flat/automobile_flat.svg"
+    },
+    {
+      "name": "Pizza",
+      "file": "pizza_flat.svg",
+      "source": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pizza/Flat/pizza_flat.svg"
+    }
+  ]
+}

@@ -1,0 +1,866 @@
+[
+  {
+    "kind": "chair",
+    "concept": "chair",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "chair.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Chair/Color/chair_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "chair",
+      "standable"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "chair"
+    ],
+    "asset_id": "chair"
+  },
+  {
+    "kind": "bed",
+    "concept": "bed",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "bed.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bed/Color/bed_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "bed",
+      "standable"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "bed"
+    ],
+    "asset_id": "bed"
+  },
+  {
+    "kind": "car",
+    "concept": "automobile",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "car.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Automobile/Color/automobile_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "car",
+      "standable"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "automobile"
+    ],
+    "asset_id": "car"
+  },
+  {
+    "kind": "tree",
+    "concept": "deciduous tree",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "tree.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deciduous%20tree/Color/deciduous_tree_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "tree",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "deciduous",
+      "tree"
+    ],
+    "asset_id": "tree"
+  },
+  {
+    "kind": "palm",
+    "concept": "palm tree",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "palm.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Palm%20tree/Color/palm_tree_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "palm",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "palm",
+      "tree"
+    ],
+    "asset_id": "palm"
+  },
+  {
+    "kind": "plant",
+    "concept": "potted plant",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "plant.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Potted%20plant/Color/potted_plant_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "plant",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "potted",
+      "plant"
+    ],
+    "asset_id": "plant"
+  },
+  {
+    "kind": "flowers",
+    "concept": "bouquet",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "flowers.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bouquet/Color/bouquet_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "flowers",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "bouquet"
+    ],
+    "asset_id": "flowers"
+  },
+  {
+    "kind": "boulder",
+    "concept": "rock",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "boulder.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rock/Color/rock_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "boulder",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "rock"
+    ],
+    "asset_id": "boulder"
+  },
+  {
+    "kind": "tv",
+    "concept": "television",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "tv.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Television/Color/television_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "tv",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "television"
+    ],
+    "asset_id": "tv"
+  },
+  {
+    "kind": "box",
+    "concept": "package",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "box.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Package/Color/package_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "box",
+      "crate",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "package"
+    ],
+    "asset_id": "box"
+  },
+  {
+    "kind": "bear",
+    "concept": "bear",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "bear.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bear/Color/bear_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "bear",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "bear"
+    ],
+    "asset_id": "bear"
+  },
+  {
+    "kind": "lion",
+    "concept": "lion",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "lion.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Lion/Color/lion_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "lion",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "lion"
+    ],
+    "asset_id": "lion"
+  },
+  {
+    "kind": "elephant",
+    "concept": "elephant",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "elephant.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Elephant/Color/elephant_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "elephant",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "elephant"
+    ],
+    "asset_id": "elephant"
+  },
+  {
+    "kind": "penguin",
+    "concept": "penguin",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "penguin.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Penguin/Color/penguin_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "penguin",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "penguin"
+    ],
+    "asset_id": "penguin"
+  },
+  {
+    "kind": "crocodile",
+    "concept": "crocodile",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "crocodile.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Crocodile/Color/crocodile_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "crocodile",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "crocodile"
+    ],
+    "asset_id": "crocodile"
+  },
+  {
+    "kind": "shark",
+    "concept": "shark",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "shark.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shark/Color/shark_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "shark",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "shark"
+    ],
+    "asset_id": "shark"
+  },
+  {
+    "kind": "cat",
+    "concept": "cat",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "cat.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cat/Color/cat_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "cat",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "cat"
+    ],
+    "asset_id": "cat"
+  },
+  {
+    "kind": "dog",
+    "concept": "dog",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "dog.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Dog/Color/dog_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "dog",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "dog"
+    ],
+    "asset_id": "dog"
+  },
+  {
+    "kind": "rabbit",
+    "concept": "rabbit",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "rabbit.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rabbit/Color/rabbit_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "rabbit",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "rabbit"
+    ],
+    "asset_id": "rabbit"
+  },
+  {
+    "kind": "horse",
+    "concept": "horse",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "horse.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Horse/Color/horse_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "horse",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "horse"
+    ],
+    "asset_id": "horse"
+  },
+  {
+    "kind": "cow",
+    "concept": "cow",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "cow.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cow/Color/cow_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "cow",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "cow"
+    ],
+    "asset_id": "cow"
+  },
+  {
+    "kind": "pig",
+    "concept": "pig",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "pig.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Pig/Color/pig_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "pig",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "pig"
+    ],
+    "asset_id": "pig"
+  },
+  {
+    "kind": "sheep",
+    "concept": "ewe",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "sheep.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Ewe/Color/ewe_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "sheep",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "ewe"
+    ],
+    "asset_id": "sheep"
+  },
+  {
+    "kind": "goat",
+    "concept": "goat",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "goat.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Goat/Color/goat_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "goat",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "goat"
+    ],
+    "asset_id": "goat"
+  },
+  {
+    "kind": "deer",
+    "concept": "deer",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "deer.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Deer/Color/deer_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "deer",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "deer"
+    ],
+    "asset_id": "deer"
+  },
+  {
+    "kind": "fox",
+    "concept": "fox",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "fox.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Fox/Color/fox_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "fox",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "fox"
+    ],
+    "asset_id": "fox"
+  },
+  {
+    "kind": "turtle",
+    "concept": "turtle",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "turtle.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Turtle/Color/turtle_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "turtle",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "turtle"
+    ],
+    "asset_id": "turtle"
+  },
+  {
+    "kind": "fish",
+    "concept": "fish",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "fish.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Fish/Color/fish_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "fish",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "fish"
+    ],
+    "asset_id": "fish"
+  },
+  {
+    "kind": "bird",
+    "concept": "bird",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "bird.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bird/Color/bird_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "bird",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "bird"
+    ],
+    "asset_id": "bird"
+  },
+  {
+    "kind": "owl",
+    "concept": "owl",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "owl.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Owl/Color/owl_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "owl",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "owl"
+    ],
+    "asset_id": "owl"
+  },
+  {
+    "kind": "butterfly",
+    "concept": "butterfly",
+    "category": "animal",
+    "pack": "fluent-color",
+    "path": "butterfly.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Butterfly/Color/butterfly_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "butterfly",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "butterfly"
+    ],
+    "asset_id": "butterfly"
+  },
+  {
+    "kind": "cactus",
+    "concept": "cactus",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "cactus.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Cactus/Color/cactus_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "plant",
+      "shrub",
+      "cactus",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "cactus"
+    ],
+    "asset_id": "cactus"
+  },
+  {
+    "kind": "sunflower",
+    "concept": "sunflower",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "sunflower.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Sunflower/Color/sunflower_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "flowers",
+      "sunflower",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "sunflower"
+    ],
+    "asset_id": "sunflower"
+  },
+  {
+    "kind": "books",
+    "concept": "books",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "books.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Books/Color/books_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "books",
+      "shelf",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "books"
+    ],
+    "asset_id": "books"
+  },
+  {
+    "kind": "guitar",
+    "concept": "guitar",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "guitar.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Guitar/Color/guitar_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "guitar",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "guitar"
+    ],
+    "asset_id": "guitar"
+  },
+  {
+    "kind": "drum",
+    "concept": "drum",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "drum.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Drum/Color/drum_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "drum",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "drum"
+    ],
+    "asset_id": "drum"
+  },
+  {
+    "kind": "bicycle",
+    "concept": "bicycle",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "bicycle.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bicycle/Color/bicycle_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "bicycle",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "bicycle"
+    ],
+    "asset_id": "bicycle"
+  },
+  {
+    "kind": "scooter",
+    "concept": "motor scooter",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "scooter.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Motor%20scooter/Color/motor_scooter_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "scooter",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "motor",
+      "scooter"
+    ],
+    "asset_id": "scooter"
+  },
+  {
+    "kind": "truck",
+    "concept": "delivery truck",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "truck.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Delivery%20truck/Color/delivery_truck_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "truck",
+      "car",
+      "standable"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "delivery",
+      "truck"
+    ],
+    "asset_id": "truck"
+  },
+  {
+    "kind": "boat",
+    "concept": "sailboat",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "boat.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Sailboat/Color/sailboat_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "boat",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "sailboat"
+    ],
+    "asset_id": "boat"
+  },
+  {
+    "kind": "basket",
+    "concept": "basket",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "basket.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Basket/Color/basket_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "box",
+      "crate",
+      "basket",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "basket"
+    ],
+    "asset_id": "basket"
+  },
+  {
+    "kind": "bucket",
+    "concept": "bucket",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "bucket.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bucket/Color/bucket_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "bucket",
+      "barrel",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "bucket"
+    ],
+    "asset_id": "bucket"
+  },
+  {
+    "kind": "vase",
+    "concept": "amphora",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "vase.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Amphora/Color/amphora_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "vase",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "amphora"
+    ],
+    "asset_id": "vase"
+  },
+  {
+    "kind": "clock",
+    "concept": "mantelpiece clock",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "clock.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Mantelpiece%20clock/Color/mantelpiece_clock_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "clock",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "mantelpiece",
+      "clock"
+    ],
+    "asset_id": "clock"
+  },
+  {
+    "kind": "computer",
+    "concept": "desktop computer",
+    "category": "object",
+    "pack": "fluent-color",
+    "path": "computer.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Desktop%20computer/Color/desktop_computer_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "computer",
+      "blocking"
+    ],
+    "geometry": "from formal scene; never inferred from icon",
+    "aliases": [
+      "desktop",
+      "computer"
+    ],
+    "asset_id": "computer"
+  },
+  {
+    "kind": "couch",
+    "asset_id": "couch",
+    "concept": "sofa",
+    "category": "furniture",
+    "pack": "fluent-color",
+    "path": "couch.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Couch%20and%20lamp/Color/couch_and_lamp_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "couch",
+      "standable"
+    ],
+    "aliases": [
+      "couch",
+      "couch and lamp"
+    ],
+    "geometry": "from formal scene; never inferred from icon"
+  },
+  {
+    "kind": "seat",
+    "asset_id": "seat",
+    "concept": "seat",
+    "category": "furniture",
+    "pack": "fluent-color",
+    "path": "seat.svg",
+    "source_url": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Seat/Color/seat_color.svg",
+    "license": "MIT",
+    "formal_roles": [
+      "seat",
+      "standable"
+    ],
+    "aliases": [
+      "seat",
+      "seat"
+    ],
+    "geometry": "from formal scene; never inferred from icon"
+  }
+]

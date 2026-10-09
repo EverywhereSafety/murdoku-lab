@@ -1,0 +1,2 @@
+# Install the task package and its runtime dependencies.
+-e .

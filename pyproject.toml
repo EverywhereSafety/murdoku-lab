@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "murdoku-lab"
+version = "0.1.0"
+readme = "README.md"
+description = "Semantically diverse puzzles and text/visual agent environments"
+requires-python = ">=3.11"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = [
+    "long-horizon-rl==0.1.0",
+    "ortools>=9.10",
+    "networkx>=3.0",
+]
+
+[project.optional-dependencies]
+dev = ["black==26.3.1", "pytest>=7.4"]
+data = ["huggingface-hub>=1.0,<2"]
+
+[project.scripts]
+murdoku-generate = "murdoku_lab.setter.generate:main"
+murdoku-serve = "murdoku_lab.visual.server:main"
+
+[tool.setuptools.packages.find]
+include = ["murdoku_lab*"]
+
+[tool.setuptools.package-data]
+murdoku_lab = ["resources/*.json", "resources/*.txt", "setter/themes/*.json", "visual/cases/*.json", "visual/assets/fluent/*", "visual/*.mjs"]
+
+[tool.black]
+required-version = "26.3.1"
+line-length = 88
+target-version = ["py311"]

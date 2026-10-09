@@ -1,0 +1,9 @@
+{
+  "enabled": false,
+  "pack": "fluent-color",
+  "search_limit": 8,
+  "selection": "llm",
+  "allow_missing": true,
+  "compatibility": "explicit_formal_roles",
+  "online_search": false
+}

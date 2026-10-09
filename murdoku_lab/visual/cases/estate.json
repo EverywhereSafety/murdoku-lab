@@ -1,0 +1,1401 @@
+{
+  "murdoku_case": {
+    "schema": "murdoku.case/1",
+    "id": "ae95a26b66350e46",
+    "variant": "course",
+    "scene": {
+      "W": 16,
+      "H": 16,
+      "area_of": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        5,
+        5,
+        5,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        5,
+        5,
+        5,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        6,
+        6,
+        6,
+        5,
+        5,
+        5,
+        5,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        6,
+        6,
+        6,
+        5,
+        5,
+        5,
+        5,
+        3,
+        3,
+        3,
+        7,
+        7,
+        7,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        8,
+        8,
+        8,
+        8,
+        3,
+        3,
+        3,
+        7,
+        7,
+        7,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        8,
+        8,
+        8,
+        8,
+        8,
+        7,
+        7,
+        7,
+        7,
+        7,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        8,
+        8,
+        8,
+        8,
+        8,
+        7,
+        7,
+        7,
+        7,
+        7,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        8,
+        8,
+        8,
+        8,
+        8,
+        7,
+        7,
+        7,
+        7,
+        7,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        7,
+        7,
+        7,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        7,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        7,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "obj_of": [
+        "shelf",
+        "shelf",
+        "shelf",
+        null,
+        "plant",
+        null,
+        null,
+        null,
+        null,
+        null,
+        "plant",
+        null,
+        null,
+        null,
+        null,
+        "tree",
+        null,
+        null,
+        "chair",
+        "table",
+        "table",
+        "plant",
+        "chair",
+        null,
+        "piano",
+        null,
+        null,
+        "chair",
+        null,
+        "chair",
+        null,
+        "plant",
+        null,
+        "carpet",
+        "carpet",
+        null,
+        null,
+        null,
+        "carpet",
+        "carpet",
+        "carpet",
+        null,
+        "plant",
+        null,
+        null,
+        null,
+        "flowers",
+        "flowers",
+        "chair",
+        null,
+        null,
+        null,
+        null,
+        null,
+        "carpet",
+        "carpet",
+        "carpet",
+        "flowers",
+        null,
+        null,
+        "table",
+        "table",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "statue",
+        null,
+        null,
+        "flowers",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "chair",
+        null,
+        null,
+        "flowers",
+        "chair",
+        null,
+        "carpet",
+        "carpet",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "barrel",
+        "chair",
+        "table",
+        "table",
+        "plant",
+        "carpet",
+        "carpet",
+        null,
+        "chair",
+        null,
+        null,
+        null,
+        "statue",
+        "flowers",
+        null,
+        "flowers",
+        null,
+        null,
+        "table",
+        "table",
+        "chair",
+        null,
+        null,
+        null,
+        null,
+        "flowers",
+        null,
+        null,
+        "chair",
+        null,
+        null,
+        null,
+        "tree",
+        null,
+        null,
+        null,
+        "plant",
+        null,
+        null,
+        "statue",
+        null,
+        null,
+        null,
+        null,
+        "flowers",
+        "flowers",
+        null,
+        "shrub",
+        null,
+        "shelf",
+        null,
+        null,
+        "tv",
+        null,
+        null,
+        null,
+        "chair",
+        null,
+        null,
+        null,
+        null,
+        null,
+        "chair",
+        null,
+        "shrub",
+        "chair",
+        "bed",
+        "bed",
+        null,
+        null,
+        "plant",
+        null,
+        null,
+        null,
+        null,
+        "statue",
+        null,
+        null,
+        null,
+        "flowers",
+        "flowers",
+        "table",
+        "table",
+        "carpet",
+        "carpet",
+        "chair",
+        null,
+        "table",
+        "table",
+        null,
+        "chair",
+        "boulder",
+        null,
+        null,
+        null,
+        null,
+        "tree",
+        null,
+        null,
+        "carpet",
+        "carpet",
+        "plant",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "tree",
+        null,
+        "tree",
+        null,
+        null,
+        "barrel",
+        "flowers",
+        null,
+        null,
+        "flowers",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "chair",
+        "tree",
+        null,
+        null,
+        null,
+        "chair",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "chair",
+        "flowers",
+        "tree",
+        null,
+        null,
+        null,
+        "tree",
+        "tree",
+        null,
+        "plant",
+        null,
+        "flowers",
+        null,
+        null,
+        "statue",
+        null,
+        null
+      ],
+      "props": [
+        {
+          "pid": "barrel",
+          "standable": false,
+          "cells": [
+            95,
+            213
+          ],
+          "landmark": true
+        },
+        {
+          "pid": "bed",
+          "standable": true,
+          "cells": [
+            161,
+            162
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "boulder",
+          "standable": false,
+          "cells": [
+            186
+          ],
+          "landmark": true
+        },
+        {
+          "pid": "carpet",
+          "standable": true,
+          "cells": [
+            33,
+            34,
+            38,
+            39,
+            40,
+            54,
+            55,
+            56,
+            84,
+            85,
+            100,
+            101,
+            178,
+            179,
+            194,
+            195
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "chair",
+          "standable": true,
+          "cells": [
+            18,
+            22,
+            27,
+            29,
+            48,
+            78,
+            82,
+            96,
+            103,
+            115,
+            123,
+            151,
+            157,
+            160,
+            180,
+            185,
+            227,
+            232,
+            239
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "flowers",
+          "standable": false,
+          "cells": [
+            46,
+            47,
+            57,
+            71,
+            81,
+            108,
+            110,
+            120,
+            139,
+            140,
+            174,
+            175,
+            214,
+            217,
+            240,
+            250
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "piano",
+          "standable": false,
+          "cells": [
+            24
+          ],
+          "landmark": true
+        },
+        {
+          "pid": "plant",
+          "standable": false,
+          "cells": [
+            4,
+            10,
+            21,
+            31,
+            42,
+            99,
+            131,
+            165,
+            196,
+            248
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "shelf",
+          "standable": false,
+          "cells": [
+            0,
+            1,
+            2,
+            144
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "shrub",
+          "standable": false,
+          "cells": [
+            142,
+            159
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "statue",
+          "standable": false,
+          "cells": [
+            68,
+            107,
+            134,
+            170,
+            253
+          ],
+          "landmark": true
+        },
+        {
+          "pid": "table",
+          "standable": false,
+          "cells": [
+            19,
+            20,
+            60,
+            61,
+            97,
+            98,
+            113,
+            114,
+            176,
+            177,
+            182,
+            183
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "tree",
+          "standable": false,
+          "cells": [
+            15,
+            127,
+            191,
+            208,
+            210,
+            228,
+            241,
+            245,
+            246
+          ],
+          "landmark": false
+        },
+        {
+          "pid": "tv",
+          "standable": false,
+          "cells": [
+            147
+          ],
+          "landmark": false
+        }
+      ],
+      "terrain_of": [
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "water",
+        "water",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "water",
+        "water",
+        "tile",
+        "tile",
+        "rough",
+        "fairway",
+        "fairway",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "rough",
+        "rough",
+        "fairway",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "fairway",
+        "fairway",
+        "fairway",
+        "rough",
+        "fairway",
+        "fairway",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "fairway",
+        "fairway",
+        "fairway",
+        "rough",
+        "rough",
+        "rough",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "fairway",
+        "fairway",
+        "water",
+        "water",
+        "fairway",
+        "fairway",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "floor",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "tile",
+        "fairway",
+        "water",
+        "water",
+        "water",
+        "water",
+        "fairway",
+        "rough",
+        "rough",
+        "rough",
+        "rough",
+        "rough",
+        "rough",
+        "tile",
+        "tile",
+        "tile",
+        "fairway",
+        "fairway",
+        "water",
+        "water",
+        "water",
+        "fairway",
+        "fairway",
+        "rough",
+        "rough",
+        "rough",
+        "rough",
+        "rough",
+        "sand",
+        "rough",
+        "rough",
+        "tile",
+        "fairway",
+        "fairway",
+        "fairway",
+        "water",
+        "water",
+        "fairway",
+        "fairway",
+        "rough",
+        "rough",
+        "rough",
+        "rough",
+        "sand",
+        "rough",
+        "rough",
+        "rough",
+        "tile",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway",
+        "fairway"
+      ],
+      "allow_disconnected_areas": false,
+      "doors": [
+        [
+          25,
+          26
+        ],
+        [
+          37,
+          53
+        ],
+        [
+          51,
+          52
+        ],
+        [
+          64,
+          80
+        ],
+        [
+          86,
+          87
+        ],
+        [
+          92,
+          93
+        ],
+        [
+          115,
+          116
+        ],
+        [
+          124,
+          125
+        ],
+        [
+          148,
+          164
+        ],
+        [
+          150,
+          151
+        ],
+        [
+          153,
+          154
+        ],
+        [
+          171,
+          187
+        ],
+        [
+          180,
+          181
+        ],
+        [
+          195,
+          211
+        ],
+        [
+          201,
+          202
+        ],
+        [
+          231,
+          232
+        ]
+      ]
+    },
+    "characters": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "V"
+    ],
+    "victim": "V",
+    "tags": {},
+    "clues": [
+      {
+        "atoms": [
+          {
+            "kind": "at_door",
+            "holder": "A",
+            "args": []
+          },
+          {
+            "kind": "in_corner",
+            "holder": "A",
+            "args": []
+          },
+          {
+            "kind": "alone",
+            "holder": "A",
+            "args": []
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside_terrain",
+            "holder": "B",
+            "args": [
+              "water"
+            ]
+          },
+          {
+            "kind": "in_area",
+            "holder": "B",
+            "args": [
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "on",
+            "holder": "C",
+            "args": [
+              "chair"
+            ]
+          },
+          {
+            "kind": "alone",
+            "holder": "C",
+            "args": []
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "in_corner",
+            "holder": "D",
+            "args": []
+          },
+          {
+            "kind": "beside",
+            "holder": "D",
+            "args": [
+              "chair"
+            ]
+          },
+          {
+            "kind": "in_area",
+            "holder": "D",
+            "args": [
+              7
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "in_corner",
+            "holder": "E",
+            "args": []
+          },
+          {
+            "kind": "beside",
+            "holder": "E",
+            "args": [
+              "flowers"
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside_terrain",
+            "holder": "F",
+            "args": [
+              "water"
+            ]
+          },
+          {
+            "kind": "compass",
+            "holder": "F",
+            "args": [
+              "L",
+              -1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "G",
+            "args": [
+              "statue"
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "H",
+            "args": [
+              "plant"
+            ]
+          },
+          {
+            "kind": "on_grid_edge",
+            "holder": "H",
+            "args": []
+          },
+          {
+            "kind": "compass",
+            "holder": "H",
+            "args": [
+              "C",
+              -1,
+              -1
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "I",
+            "args": [
+              "flowers"
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "in_corner",
+            "holder": "J",
+            "args": []
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "on",
+            "holder": "K",
+            "args": [
+              "bed"
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "L",
+            "args": [
+              "statue"
+            ]
+          },
+          {
+            "kind": "with",
+            "holder": "L",
+            "args": [
+              "I"
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "M",
+            "args": [
+              "flowers"
+            ]
+          },
+          {
+            "kind": "with",
+            "holder": "M",
+            "args": [
+              "J"
+            ]
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "N",
+            "args": [
+              "barrel"
+            ]
+          },
+          {
+            "kind": "alone",
+            "holder": "N",
+            "args": []
+          }
+        ]
+      },
+      {
+        "atoms": [
+          {
+            "kind": "beside",
+            "holder": "O",
+            "args": [
+              "tree"
+            ]
+          },
+          {
+            "kind": "with",
+            "holder": "O",
+            "args": [
+              "G"
+            ]
+          },
+          {
+            "kind": "not_in_corner",
+            "holder": "O",
+            "args": []
+          }
+        ]
+      }
+    ],
+    "solution": {
+      "A": 53,
+      "B": 104,
+      "C": 22,
+      "D": 135,
+      "E": 80,
+      "F": 207,
+      "G": 154,
+      "H": 3,
+      "I": 233,
+      "J": 75,
+      "K": 161,
+      "L": 252,
+      "M": 45,
+      "N": 212,
+      "O": 126,
+      "V": 178
+    },
+    "answer": "murderer",
+    "answer_key": "K",
+    "theme_id": null,
+    "seed": null,
+    "target_band": null,
+    "certificate": null,
+    "meta": {
+      "kind": "authored rich estate fixture",
+      "revision": 2
+    }
+  },
+  "murdoku_theme": {
+    "theme_id": "estate-flat-v2",
+    "title": "The Winter Garden Masquerade",
+    "names": {
+      "A": "Ada",
+      "B": "Basil",
+      "C": "Cleo",
+      "D": "Dorian",
+      "E": "Esme",
+      "F": "Felix",
+      "G": "Grace",
+      "H": "Hugo",
+      "I": "Iris",
+      "J": "Jules",
+      "K": "Kit",
+      "L": "Luca",
+      "M": "Mabel",
+      "N": "Noah",
+      "O": "Otis",
+      "V": "Victor"
+    },
+    "pronouns": {},
+    "areas": [
+      "Library",
+      "Music room",
+      "Conservatory",
+      "Gallery",
+      "Courtyard",
+      "Dining room",
+      "Rose garden",
+      "Terrace",
+      "Guest suite",
+      "Lily garden",
+      "Orchard"
+    ],
+    "objects": {
+      "carpet": "rug",
+      "shelf": "bookshelf",
+      "shrub": "rose bush",
+      "boulder": "garden rock"
+    },
+    "tags": {},
+    "victim_note": "was found dead",
+    "blurb": "The music has stopped. Sixteen guests, eleven spaces, and alibis that overlap."
+  }
+}

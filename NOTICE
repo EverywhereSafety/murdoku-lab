@@ -1,0 +1,11 @@
+Murdoku Lab project code is licensed under AGPL-3.0-only.
+
+Bundled Microsoft Fluent Emoji artwork is licensed separately under the MIT
+license. See murdoku_lab/visual/assets/fluent/LICENSE and web/public/art-preview/LICENSE
+for the upstream copyright and license notices. Catalog metadata records sources.
+
+Published generated queries and recorded rollouts are licensed under
+CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/.
+The dataset carries its license text and separate artwork attribution.
+
+Third-party dependencies retain their respective licenses.

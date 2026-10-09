@@ -1,0 +1,19 @@
+{
+  "theme_id": "manor",
+  "title": "The Quiet Inheritance",
+  "blurb": "A country house, a reading of the will, and one guest who never left the east wing.",
+  "names": {"A": "Amelia Vance", "B": "Bruce Ashcombe", "C": "Charlotte Reed", "D": "Dean Whitlock",
+            "E": "Enid Marlow", "F": "Franklin Dace", "G": "Greta Sollis", "H": "Holden Pike",
+            "I": "Iris Calloway", "J": "Jasper Nunn", "K": "Kira Adeyemi", "V": "Vaughn Ashcombe"},
+  "pronouns": {"A": "she", "B": "he", "C": "she", "D": "he", "E": "she", "F": "he", "G": "she",
+               "H": "he", "I": "she", "J": "he", "K": "she", "V": "he"},
+  "areas": ["Library", "Conservatory", "Dining Room", "Kitchen", "Study", "Billiard Room",
+            "Cellar", "Morning Room", "Gallery", "Scullery", "Boot Room", "Orangery"],
+  "objects": {"table": "oak table", "tv": "cabinet radio", "shelf": "bookcase", "plant": "fern",
+              "tree": "potted bay", "flowers": "cut lilies", "shrub": "box hedge",
+              "statue": "marble bust", "piano": "grand piano", "boulder": "millstone",
+              "barrel": "wine cask", "bed": "chaise", "chair": "wingback chair",
+              "carpet": "Persian rug", "car": "motor car", "crate": "packing crate",
+              "box": "hat box", "register": "writing desk", "palm": "palm", "bear": "bearskin"},
+  "victim_note": "was found dead"
+}

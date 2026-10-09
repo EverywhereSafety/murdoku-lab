@@ -1,0 +1,44 @@
+# Local environments, secrets, and Python caches.
+.DS_Store
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+
+# Generated datasets and runtime artifacts belong outside Git.
+data/
+datasets/
+outputs/
+results/
+logs/
+checkpoints/
+wandb/
+*.log
+slurm-*.out
+
+# Visual lab local dependencies and build products.
+node_modules/
+.venv-*/
+dist/
+
+# Generated review screenshots and query previews stay with dataset artifacts.
+web/public/review/
+web/public/review-previous/
+web/public/comparison/
+web/public/dense-review/
+
+# Local model endpoint configuration.
+config/llm.json
+
+# Local SVG exports and verification reports.
+artifacts/
+.tool-env/
+
+# Python packaging outputs.
+*.egg-info/
+build/

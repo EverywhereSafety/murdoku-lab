@@ -1,0 +1,25 @@
+{
+  "name": "murdoku-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test:browser": "node tests/browser/visual.mjs",
+    "test:proxy": "node tests/browser/proxy.mjs",
+    "render": "node scripts/render_visual.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.58.0",
+    "vite": "^6.1.0"
+  },
+  "license": "AGPL-3.0-only"
+}

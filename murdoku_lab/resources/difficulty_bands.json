@@ -1,0 +1,26 @@
+{
+  "_doc": "Original functional configuration supplied by the user on 2026-10-02; difficulty bands are regions in certificate space, partitioned by advanced steps.",
+  "order": ["easy", "medium", "hard", "expert"],
+  "bands": {
+    "easy": {"advanced_max": 0},
+    "medium": {"advanced_min": 1, "advanced_max": 2},
+    "hard": {"advanced_min": 3, "advanced_max": 6},
+    "expert": {"advanced_min": 7}
+  },
+  "caps": {
+    "easy": {"max_positional": 1, "max_instant_pins": 2},
+    "medium": {"max_positional": 1, "max_instant_pins": 1},
+    "hard": {"max_positional": 2, "max_instant_pins": 1},
+    "expert": {"max_positional": 2, "max_instant_pins": 1},
+    "scaling": {"max_instant_pins_per_character": 0.2, "max_positional_per_character": 0.12}
+  },
+  "style": {
+    "min_positive_frac": 0.45,
+    "min_anchor_atoms": 2,
+    "max_clues_per_holder": 3,
+    "max_atoms_total": {"easy": 18, "medium": 16, "hard": 14, "expert": 14},
+    "max_negatives_per_char": 4,
+    "max_atoms_per_character": 2.5,
+    "min_anchor_per_character": 0.12
+  }
+}

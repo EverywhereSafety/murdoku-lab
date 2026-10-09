@@ -1,0 +1,8 @@
+{
+  "schema": "murdoku.scene_spec/1",
+  "area_count": 8,
+  "anchors_per_area": {
+    "flag": 1,
+    "tee": 1
+  }
+}

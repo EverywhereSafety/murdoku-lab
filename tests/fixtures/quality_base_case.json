@@ -1,0 +1,328 @@
+{
+  "schema": "murdoku.case/1",
+  "variant": "classic",
+  "scene": {
+    "W": 6,
+    "H": 6,
+    "area_of": [
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      2,
+      2,
+      0,
+      1,
+      0,
+      0,
+      3,
+      2,
+      1,
+      1,
+      1,
+      1,
+      3,
+      3,
+      4,
+      1,
+      5,
+      1,
+      3,
+      4,
+      4,
+      4,
+      5,
+      5,
+      3,
+      4,
+      4,
+      4,
+      5,
+      5
+    ],
+    "obj_of": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      "carpet",
+      null,
+      "shelf",
+      null,
+      null,
+      null,
+      "barrel",
+      null,
+      null,
+      null,
+      "bed",
+      null,
+      null,
+      null,
+      null,
+      null,
+      "car",
+      null,
+      null,
+      "flowers",
+      "boulder",
+      null,
+      null,
+      "barrel",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "props": [
+      {
+        "pid": "barrel",
+        "standable": false,
+        "cells": [
+          11,
+          28
+        ],
+        "landmark": true
+      },
+      {
+        "pid": "bed",
+        "standable": true,
+        "cells": [
+          15
+        ],
+        "landmark": false
+      },
+      {
+        "pid": "boulder",
+        "standable": false,
+        "cells": [
+          25
+        ],
+        "landmark": true
+      },
+      {
+        "pid": "car",
+        "standable": true,
+        "cells": [
+          21
+        ],
+        "landmark": false
+      },
+      {
+        "pid": "carpet",
+        "standable": true,
+        "cells": [
+          5
+        ],
+        "landmark": false
+      },
+      {
+        "pid": "flowers",
+        "standable": false,
+        "cells": [
+          24
+        ],
+        "landmark": false
+      },
+      {
+        "pid": "shelf",
+        "standable": false,
+        "cells": [
+          7
+        ],
+        "landmark": false
+      }
+    ],
+    "terrain_of": [
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor",
+      "floor"
+    ],
+    "allow_disconnected_areas": false,
+    "doors": [
+      [
+        8,
+        9
+      ],
+      [
+        13,
+        14
+      ],
+      [
+        13,
+        19
+      ],
+      [
+        16,
+        22
+      ],
+      [
+        20,
+        21
+      ],
+      [
+        33,
+        34
+      ]
+    ]
+  },
+  "characters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "V"
+  ],
+  "victim": "V",
+  "tags": {},
+  "clues": [
+    {
+      "atoms": [
+        {
+          "kind": "in_corner",
+          "holder": "A",
+          "args": []
+        }
+      ]
+    },
+    {
+      "atoms": [
+        {
+          "kind": "in_corner",
+          "holder": "C",
+          "args": []
+        },
+        {
+          "kind": "with",
+          "holder": "C",
+          "args": [
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "atoms": [
+        {
+          "kind": "in_corner",
+          "holder": "B",
+          "args": []
+        },
+        {
+          "kind": "in_areas",
+          "holder": "B",
+          "args": [
+            [
+              1,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "atoms": [
+        {
+          "kind": "in_areas",
+          "holder": "E",
+          "args": [
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "kind": "alone",
+          "holder": "E",
+          "args": []
+        }
+      ]
+    },
+    {
+      "atoms": [
+        {
+          "kind": "row_offset",
+          "holder": "D",
+          "args": [
+            "A",
+            -4
+          ]
+        },
+        {
+          "kind": "other_beside",
+          "holder": "D",
+          "args": [
+            "shelf"
+          ]
+        }
+      ]
+    },
+    {
+      "atoms": [
+        {
+          "kind": "area_empty",
+          "holder": "A",
+          "args": [
+            3
+          ]
+        }
+      ]
+    }
+  ],
+  "solution": {
+    "A": 27,
+    "B": 17,
+    "C": 20,
+    "D": 1,
+    "E": 34,
+    "V": 6
+  },
+  "answer": "murderer",
+  "theme_id": null,
+  "seed": 8000,
+  "target_band": "easy",
+  "meta": {
+    "fixture_origin": "CPU synthetic seed 8000; used only for implication-equivalence tests"
+  }
+}
