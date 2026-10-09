@@ -266,8 +266,8 @@ def dimensions(observation):
 
 
 def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
-    if style not in ("art", "diagram", "fluent"):
-        raise ValueError("style must be art, diagram or fluent")
+    if style not in ("art", "diagram", "fluent", "classic"):
+        raise ValueError("style must be art, diagram, fluent or classic")
     scene = observation["scene"]
     width, height = dimensions(observation)
     cells, areas = scene["cells"], {a["id"]: a for a in scene["areas"]}
@@ -291,6 +291,9 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
     for cell in cells:
         x, y = PAD + cell["col"] * CELL, PAD + cell["row"] * CELL
         color = areas[cell["area"]]["color"]
+        if style == "classic":
+            palette = ("#ffe095", "#cce8b4", "#f0c5ad", "#c9c0ed", "#b6dedc", "#f5c6db")
+            color = palette[list(areas).index(cell["area"]) % len(palette)]
         t = cell["terrain"]
         if t == "water":
             color = "#a2cbd0"
@@ -299,7 +302,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
         elif t == "rough":
             color = "#adbf96"
         root.append(f'<rect x="{x}" y="{y}" width="100" height="100" fill="{color}"/>')
-        if style == "art":
+        if style in ("art", "classic"):
             pattern = {
                 "floor": "wood",
                 "tile": "tile",
@@ -312,7 +315,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
                 f'<rect x="{x}" y="{y}" width="100" height="100" fill="url(#{pattern})"/>'
             )
         root.append(
-            f'<rect x="{x}" y="{y}" width="100" height="100" fill="none" stroke="#51624d" stroke-opacity=".16" stroke-width="1"/>'
+            f'<rect x="{x}" y="{y}" width="100" height="100" fill="none" stroke="{"#292929" if style == "classic" else "#51624d"}" stroke-opacity="{".8" if style == "classic" else ".16"}" stroke-width="{3 if style == "classic" else 1}"/>'
         )
     # Merge only filled rectangular connected footprints. Never stretch an illustration over
     # a hole, an unrelated cell, a disconnected instance or an area boundary.
@@ -384,7 +387,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             )
     for x1, y1, x2, y2 in sorted(edges):
         root.append(
-            f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="#526253" stroke-width="5.5" stroke-linecap="round"/>'
+            f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="{"#222222" if style == "classic" else "#526253"}" stroke-width="{7 if style == "classic" else 5.5}" stroke-linecap="round"/>'
         )
         root.append(
             f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="#faf6dd" stroke-width="1.2" stroke-opacity=".7"/>'

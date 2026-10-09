@@ -516,7 +516,10 @@ export default function App() {
   const note = state.last_event?.note;
   return (
     <>
-      <div className="app-shell">
+      <div
+        className="app-shell"
+        data-skin={style === "classic" ? "classic" : "default"}
+      >
         <header className="header">
           <button
             className="brand"

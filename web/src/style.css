@@ -2647,3 +2647,41 @@ button:not(:disabled):active {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Classic uses the same board and controls with a bold, colourful print style. */
+.app-shell[data-skin="classic"] {
+  --ink: #25232b;
+  --muted: #68616e;
+  --line: #cdc8d5;
+  --paper: #f8f6fc;
+  --green: #43335e;
+  color: var(--ink);
+  background: var(--paper);
+}
+[data-skin="classic"] .person-card {
+  border: 2px solid #302c36;
+  border-radius: 5px;
+  box-shadow: 3px 3px 0 #302c3620;
+  background: #fff;
+}
+[data-skin="classic"] .person-container.selected .person-card {
+  outline: 3px solid #a763cf;
+  outline-offset: 3px;
+}
+[data-skin="classic"] .portrait-wrap {
+  border-radius: 2px;
+  background: #e6d6f5;
+}
+[data-skin="classic"] .person-container:nth-child(3n + 2) .portrait-wrap {
+  background: #c9e6d4;
+}
+[data-skin="classic"] .person-container:nth-child(3n) .portrait-wrap {
+  background: #f4d6b1;
+}
+[data-skin="classic"] .scene-panel {
+  border: 2px solid #302c36;
+  border-radius: 6px;
+}
+[data-skin="classic"] .person-caption {
+  font-weight: 700;
+}

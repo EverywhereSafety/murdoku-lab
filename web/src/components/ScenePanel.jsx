@@ -10,6 +10,7 @@ import {
   Maximize,
   MousePointer2,
   Palette,
+  Paintbrush,
   Pencil,
   Plus,
   Minus,
@@ -95,6 +96,16 @@ export function ScenePanel({
             >
               <Grid2X2 size={14} />
               <span>Diagram</span>
+            </button>
+            <button
+              title="Classic skin"
+              aria-label="Classic"
+              aria-pressed={style === "classic"}
+              className={style === "classic" ? "active" : ""}
+              onClick={() => setStyle("classic")}
+            >
+              <Paintbrush size={14} />
+              <span>Classic</span>
             </button>
           </div>
           <div className="export-anchor">

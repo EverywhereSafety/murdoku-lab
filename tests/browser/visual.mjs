@@ -150,7 +150,18 @@ try {
   );
   await page.screenshot({ path: "artifacts/diagram.png", fullPage: true });
   await page.getByRole("button", { name: "Illustrated", exact: true }).click();
-  checks.push("personal clue checklist / both render styles");
+  await page.getByRole("button", { name: "Classic", exact: true }).click();
+  await page.waitForFunction(
+    () => document.querySelector(".scene-svg")?.dataset.style === "classic",
+  );
+  assert.equal(
+    await page.locator(".app-shell").getAttribute("data-skin"),
+    "classic",
+  );
+  assert.equal((await state()).revision, 7);
+  await page.screenshot({ path: "artifacts/classic.png", fullPage: true });
+  await page.getByRole("button", { name: "Illustrated", exact: true }).click();
+  checks.push("personal clue checklist / three render styles preserve board");
 
   await action({ action: "place", person: "C", cell: "a1" });
   const checked = await action({ action: "check" });
