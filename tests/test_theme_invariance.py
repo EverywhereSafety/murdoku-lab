@@ -52,7 +52,7 @@ def test_both_renderings_are_produced_and_differ_only_in_words(cases):
         themed = render_case(case, th)
         plain = render_case(case, canonical_theme(case))
         assert themed != plain  # the words changed
-        assert themed.count("CLUES") == plain.count("CLUES") == 1
+        assert themed.count("线索（") == plain.count("线索（") == 1
         # same number of clue lines: the logical content is identical
         n1 = len(
             [l for l in themed.splitlines() if l.strip()[:2].rstrip(".").isdigit()]

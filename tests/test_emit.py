@@ -77,7 +77,7 @@ def test_the_statement_never_pairs_a_person_with_their_square(theme_id, case):
 
     theme = canonical_theme(case) if theme_id == "canonical" else Theme.load(theme_id)
     statement = emit(case, theme).puzzle["statement"]
-    clues = statement.split("CLUES", 1)[1] if "CLUES" in statement else statement
+    clues = statement.split("线索", 1)[1] if "线索" in statement else statement
     for x, k in case.solution.items():
         cell = cell_label(case, k)
         name = theme.name(x)
@@ -109,7 +109,7 @@ def test_the_statement_is_self_contained(parts):
     """A solver gets this and nothing else, so it must carry the rules, the map, the cast and the
     clues. Missing any one of them makes the puzzle unanswerable rather than hard."""
     s = parts.puzzle["statement"]
-    for section in ("RULES", "GOAL", "PEOPLE", "SCENE", "AREAS", "CLUES"):
+    for section in ("规则", "目标", "角色", "场景", "区域", "线索"):
         assert section in s, f"the statement has no {section} section"
 
 

@@ -1,5 +1,6 @@
 """The compact solver view is small, readable, and carries every structural scene fact."""
 
+from murdoku_lab.core.board import DEFAULT_TERRAIN
 from murdoku_lab.core.theme import Theme
 from murdoku_lab.core.render import (
     cell_label,
@@ -30,7 +31,10 @@ def test_compact_view_names_every_area_prop_terrain_and_door():
         for k in prop.cells:
             assert cell_label(case, k) in text
     for terrain in set(case.scene.terrain_of):
-        assert th.obj(terrain) in text
+        if terrain == DEFAULT_TERRAIN:
+            assert "地面" in text  # 统一地板在紧凑视图中以「地面」一词呈现
+        else:
+            assert th.obj(terrain) in text
     for door in case.scene.doors:
         u, v = sorted(door)
         assert f"{cell_label(case, u)} <-> {cell_label(case, v)}" in text
@@ -39,7 +43,7 @@ def test_compact_view_names_every_area_prop_terrain_and_door():
 def test_compact_grid_contains_every_cell_once_per_layer():
     case = _case()
     text = render_scene_compact(case, Theme.load("manor"))
-    area = text.split("AREA LEGEND", 1)[0]
+    area = text.split("区域图例", 1)[0]
     area_rows = [
         line.split()[1:] for line in area.splitlines() if line.lstrip()[:1].isdigit()
     ]
@@ -50,8 +54,8 @@ def test_compact_grid_contains_every_cell_once_per_layer():
 def test_compact_case_uses_matching_rules_and_never_leaks_solution():
     case = _case()
     text = render_case(case, Theme.load("manor"), scene_format="compact")
-    assert "AREA/FEATURE" in text and "PROP LEGEND" in text and "TERRAIN" in text
-    assert "Squares marked (...)" not in text
+    assert "区域/道具" in text and "道具图例" in text and "地形" in text
+    assert "标 (...) " not in text
     for x, k in case.solution.items():
         assert f"[{x}]" not in text
 
@@ -61,7 +65,7 @@ def test_unknown_scene_format_fails_loudly():
     try:
         render_case(case, Theme.load("manor"), scene_format="painted")
     except ValueError as e:
-        assert "unknown scene format" in str(e)
+        assert "未知场景格式" in str(e)
     else:
         raise AssertionError("an unknown view must not silently change the prompt")
 
@@ -93,7 +97,7 @@ def test_existential_conjunction_preserves_each_atom_subject(base_case):
     text = render_clue(clue, case, theme)
     assert (
         text
-        == "Someone else in V's area was beside a bed. V was in the same area as C."
+        == "V所在区域里有另一只人在某bed旁边。 V和C在同一个区域。"
     )
     for clue in case.clues:
         assert render_clue(clue, case, theme) == " ".join(

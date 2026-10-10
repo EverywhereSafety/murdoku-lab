@@ -42,88 +42,76 @@ def _area_phrase(label: str) -> str:
     return label if numbered or label.lower().startswith("the ") else "the " + label
 
 
+_PAR = {"even": "偶数", "odd": "奇数"}
+_SIDE = {"north": "北", "south": "南", "west": "西", "east": "东"}
+_AXIS = {"row": "行", "column": "列"}
+
+
 def render_atom(a: Atom, case: Case, th: Theme) -> str:
     s, spec = case.scene, SPECS[a.kind]
     who, other = th.name(a.holder), th.name(a.other) if a.other else ""
+    noun = th.cast_noun
 
-    # Short witness statements; shared geometric definitions live in TERMS below.
-    # Keep every subject explicit: existential "someone else" clauses must not
-    # inherit the holder's following predicate when a compound clue is rendered.
+    # 短陈述式线索；每个主语都显式写出，避免复合线索里"另一只"存在句继承后面谓词。
     if a.kind == "in_corner":
-        return f"{who} was in a corner of their area."
+        return f"{who}站在所处区域的墙角。"
     if a.kind == "not_in_corner":
-        return f"{who} was not in a corner of their area."
+        return f"{who}没有站在所处区域的墙角。"
     if a.kind == "alone":
-        return f"{who} was the only person in their area."
+        return f"{who}是独自一只——所在区域里没有别的{noun}。"
     if a.kind == "in_area":
-        return f"{who} was in {_area_phrase(th.area(a['area']))}."
+        return f"{who}在{th.area(a['area'])}里。"
     if a.kind == "not_in_area":
-        return f"{who} was not in {_area_phrase(th.area(a['area']))}."
+        return f"{who}不在{th.area(a['area'])}里。"
     if a.kind == "area_empty":
-        return f"Nobody was in {_area_phrase(th.area(a['area']))}."
+        return f"{th.area(a['area'])}里一只{noun}都没有。"
     if a.kind == "area_no_parity":
-        return f"{who} was in an {a['par']}-numbered area."
+        return f"{who}所在区域的编号是{_PAR[a['par']]}。"
     if a.kind == "on_grid_edge":
-        return f"{who} stood on the outer border of the grid."
+        return f"{who}站在棋盘的外边界。"
     if a.kind == "beside_terrain":
-        return f"{who} was beside a {th.obj(a['ter'])} terrain square."
+        return f"{who}在某{th.obj(a['ter'])}地面的格子旁边。"
     if a.kind == "beside" and a["obj"] == "flowers" and th.obj("flowers") == "flowers":
-        return f"{who} was beside the flowers."
+        return f"{who}在花旁边。"
 
     if a.kind in ("row_offset", "col_offset"):
-        # "X was exactly 3 rows below Y" reads in English as implying the SAME COLUMN, and a solver
-        # reading it that way found the puzzle unsolvable — the true answer has their columns
-        # differing, so the same-column reading admits zero placements. The atom constrains only the
-        # row difference, so the sentence has to say that outright.
         d = a["d"]
         n = abs(d)
+        # 只约束行/列之差，明确写出来，避免读者误读成同一列/行。
         if a.kind == "row_offset":
-            word = "below" if d > 0 else "above"
-            return (
-                f"{who}'s row was {n} row{'s' if n != 1 else ''} {word} {other}'s row."
-            )
-        word = "right" if d > 0 else "left"
-        return f"{who}'s column was {n} column{'s' if n != 1 else ''} to the {word} of {other}'s column."
+            word = "下方" if d > 0 else "上方"
+            return f"{who}正好在{other}{word} {n} 行（只比较行，不要求同列）。"
+        word = "右侧" if d > 0 else "左侧"
+        return f"{who}正好在{other}{word} {n} 列（只比较列，不要求同行）。"
     if a.kind == "compass":
-        return f"{who} was {COMPASS_WORDS[(a['dr'], a['dc'])]} of {other}."
+        return f"{who}在{other}的{COMPASS_WORDS[(a['dr'], a['dc'])]}方向。"
     if a.kind == "in_areas":
-        names = " or ".join(_area_phrase(th.area(x)) for x in a["areas"])
-        return f"{who} was in {names}."
+        names = "或".join(th.area(x) for x in a["areas"])
+        return f"{who}在以下区域之一：{names}。"
     if a.kind == "tag_in_area":
-        # Was "Someone who woman was in A's room" — the tag is a noun, not a relative clause.
-        return f"Someone who is a {th.tag(a['tag'])} was in {who}'s area."
+        return f"有一只{th.tag(a['tag'])}在{who}所在区域里。"
     if a.kind == "on_in_areas":
-        names = " or ".join(_area_phrase(th.area(x)) for x in a["areas"])
+        names = "或".join(th.area(x) for x in a["areas"])
         obj = th.obj(a["obj"])
-        obj = {"sand": "sand patch", "water": "water feature"}.get(obj, obj)
-        return f"{who} was on a {obj} in {names}."
+        return f"{who}在{names}里的一个{obj}上。"
     if a.kind == "area_no_offset":
         d = a["d"]
         if d == 0:
-            return f"{who} was in the same area as {other}."
-        return (
-            f"{who}'s area number was {abs(d)} "
-            f"{'higher' if d > 0 else 'lower'} than {other}'s."
-        )
+            return f"{who}和{other}在同一个区域。"
+        word = "大" if d > 0 else "小"
+        return f"{who}所在区域的编号比{other}{word} {abs(d)}。"
     if a.kind == "not_area_no_offset":
-        # "immediately" was emitted for every offset, so d=-2 rendered as d=-1 and the sentence
-        # stated a different constraint than the atom. Round-trip verification caught it.
         d = a["d"]
         if abs(d) == 1:
-            word = "immediately after" if d > 0 else "immediately before"
-            return f"{who}'s area did not come {word} {other}'s."
-        return (
-            f"{who}'s area number was not {abs(d)} "
-            f"{'higher' if d > 0 else 'lower'} than {other}'s."
-        )
+            word = "之后" if d > 0 else "之前"
+            return f"{who}所在区域的编号不是紧接在{other}{word}。"
+        word = "大" if d > 0 else "小"
+        return f"{who}所在区域的编号不比{other}{word} {abs(d)}。"
     if a.kind == "area_occupancy_parity":
-        p = a["par"]
-        return f"Each {p}-numbered area contained an {p} number of people."
+        return f"每个编号为{_PAR[a['par']]}的区域里都有{_PAR[a['par']]}只{noun}（0 算偶数）。"
 
-    # Every declared parameter gets a slot, themed where a theme has a word for it. Building this
-    # from `spec.params` rather than a fixed list is what lets a newly registered predicate render
-    # without touching this function — the previous fixed dict raised KeyError on every new kind.
-    fields = {"holder": who, "other": other}
+    # 每个声明的参数都留一个槽位，主题能给词的用主题词；side/axis/par 等英文枚举译成中文。
+    fields = {"holder": who, "other": other, "cast_noun": noun}
     for name in spec.params:
         if name in fields:
             continue
@@ -131,21 +119,24 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
         if name == "area":
             fields[name] = th.area(val)
         elif name == "areas":
-            fields[name] = " or the ".join(th.area(x) for x in val)
+            fields[name] = "或".join(th.area(x) for x in val)
         elif name == "obj":
-            label = th.obj(val)
-            fields[name] = {"sand": "sand patch", "water": "water feature"}.get(
-                label, label
-            )
+            fields[name] = th.obj(val)
         elif name == "ter":
-            fields[name] = th.obj(val)  # themes may rename terrain like any other noun
+            fields[name] = th.obj(val)
         elif name == "tag":
             fields[name] = th.tag(val)
         elif name in ("row", "col"):
-            fields[name] = val + 1  # 1-based for a reader
+            fields[name] = val + 1
+        elif name == "par":
+            fields[name] = _PAR[val]
+        elif name == "side":
+            fields[name] = _SIDE[val]
+        elif name == "axis":
+            fields[name] = _AXIS[val]
         else:
-            fields[name] = val  # side / axis / par / d: plain words already
-    return spec.template.format(**fields).replace("a flowers", "the flowers")
+            fields[name] = val
+    return spec.template.format(**fields)
 
 
 def render_clue(c: Clue, case: Case, th: Theme) -> str:
@@ -242,54 +233,52 @@ def render_scene_compact(case: Case, th: Theme, *, solution: bool = False) -> st
         return "." if k in s.open_cells else "#"
 
     out = [
-        "COMPACT SCENE — use coordinates to reason; emoji are redundant labels only.",
-        "Each AREA/FEATURE cell gives its area and prop code. '.' is no prop; '#' is a blocked "
-        "terrain cell. Exact standability is stated in the legends.",
+        "紧凑场景图——用坐标推理；emoji 只是冗余标注，不作为信息依据。",
+        "每个「区域/道具」格子给出所在区域和道具编号。'.' 表示无道具；'#' 表示地形使格子不可站。能否站立以图例为准。",
         *grid(
-            "AREA/FEATURE GRID",
+            "区域/道具图",
             lambda k: f"{area_codes[s.area_of[k]]}/{cell_feature(k)}",
         ),
         "",
-        "AREA LEGEND",
+        "区域图例",
     ]
     for a in range(s.n_areas):
         out.append(f"  {area_codes[a]} = {th.area(a)}")
 
-    out.append("\nPROP LEGEND")
+    out.append("\n道具图例")
     if not props:
-        out.append("  (none)")
+        out.append("  （无）")
     for p in props:
         icon = "🟢" if p.standable else "⛔"
-        landmark = " 📍landmark" if p.landmark else ""
+        landmark = " 📍地标" if p.landmark else ""
         cells = " ".join(cell_label(case, k) for k in sorted(p.cells))
         out.append(
             f"  {prop_codes[p.pid]} {icon} {th.obj(p.pid)} — "
-            f"{'standable' if p.standable else 'blocked'}{landmark}; cells: {cells}"
+            f"{'可站立' if p.standable else '阻挡'}{landmark}; 格子: {cells}"
         )
 
-    # Terrain is a separate layer because a cell can carry both terrain and a prop. A uniform floor
-    # needs one sentence rather than a duplicate grid; any non-trivial terrain gets the full layer.
+    # 地形是独立一层，因为一个格子可以同时有地形和道具。统一地板只需一句话；非平凡地形给出完整图层。
     if len(terrains) == 1 and terrains[0] == DEFAULT_TERRAIN:
-        out.append("\nTERRAIN\n  all cells: floor 🗺 standable")
+        out.append("\n地形\n  所有格子: 地面 🗺 可站立")
     else:
         out.extend(
             [
                 "",
-                *grid("TERRAIN GRID", lambda k: terrain_codes[s.terrain_of[k]]),
+                *grid("地形图", lambda k: terrain_codes[s.terrain_of[k]]),
                 "",
-                "TERRAIN LEGEND",
+                "地形图例",
             ]
         )
         for t in terrains:
             standable = TERRAINS[t].standable
             out.append(
                 f"  {terrain_codes[t]} 🗺 {th.obj(t)} — "
-                f"{'standable' if standable else 'blocked'}"
+                f"{'可站立' if standable else '阻挡'}"
             )
 
-    out.append("\nDOORS / WINDOWS")
+    out.append("\n门/窗")
     if not s.doors:
-        out.append("  (none)")
+        out.append("  （无）")
     else:
         for d in sorted((tuple(sorted(x)) for x in s.doors)):
             out.append(f"  🚪 {cell_label(case, d[0])} <-> {cell_label(case, d[1])}")
@@ -305,50 +294,39 @@ def render_areas(case: Case, th: Theme) -> str:
     return "\n".join(out)
 
 
-RULES = """RULES
-  1. Every person stands on exactly one square. No two people share a row, and no two share a
-     column. (With {n} people on a {W}x{H} grid, every row and every column holds exactly one.)
-  2. Squares marked (...) hold something you cannot stand on. Squares marked <...> hold furniture
-     you CAN stand on. A bare '.' is empty floor.
-  3. The grid is divided into areas by the '=' walls; the area list below is authoritative.
-  4. The victim, {victim}, is one of the {n} people and occupies a square like everyone else --
-     think of it as where everyone stood at the moment of the murder.
+RULES = """规则
+  1. 每只{cast_noun}恰好站在一个格子上。任意两只不同行，也不同列。（在 {W}x{H} 的棋盘上放 {n} 只{cast_noun}，每行每列恰好一只。）
+  2. 标 (...) 的格子放着你不能站的东西；标 <...> 的格子放着可站的家具；光秃秃的 '.' 是空地。
+  3. 棋盘被 '=' 的墙分成若干区域；下面列出的区域列表为准。
+  4. 受害者 {victim} 是这 {n} 只{cast_noun}之一，和其他{cast_noun}一样占一个格子——把它想成案发那一刻大家站的位置。
 """
 
-COMPACT_RULES = """RULES
-  1. Every person stands on exactly one square. No two people share a row, and no two share a
-     column. (With {n} people on a {W}x{H} grid, every row and every column holds exactly one.)
-  2. In AREA/FEATURE, A1/A2/... are areas, P1/P2/... are props, '.' means no prop, and '#'
-     means terrain makes the square unusable. The prop and terrain legends state standability.
-  3. Area membership is given explicitly in every grid cell; doors/windows are listed by their two
-     endpoint cells.
-  4. The victim, {victim}, is one of the {n} people and occupies a square like everyone else --
-     think of it as where everyone stood at the moment of the murder.
+COMPACT_RULES = """规则
+  1. 每只{cast_noun}恰好站在一个格子上。任意两只不同行，也不同列。（在 {W}x{H} 的棋盘上放 {n} 只{cast_noun}，每行每列恰好一只。）
+  2. 在"区域/道具"图中，A1/A2/... 是区域，P1/P2/... 是道具，'.' 表示无道具，'#' 表示地形让格子不可站。道具和地形图例会说明能否站立。
+  3. 每个格子都明确给出所在区域；门/窗按两端格子列出。
+  4. 受害者 {victim} 是这 {n} 只{cast_noun}之一，和其他{cast_noun}一样占一个格子——把它想成案发那一刻大家站的位置。
 """
 
-TERMS = """TERMS
-  Beside: one square up, down, left or right, within the same area, unless a clue says otherwise.
-  Corner: a square touching two adjacent boundaries of its area, including the outer border.
-  Outer border: the first or last row or column of the whole grid.
-  In front of a door/window: either of the two squares joined by that opening. Areas stay separate.
-  With: in the same area. Alone: no other person in that area, including the victim.
-  Alone with: exactly those two people in the area.
-  Offsets compare only the named row or column. Area numbers are counted from 1.
-  An empty area contains zero people; zero is even.
-  Terrain is the ground layer, separate from named props that may have the same label.
+TERMS = """术语
+  「旁边」：上、下、左、右相邻一格，且在同一区域内（除非线索另有说明）。
+  「墙角」：与所在区域两面相邻边界（含外边界）相接的格子。
+  「外边界」：整个棋盘的第一行/最后一行，或第一列/最后一列。
+  「门/窗前面」：该开口连接的两个格子之一；区域之间互不相通。
+  「同区域」：在同一区域内。「独自」：所在区域里没有别的{cast_noun}（含受害者）。
+  「单独在一起」：那个区域里恰好只有这两只{cast_noun}。
+  行/列偏移只比较指出的那一行或列。区域编号从 1 开始。
+  空区域里有 0 只{cast_noun}；0 算偶数。
+  地形是地面层，与可能同名道具相互独立。
 """
 
-GOAL_MURDERER = """GOAL
-  {victim} {note}. The murderer is the one person who was ALONE WITH {victim} -- in the same area,
-  with no third person there.
-  Your answer is the WHOLE arrangement: every person and the square they stood on. Name the
-  murderer as well, but the arrangement is what is judged -- with only a handful of suspects, a
-  name on its own is indistinguishable from a guess.
+GOAL_MURDERER = """目标
+  {victim} {note}。凶手就是那个和{victim}「单独在一起」的{cast_noun}——与它在同一区域，且该区域没有第三只{cast_noun}。
+  你的答案要给出完整布局：每只{cast_noun}及所站格子。也要指出凶手，但判定的是整个布局——嫌疑只有几只时，光报一个名字和猜没什么区别。
 """
 
-GOAL_VICTIM_CELL = """GOAL
-  {victim} {note}. Your answer is the WHOLE arrangement: every person and the square they stood
-  on. The square {victim} occupied is what the case turns on, but the full arrangement is judged.
+GOAL_VICTIM_CELL = """目标
+  {victim} {note}。你的答案要给出完整布局：每只{cast_noun}及所站格子。关键在于{victim}所占的格子，但判定的是整个布局。
 """
 
 
@@ -362,7 +340,7 @@ def render_case(
     th = th or canonical_theme(case)
     th.validate(case)
     if scene_format not in ("classic", "compact"):
-        raise ValueError(f"unknown scene format {scene_format!r}")
+        raise ValueError(f"未知场景格式 {scene_format!r}")
     n = len(case.characters)
     goal = GOAL_MURDERER if case.vdef.answer == "murderer" else GOAL_VICTIM_CELL
     rules = COMPACT_RULES if scene_format == "compact" else RULES
@@ -372,7 +350,7 @@ def render_case(
         else render_scene(case, th, solution=include_solution)
     )
     cast = ", ".join(
-        f"{th.name(x)}" + (" (the victim)" if x == case.victim else "")
+        f"{th.name(x)}" + ("（受害者）" if x == case.victim else "")
         for x in case.characters
     )
     clues = "\n".join(
@@ -380,12 +358,12 @@ def render_case(
     )
     attributes = (
         (
-            "ATTRIBUTES\n"
+            "属性\n"
             + "\n".join(
                 f"  {th.name(x)}: "
                 + (
-                    ", ".join(th.tag(t) for t in sorted(case.tags.get(x, ()), key=str))
-                    or "no listed attributes"
+                    "、".join(th.tag(t) for t in sorted(case.tags.get(x, ()), key=str))
+                    or "无列出属性"
                 )
                 for x in case.characters
             )
@@ -395,20 +373,28 @@ def render_case(
         else ""
     )
     parts = [
-        f"CASE: {th.title}",
+        f"案卷：{th.title}",
         (f"\n{th.blurb}\n" if th.blurb else ""),
-        rules.format(n=n, W=case.scene.W, H=case.scene.H, victim=th.name(case.victim)),
-        TERMS,
-        goal.format(victim=th.name(case.victim), note=th.victim_note),
-        f"PEOPLE ({n})\n  {cast}\n",
+        rules.format(
+            n=n,
+            W=case.scene.W,
+            H=case.scene.H,
+            victim=th.name(case.victim),
+            cast_noun=th.cast_noun,
+        ),
+        TERMS.format(cast_noun=th.cast_noun),
+        goal.format(
+            victim=th.name(case.victim), note=th.victim_note, cast_noun=th.cast_noun
+        ),
+        f"角色（{n}只）\n  {cast}\n",
         attributes,
-        "SCENE\n" + scene + "\n",
+        "场景\n" + scene + "\n",
         (
-            ("AREAS\n" + render_areas(case, th) + "\n")
+            ("区域\n" + render_areas(case, th) + "\n")
             if scene_format == "classic"
             else ""
         ),
-        f"CLUES ({len(case.clues)})\n{clues}\n",
+        f"线索（{len(case.clues)}）\n{clues}\n",
     ]
     return "\n".join(p for p in parts if p)
 
@@ -441,6 +427,6 @@ def render_certificate(case: Case, certificate, th: Theme | None = None) -> str:
         )
     if not certificate.solved:
         lines.append(
-            f"\nStopped with {len(certificate.stuck)} unresolved character(s)."
+            f"\n在 {len(certificate.stuck)} 只未确定角色处停下。"
         )
     return "\n".join(lines)
