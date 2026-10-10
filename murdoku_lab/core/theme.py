@@ -27,6 +27,7 @@ class Theme:
     title: str
     names: dict[str, str]  # character symbol -> display name
     pronouns: dict[str, str] = field(default_factory=dict)  # symbol -> they/she/he
+    cast_noun: str = "人"  # what the characters are called as a species/role ("人", "猫", ...)
     areas: tuple[str, ...] = ()  # area id -> room name
     objects: dict[str, str] = field(
         default_factory=dict
@@ -93,6 +94,7 @@ class Theme:
             "title": self.title,
             "names": self.names,
             "pronouns": self.pronouns,
+            "cast_noun": self.cast_noun,
             "areas": list(self.areas),
             "objects": self.objects,
             "tags": self.tags,
@@ -108,6 +110,7 @@ class Theme:
             title=d["title"],
             names=dict(d["names"]),
             pronouns=dict(d.get("pronouns", {})),
+            cast_noun=d.get("cast_noun", "人"),
             areas=tuple(d.get("areas", ())),
             objects=dict(d.get("objects", {})),
             tags=dict(d.get("tags", {})),

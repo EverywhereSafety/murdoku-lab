@@ -105,7 +105,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=False,
-    template="{holder} was in the {area}.",
+    template="{holder}在{area}里。",
     holds=lambda a, s, pl: s.area_of[pl[a.holder]] == a["area"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.area_of[k] == a["area"]),
 )
@@ -115,7 +115,7 @@ _spec(
     params=("areas",),
     arity="unary",
     tier=2,
-    template="{holder} was in one of: {areas}.",
+    template="{holder}在以下区域之一：{areas}。",
     holds=lambda a, s, pl: s.area_of[pl[a.holder]] in a["areas"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.area_of[k] in a["areas"]),
 )
@@ -125,7 +125,7 @@ _spec(
     params=("area",),
     arity="unary",
     tier=2,
-    template="{holder} was not in the {area}.",
+    template="{holder}不在{area}里。",
     holds=lambda a, s, pl: s.area_of[pl[a.holder]] != a["area"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.area_of[k] != a["area"]),
 )
@@ -136,7 +136,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=True,
-    template="{holder} was on a {obj}.",
+    template="{holder}在某{obj}上。",
     holds=lambda a, s, pl: s.obj_of[pl[a.holder]] == a["obj"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.obj_of[k] == a["obj"]),
 )
@@ -146,7 +146,7 @@ _spec(
     params=("obj",),
     arity="unary",
     tier=2,
-    template="{holder} was not on a {obj}.",
+    template="{holder}不在{obj}上。",
     holds=lambda a, s, pl: s.obj_of[pl[a.holder]] != a["obj"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.obj_of[k] != a["obj"]),
 )
@@ -157,7 +157,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=True,
-    template="{holder} was beside a {obj}.",
+    template="{holder}在某{obj}旁边。",
     holds=lambda a, s, pl: a["obj"] in s.info.beside[pl[a.holder]],
     mask=lambda a, s: s.cells_beside(a["obj"]),
 )
@@ -167,7 +167,7 @@ _spec(
     params=("obj",),
     arity="unary",
     tier=2,
-    template="{holder} was not beside a {obj}.",
+    template="{holder}不在{obj}旁边。",
     holds=lambda a, s, pl: a["obj"] not in s.info.beside[pl[a.holder]],
     mask=lambda a, s: frozenset(s.open_cells - s.cells_beside(a["obj"])),
 )
@@ -177,7 +177,7 @@ _spec(
     params=("obj",),
     arity="unary",
     tier=2,
-    template="{holder} was beside a {obj}, wall or no wall.",
+    template="{holder}在某{obj}旁边（隔着一道墙也算）。",
     holds=lambda a, s, pl: a["obj"] in s.info.beside_any[pl[a.holder]],
     mask=lambda a, s: s.cells_beside(a["obj"], same_area=False),
 )
@@ -190,8 +190,7 @@ _spec(
     params=(),
     arity="unary",
     tier=1,
-    template="{holder} stood in a corner of the area they were in — a square with a wall of that "
-    "area on two adjacent sides. (Not necessarily a corner of the whole grid.)",
+    template="{holder}站在所处区域的墙角——该区域两面相邻的墙交汇的格子。（不一定是整个棋盘的角。）",
     holds=lambda a, s, pl: pl[a.holder] in s.info.room_corner,
     mask=lambda a, s: frozenset(s.open_cells & s.info.room_corner),
 )
@@ -201,8 +200,7 @@ _spec(
     params=(),
     arity="unary",
     tier=2,
-    template="{holder} did not stand in a corner of the area they were in — no square with walls "
-    "of that area on two adjacent sides.",
+    template="{holder}没有站在所处区域的墙角——没有该区域两面相邻的墙交汇的格子。",
     holds=lambda a, s, pl: pl[a.holder] not in s.info.room_corner,
     mask=lambda a, s: frozenset(s.open_cells - s.info.room_corner),
 )
@@ -213,7 +211,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=True,
-    template="{holder} stood in one of the four corners of the whole grid.",
+    template="{holder}站在整个棋盘四个角之一。",
     holds=lambda a, s, pl: pl[a.holder] in s.info.grid_corner,
     mask=lambda a, s: frozenset(s.open_cells & s.info.grid_corner),
 )
@@ -227,8 +225,7 @@ _spec(
     params=(),
     arity="unary",
     tier=2,
-    template="{holder} had a wall on at least one of the four sides of their square — either a "
-    "wall between two areas, or the outside of the grid.",
+    template="{holder}所处格子的四面中至少有一面是墙（区域间的墙或棋盘外边界）。",
     holds=lambda a, s, pl: pl[a.holder] in s.info.edge,
     mask=lambda a, s: frozenset(s.open_cells & s.info.edge),
 )
@@ -238,7 +235,7 @@ _spec(
     params=(),
     arity="unary",
     tier=2,
-    template="{holder} stood in the first or last row of the grid, or in its first or last column.",
+    template="{holder}站在棋盘的第一行或最后一行，或第一列或最后一列。",
     holds=lambda a, s, pl: pl[a.holder] in s.info.border,
     mask=lambda a, s: frozenset(s.open_cells & s.info.border),
 )
@@ -249,7 +246,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=True,
-    template="{holder} was in front of a door or window.",
+    template="{holder}在门或窗前面。",
     holds=lambda a, s, pl: pl[a.holder] in s.info.door_cells,
     mask=lambda a, s: frozenset(s.open_cells & s.info.door_cells),
 )
@@ -260,7 +257,7 @@ _spec(
     arity="unary",
     tier=1,
     positional=True,
-    template="{holder} was in row {row}.",
+    template="{holder}在第{row}行。",
     holds=lambda a, s, pl: s.row(pl[a.holder]) == a["row"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.row(k) == a["row"]),
 )
@@ -271,7 +268,7 @@ _spec(
     arity="unary",
     tier=1,
     positional=True,
-    template="{holder} was in column {col}.",
+    template="{holder}在第{col}列。",
     holds=lambda a, s, pl: s.col(pl[a.holder]) == a["col"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.col(k) == a["col"]),
 )
@@ -294,7 +291,7 @@ _spec(
     tier=2,
     pinning=True,
     exclusive=True,
-    template="{holder} was the only person on a {obj}.",
+    template="{holder}是唯一在某{obj}上的{cast_noun}。",
     holds=_only_on_holds,
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.obj_of[k] == a["obj"]),
 )
@@ -313,7 +310,7 @@ _spec(
     arity="global",
     tier=2,
     exclusive=True,
-    template="{holder} was the only person beside a {obj}.",
+    template="{holder}是唯一在某{obj}旁边的{cast_noun}。",
     holds=_only_beside_holds,
     mask=lambda a, s: s.cells_beside(a["obj"]),
 )
@@ -329,7 +326,7 @@ _spec(
     arity="global",
     tier=2,
     exclusive=True,
-    template="{holder} was alone — no one else was in their area, not even the victim.",
+    template="{holder}是独自一只——所在区域里没有别的{cast_noun}，受害者也不在。",
     holds=_alone_holds,
     mask=None,
 )
@@ -345,7 +342,7 @@ _spec(
     arity="global",
     tier=2,
     exclusive=True,
-    template="Nobody at all was in the {area}.",
+    template="{area}里一只{cast_noun}都没有。",
     holds=_area_empty_holds,
     mask=None,
 )
@@ -361,7 +358,7 @@ _spec(
     arity="global",
     tier=3,
     exclusive=True,
-    template="Every area held at least one person.",
+    template="每个区域都至少有一只{cast_noun}。",
     holds=_no_empty_area_holds,
     mask=None,
 )
@@ -377,7 +374,7 @@ _spec(
     arity="global",
     tier=3,
     exclusive=True,
-    template="Exactly one person was on a {obj}.",
+    template="恰好一只{cast_noun}在某{obj}上。",
     holds=_exactly_one_on_holds,
     mask=None,
 )
@@ -391,7 +388,7 @@ _spec(
     arity="pair",
     tier=2,
     relational=True,
-    template="{holder} was in the same area as {other}.",
+    template="{holder}和{other}在同一个区域。",
     holds=lambda a, s, pl: s.area_of[pl[a.holder]] == s.area_of[pl[a["other"]]],
     mask=None,
 )
@@ -402,7 +399,7 @@ _spec(
     arity="pair",
     tier=2,
     relational=True,
-    template="{holder} was not in the same area as {other}.",
+    template="{holder}和{other}不在同一个区域。",
     holds=lambda a, s, pl: s.area_of[pl[a.holder]] != s.area_of[pl[a["other"]]],
     mask=None,
 )
@@ -423,7 +420,7 @@ _spec(
     tier=2,
     relational=True,
     exclusive=True,
-    template="{holder} was alone with {other} — only those two were in that area.",
+    template="{holder}和{other}单独在一起——那个区域里只有他们两只{cast_noun}。",
     holds=_alone_with_holds,
     mask=None,
 )
@@ -435,7 +432,7 @@ _spec(
     tier=2,
     relational=True,
     positional=True,
-    template="{holder} was exactly {d} row(s) below {other}.",
+    template="{holder}正好在{other}下方 {d} 行。",
     holds=lambda a, s, pl: s.row(pl[a.holder]) - s.row(pl[a["other"]]) == a["d"],
     mask=None,
 )
@@ -447,7 +444,7 @@ _spec(
     tier=2,
     relational=True,
     positional=True,
-    template="{holder} was exactly {d} column(s) right of {other}.",
+    template="{holder}正好在{other}右侧 {d} 列。",
     holds=lambda a, s, pl: s.col(pl[a.holder]) - s.col(pl[a["other"]]) == a["d"],
     mask=None,
 )
@@ -464,7 +461,7 @@ _spec(
     tier=2,
     relational=True,
     positional=True,
-    template="{holder} was {compass_word} of {other}.",
+    template="{holder}在{other}的{compass_word}方向。",
     holds=lambda a, s, pl: (
         _sgn(s.row(pl[a.holder]) - s.row(pl[a["other"]])) == a["dr"]
         and _sgn(s.col(pl[a.holder]) - s.col(pl[a["other"]])) == a["dc"]
@@ -478,7 +475,7 @@ _spec(
     arity="pair",
     tier=3,
     relational=True,
-    template="{holder} was diagonally in line with {other}.",
+    template="{holder}和{other}在对角线上对齐。",
     holds=lambda a, s, pl: abs(s.row(pl[a.holder]) - s.row(pl[a["other"]]))
     == abs(s.col(pl[a.holder]) - s.col(pl[a["other"]])),
     mask=None,
@@ -490,7 +487,7 @@ _spec(
     arity="pair",
     tier=2,
     relational=True,
-    template="{holder} was directly next to {other}.",
+    template="{holder}紧挨着{other}。",
     holds=lambda a, s, pl: pl[a["other"]] in s.neighbours(pl[a.holder]),
     mask=None,
 )
@@ -518,7 +515,7 @@ _spec(
     arity="global",
     tier=2,
     needs_tags=True,
-    template="Someone who is a {tag} was in {holder}'s area.",
+    template="有一只{tag}在{holder}所在区域里。",
     holds=lambda a, s, pl: (_ for _ in ()).throw(
         NotImplementedError("tag_in_area requires tags; call holds_atom(..., tags=...)")
     ),
@@ -538,7 +535,7 @@ _spec(
     params=("ter",),
     arity="unary",
     tier=1,
-    template="{holder} was standing on {ter} ground.",
+    template="{holder}站在{ter}地面上。",
     holds=lambda a, s, pl: s.terrain_of[pl[a.holder]] == a["ter"],
     mask=lambda a, s: frozenset(s.info.cells_of_terrain.get(a["ter"], frozenset())),
 )
@@ -548,7 +545,7 @@ _spec(
     params=("ter",),
     arity="unary",
     tier=2,
-    template="{holder} was not standing on {ter} ground.",
+    template="{holder}没有站在{ter}地面上。",
     holds=lambda a, s, pl: s.terrain_of[pl[a.holder]] != a["ter"],
     mask=lambda a, s: frozenset(k for k in s.open_cells if s.terrain_of[k] != a["ter"]),
 )
@@ -559,7 +556,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=False,
-    template="{holder} was beside a square of {ter} ground.",
+    template="{holder}在某{ter}地面的格子旁边。",
     holds=lambda a, s, pl: a["ter"] in s.info.beside_terrain[pl[a.holder]],
     mask=lambda a, s: frozenset(
         k for k in s.open_cells if a["ter"] in s.info.beside_terrain[k]
@@ -577,8 +574,7 @@ _spec(
     params=("par",),
     arity="unary",
     tier=2,
-    template="{holder} was in an area whose number is {par}, counting the areas as they are "
-    "named below starting from 1.",
+    template="{holder}所在区域的编号是{par}（区域按下文从 1 开始编号）。",
     holds=lambda a, s, pl: (s.area_no(pl[a.holder]) % 2)
     == (0 if a["par"] == "even" else 1),
     mask=lambda a, s: frozenset(
@@ -594,7 +590,7 @@ _spec(
     arity="pair",
     tier=2,
     relational=True,
-    template="{holder} was in a higher-numbered area than {other}.",
+    template="{holder}在比{other}编号更大的区域。",
     holds=lambda a, s, pl: s.area_no(pl[a.holder]) > s.area_no(pl[a["other"]]),
     mask=None,
 )
@@ -605,7 +601,7 @@ _spec(
     arity="pair",
     tier=2,
     relational=True,
-    template="{holder} was in a lower-numbered area than {other}.",
+    template="{holder}在比{other}编号更小的区域。",
     holds=lambda a, s, pl: s.area_no(pl[a.holder]) < s.area_no(pl[a["other"]]),
     mask=None,
 )
@@ -616,7 +612,7 @@ _spec(
     arity="pair",
     tier=3,
     relational=True,
-    template="{holder}'s area number was {d} from {other}'s.",
+    template="{holder}所在区域的编号与{other}相差 {d}。",
     holds=lambda a, s, pl: s.area_no(pl[a.holder]) - s.area_no(pl[a["other"]])
     == a["d"],
     mask=None,
@@ -628,7 +624,7 @@ _spec(
     arity="pair",
     tier=2,
     relational=True,
-    template="{holder}'s area number was not {d} from {other}'s.",
+    template="{holder}所在区域的编号与{other}不相差 {d}。",
     holds=lambda a, s, pl: s.area_no(pl[a.holder]) - s.area_no(pl[a["other"]])
     != a["d"],
     mask=None,
@@ -653,7 +649,7 @@ _spec(
     arity="unary",
     tier=1,
     pinning=False,
-    template="{holder} was in the {side}most line of the scene.",
+    template="{holder}在场景最{side}的一行或一列。",
     holds=lambda a, s, pl: _EXTREME[a["side"]](s, pl[a.holder]),
     mask=lambda a, s: frozenset(k for k in s.open_cells if _EXTREME[a["side"]](s, k)),
 )
@@ -663,7 +659,7 @@ _spec(
     params=("axis",),
     arity="unary",
     tier=2,
-    template="{holder} was in neither the first nor the last {axis}.",
+    template="{holder}既不在第一{axis}也不在最后一{axis}。",
     holds=lambda a, s, pl: not _extreme_axis(s, pl[a.holder], a["axis"]),
     mask=lambda a, s: frozenset(
         k for k in s.open_cells if not _extreme_axis(s, k, a["axis"])
@@ -688,7 +684,7 @@ _spec(
     arity="unary",
     tier=2,
     pinning=True,
-    template="{holder} was on the {obj} of one of: {areas}.",
+    template="{holder}在以下区域之一的{obj}上。",
     holds=lambda a, s, pl: (
         s.obj_of[pl[a.holder]] == a["obj"] and s.area_of[pl[a.holder]] in a["areas"]
     ),
@@ -739,7 +735,7 @@ _spec(
     needs_tags=True,
     exclusive=True,
     pinning=True,
-    template="{holder} was the only {tag} on a {obj}.",
+    template="{holder}是唯一在某{obj}上的{tag}。",
     holds=lambda a, s, pl: (_ for _ in ()).throw(
         NotImplementedError("only_tag_on needs tags; call holds_atom(..., tags=...)")
     ),
@@ -752,7 +748,7 @@ _spec(
     arity="global",
     tier=2,
     needs_tags=True,
-    template="In {holder}'s area, a {tag} was on a {obj}.",
+    template="在{holder}所在区域里，有一只{tag}在某{obj}上。",
     holds=lambda a, s, pl: (_ for _ in ()).throw(
         NotImplementedError("tag_in_area_on needs tags; call holds_atom(..., tags=...)")
     ),
@@ -777,7 +773,7 @@ _spec(
     params=("obj",),
     arity="global",
     tier=2,
-    template="Someone else in {holder}'s area was beside a {obj}.",
+    template="{holder}所在区域里有另一只{cast_noun}在某{obj}旁边。",
     holds=_other_beside_holds,
     mask=None,
 )
@@ -804,7 +800,7 @@ _spec(
     arity="global",
     tier=3,
     exclusive=True,
-    template="Every {par}-numbered area held an {par} number of people (zero counts as even).",
+    template="每个编号为{par}的区域里都有偶数只{cast_noun}（0 算偶数）。",
     holds=_occupancy_parity_holds,
     mask=None,
 )
@@ -855,12 +851,12 @@ def canonical_kind(kind: str) -> str:
 
 
 COMPASS_WORDS = {
-    (-1, -1): "north-west",
-    (-1, 0): "north",
-    (-1, 1): "north-east",
-    (0, -1): "west",
-    (0, 1): "east",
-    (1, -1): "south-west",
-    (1, 0): "south",
-    (1, 1): "south-east",
+    (-1, -1): "西北",
+    (-1, 0): "北",
+    (-1, 1): "东北",
+    (0, -1): "西",
+    (0, 1): "东",
+    (1, -1): "西南",
+    (1, 0): "南",
+    (1, 1): "东南",
 }
