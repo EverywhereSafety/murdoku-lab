@@ -30,7 +30,7 @@ from murdoku_lab.core.instance import Case, Clue, MURDERER_RULES, VARIANTS, Vari
 from murdoku_lab.solver.exact import unique_solution
 from murdoku_lab.solver.logic import Certificate, certify
 
-CHAR_SYMBOLS = "ABCDEFGHIJKLMNOPQRSTU"
+CHAR_SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUWXYZ"
 VICTIM_SYMBOL = "V"
 
 

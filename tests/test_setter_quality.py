@@ -203,3 +203,57 @@ def test_constraint_first_rejects_a_disagreeing_final_certificate(monkeypatch):
         time_limit_s=5,
     )
     assert result.reason == "logic_solution_mismatch"
+
+
+def test_generation_config_resolves_assets_and_accepts_cli_overrides(tmp_path):
+    import json
+    from murdoku_lab.setter.farm import _arguments
+
+    config = tmp_path / "generation.json"
+    config.write_text(
+        json.dumps(
+            {
+                "strategy": "constraint-first",
+                "bands": "any",
+                "size": 24,
+                "scene_spec": "scenes/manor.json",
+            }
+        )
+    )
+    args = _arguments(["--config", str(config), "--size", "20"])
+    assert args.size == 20
+    assert args.scene_spec == tmp_path / "scenes/manor.json"
+    config.write_text(json.dumps({"size_typo": 24}))
+    with pytest.raises(SystemExit):
+        _arguments(["--config", str(config)])
+    with pytest.raises(SystemExit):
+        _arguments(["--strategy", "placement-first", "--bands", "any"])
+
+
+def test_area_option_folding_preserves_all_public_candidates():
+    from murdoku_lab.core.atoms import unary_mask
+    from murdoku_lab.setter.quality import fold_area_options
+    from murdoku_lab.visual.demos import glasshouse
+
+    original = glasshouse().case
+    clues = (
+        Clue((Atom("in_areas", "A", ((0, 1, 2),)), Atom("not_in_area", "A", (2,)))),
+        Clue((Atom("in_areas", "B", ((0, 1),)),)),
+        Clue((Atom("not_in_area", "B", (0,)),)),
+        Clue((Atom("not_in_area", "C", (1,)),)),
+    )
+    case = replace(original, clues=clues, solution={})
+    folded = fold_area_options(case)
+    for holder in ("A", "B", "C"):
+        domains = []
+        for version in (case, folded):
+            cells = set(version.scene.open_cells)
+            for atom in version.atoms:
+                if atom.holder == holder:
+                    cells &= unary_mask(atom, version.scene)
+            domains.append(cells)
+        assert domains[0] == domains[1]
+    assert len(folded.atoms) == 3
+    assert folded.atoms[1] == Atom("in_area", "B", (1,))
+    assert fold_area_options(folded).clues == folded.clues
+    assert case.clues == clues

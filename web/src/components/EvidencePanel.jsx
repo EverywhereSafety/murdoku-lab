@@ -58,7 +58,7 @@ export function EvidencePanel({
         {clues.map((c) => (
           <article
             key={c.id}
-            className={`clue-card ${c.person === selected ? "focused" : ""} ${c.reviewed ? "reviewed" : ""} ${highlightedClues.includes(c.id) ? "referenced" : ""}`}
+            className={`clue-card ${c.person === selected || (person && c.text.includes(person.name)) ? "focused" : ""} ${c.reviewed ? "reviewed" : ""} ${highlightedClues.includes(c.id) ? "referenced" : ""}`}
             data-clue={c.id}
           >
             <span className="clue-number">

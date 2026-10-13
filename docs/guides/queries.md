@@ -83,22 +83,34 @@ through [the artwork catalog](../reference/artwork.md).
 
 ## Large boards and scene configuration
 
-For larger boards, use the constraint-first strategy and a scene specification:
+The `extended`, `anon` and `course` families support boards up to 24×24.
+The `classic` and `open` families retain their 6–9 ranges. Characters have
+unique single-letter IDs and name initials, with `V` reserved for the victim.
+
+Generate and export a courtyard case with the bundled preset
 
 ```bash
-python -m murdoku_lab.setter.farm --strategy constraint-first --variant course --size 16 \
-  --bands expert --n 1 --shots 3 --attempts 1 --workers 3 \
-  --scene-spec config/scene_specs/paired_anchors_16.json \
-  --out data/course-cases.jsonl
+python -m murdoku_lab.setter.farm \
+  --config config/generation/courtyard.json \
+  --n 3 --workers 4 --seed 42 \
+  --out data/courtyard.jsonl --query-dir data/courtyard-queries
 ```
 
-Scene specifications configure area counts, prop density and standable anchors.
-Example:
+Use `--size 16` or `--size 20` for smaller boards. CLI arguments override the
+preset. Attempts refill workers until the requested count or attempt budget is
+reached. A nonzero exit means the requested count was not reached.
 
-```json
-{"schema":"murdoku.scene_spec/1","area_count":8,"anchors_per_area":{"flag":1,"tee":1}}
-```
+`config/scene_specs/courtyard.json` defines twelve furnished rooms around a
+connected cloister and courtyard. Regional roles specify ground, terrain patches
+and prop densities before character placement and clue generation. Copy this
+file to create another setting. Door endpoints stay clear.
 
-The generator validates scene requirements and admits cases through solution,
-difficulty and clue-quality gates. Semantic themes and artwork control the
-presentation; the verified case supplies the gold answer.
+`config/rhythm/player.json` screens opening progress, stalls and target timing
+across five deduction schedules. It excludes coordinate shortcuts and area-number
+arithmetic, and simplifies equivalent room alternatives. Pass the same
+`--rhythm-policy` when exporting previously generated cases. The independent
+export gate preserves the same clue-quality requirements.
+
+Every accepted case passes uniqueness, logic and clue-utility checks. Text and
+visual exports share its answer key. See [reasoning profiles](../reference/reasoning-profiles.md)
+for policy options and measurements.

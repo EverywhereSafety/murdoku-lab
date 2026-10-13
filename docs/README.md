@@ -1,7 +1,7 @@
 # Murdoku Lab documentation
 
 [Website](https://everywheresafety.github.io/murdoku/) ·
-[Blog](https://everywheresafety.github.io/blog/murdoku-as-vhd/) ·
+[Blog](https://everywheresafety.github.io/blog/treasure-hunt/) ·
 [Code and quickstart](../README.md)
 
 For a first run, follow the quickstart to generate and solve one small case on

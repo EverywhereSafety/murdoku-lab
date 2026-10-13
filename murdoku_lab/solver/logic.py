@@ -236,8 +236,9 @@ class Deducer:
             ("row", self.scene.H, self.scene.row),
             ("column", self.scene.W, self.scene.col),
         ):
+            projected = {x: {of(k) for k in st.cand[x]} for x in self.chars}
             for i in range(size):
-                who = [x for x in self.chars if any(of(k) == i for k in st.cand[x])]
+                who = [x for x in self.chars if i in projected[x]]
                 if len(who) == 1:
                     x = who[0]
                     keep = {k for k in st.cand[x] if of(k) == i}
@@ -334,9 +335,7 @@ class Deducer:
             if spec.arity != "pair":
                 continue
             x, y = a.holder, a["other"]
-            rel = self._relation(a)
-            nx = {k for k in st.cand[x] if any(rel(k, m) for m in st.cand[y])}
-            ny = {m for m in st.cand[y] if any(rel(k, m) for k in st.cand[x])}
+            nx, ny = self._pair_supports(a, st.cand[x], st.cand[y])
             n = (len(st.cand[x]) - len(nx)) + (len(st.cand[y]) - len(ny))
             if n:
                 st.cand[x], st.cand[y] = nx, ny
@@ -348,6 +347,60 @@ class Deducer:
                     removed=n,
                 )
         return None
+
+    def _pair_supports(self, atom, left, right):
+        """Exact relational support with projections for common geometric clues.
+
+        Both sides use the original domains, preserving the existing arc step.
+        Unhandled relations keep the general pairwise implementation.
+        """
+        scene, kind = self.scene, atom.kind
+        if kind in ("row_offset", "col_offset", "with", "alone_with", "not_with"):
+            project = (
+                scene.row
+                if kind == "row_offset"
+                else scene.col if kind == "col_offset" else scene.area_of.__getitem__
+            )
+            xs, ys = {project(k) for k in left}, {project(m) for m in right}
+            if kind == "not_with":
+                return (
+                    {k for k in left if ys - {project(k)}},
+                    {m for m in right if xs - {project(m)}},
+                )
+            delta = atom["d"] if kind in ("row_offset", "col_offset") else 0
+            return (
+                {k for k in left if project(k) - delta in ys},
+                {m for m in right if project(m) + delta in xs},
+            )
+        if kind == "diagonal":
+
+            def diagonals(cells):
+                return (
+                    {scene.row(k) - scene.col(k) for k in cells},
+                    {scene.row(k) + scene.col(k) for k in cells},
+                )
+
+            lx, ly = diagonals(left)
+            rx, ry = diagonals(right)
+            return (
+                {
+                    k
+                    for k in left
+                    if scene.row(k) - scene.col(k) in rx
+                    or scene.row(k) + scene.col(k) in ry
+                },
+                {
+                    m
+                    for m in right
+                    if scene.row(m) - scene.col(m) in lx
+                    or scene.row(m) + scene.col(m) in ly
+                },
+            )
+        relation = self._relation(atom)
+        return (
+            {k for k in left if any(relation(k, m) for m in right)},
+            {m for m in right if any(relation(k, m) for k in left)},
+        )
 
     def t_area(self, st: State) -> Step | None:
         """Area-level reasoning for `alone` / `alone_with`.
@@ -417,11 +470,11 @@ class Deducer:
         """
         for axis, of in (("row", self.scene.row), ("column", self.scene.col)):
             live = [x for x in self.chars if len(st.cand[x]) > 1]
+            projected = {x: {of(c) for c in st.cand[x]} for x in live}
             for k in range(2, min(max_k, len(live)) + 1):
-                for grp in combinations(live, k):
-                    lines = set()
-                    for x in grp:
-                        lines |= {of(c) for c in st.cand[x]}
+                eligible = [x for x in live if len(projected[x]) <= k]
+                for grp in combinations(eligible, k):
+                    lines = set().union(*(projected[x] for x in grp))
                     if len(lines) != k:
                         continue
                     n = 0
@@ -453,11 +506,14 @@ class Deducer:
             ("row", self.scene.H, self.scene.row),
             ("column", self.scene.W, self.scene.col),
         ):
+            projected = {x: {of(c) for c in st.cand[x]} for x in self.chars}
+            owners = {
+                i: {x for x in self.chars if i in projected[x]} for i in range(size)
+            }
             for k in range(2, min(max_k, size) + 1):
-                for lines in combinations(range(size), k):
-                    who = {
-                        x for x in self.chars if any(of(c) in lines for c in st.cand[x])
-                    }
+                eligible = [i for i in range(size) if len(owners[i]) <= k]
+                for lines in combinations(eligible, k):
+                    who = set().union(*(owners[i] for i in lines))
                     if len(who) != k:
                         continue
                     n = 0
@@ -491,12 +547,11 @@ class Deducer:
                 for x in self.chars:
                     if x == z:
                         continue
-                    rest = {
-                        m
+                    has_square = any(
+                        m != k and self.scene.row(m) != r and self.scene.col(m) != c
                         for m in st.cand[x]
-                        if m != k and self.scene.row(m) != r and self.scene.col(m) != c
-                    }
-                    if not rest:
+                    )
+                    if not has_square:
                         st.cand[z].discard(k)
                         return Step(
                             "xblock",

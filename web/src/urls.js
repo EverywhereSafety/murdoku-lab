@@ -29,7 +29,7 @@ const organizationSite = "https://everywheresafety.github.io";
 export const projectLinks = [
   ["Everywhere Safety", `${organizationSite}/`],
   ["Project website", `${organizationSite}/murdoku/`],
-  ["Blog", `${organizationSite}/blog/murdoku-as-vhd/`],
+  ["Blog", `${organizationSite}/blog/treasure-hunt/`],
   ["Code & generator", "https://github.com/EverywhereSafety/murdoku-lab"],
   ["Agentic RL infrastructure", `${organizationSite}/agent-horizon/`],
   [

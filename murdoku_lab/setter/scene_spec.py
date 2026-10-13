@@ -1,8 +1,7 @@
-"""Small, public scene requirements for the unified setter.
+"""Public geometry and regional roles applied before placement or clue generation.
 
-This is a deterministic CPU interface a later text/LLM planner can target.
-Version 1 supports area count, standable anchor counts and optional prop cell budgets. It does not
-introduce rules, identities, clues, arbitrary graph layouts or hidden placements.
+Scene requests configure area count, standable anchors, prop-cell budgets and
+local terrain/prop profiles. They contain no identities, clues or placements.
 """
 
 from dataclasses import replace
@@ -28,9 +27,16 @@ def normalize_spec(value, *, size, n_areas=None):
         "anchors_per_area",
         "blocker_rate",
         "furniture_rate",
+        "regions",
+        "layout",
     }
     if unknown:
         raise ValueError(f"unsupported scene_spec fields: {sorted(unknown)}")
+    layout = value.get("layout")
+    if layout is not None and (layout != "courtyard" or size < 16):
+        raise ValueError("courtyard layout requires a board side of at least 16")
+    if layout and value.get("area_count", 14) != 14:
+        raise ValueError("courtyard layout requires 14 areas")
     rates = {}
     for name, default in (("blocker_rate", 0.14), ("furniture_rate", 0.10)):
         rate = value.get(name, default)
@@ -45,7 +51,7 @@ def normalize_spec(value, *, size, n_areas=None):
             rates[name] = float(rate)
     if value.get("blocker_rate", 0.14) + value.get("furniture_rate", 0.10) > 0.65:
         raise ValueError("combined prop density must not exceed 0.65")
-    area_count = value.get("area_count")
+    area_count = value.get("area_count", 14 if layout else None)
     if area_count is not None:
         if type(area_count) is not int or not 1 <= area_count <= size:
             raise ValueError(
@@ -67,6 +73,63 @@ def normalize_spec(value, *, size, n_areas=None):
     if area_count is not None:
         out["area_count"] = area_count
     out.update(rates)
+    if layout:
+        out["layout"] = layout
+    if "regions" in value:
+        if anchors:
+            raise ValueError(
+                "region prop budgets and anchors_per_area cannot be combined"
+            )
+        regions = value["regions"]
+        if not isinstance(regions, list) or not regions or len(regions) > 24:
+            raise ValueError("regions must contain 1..24 area profiles")
+        normalized = []
+        for region in regions:
+            if not isinstance(region, dict) or set(region) != {
+                "name",
+                "ground",
+                "patches",
+                "props",
+            }:
+                raise ValueError("each region needs name, ground, patches and props")
+            if not isinstance(region["name"], str) or not region["name"].strip():
+                raise ValueError("region names must be nonempty")
+            if (
+                not isinstance(region["ground"], str)
+                or region["ground"] not in TERRAINS
+                or not TERRAINS[region["ground"]].standable
+            ):
+                raise ValueError("region ground must be standable terrain")
+            for field, known, maximum in (
+                ("patches", TERRAINS, 0.45),
+                ("props", OBJECTS, 0.4),
+            ):
+                values = region[field]
+                if not isinstance(values, dict) or any(
+                    key not in known for key in values
+                ):
+                    raise ValueError(f"unknown region {field}")
+                if any(
+                    type(rate) not in (int, float)
+                    or not math.isfinite(rate)
+                    or not 0 < rate <= maximum
+                    for rate in values.values()
+                ):
+                    raise ValueError(f"invalid region {field} density")
+                if sum(values.values()) > maximum:
+                    raise ValueError(f"region {field} density exceeds {maximum}")
+            if region["ground"] in region["patches"]:
+                raise ValueError("patch terrain must differ from region ground")
+            normalized.append(
+                {
+                    **region,
+                    "patches": dict(region["patches"]),
+                    "props": dict(region["props"]),
+                }
+            )
+        out["regions"] = normalized
+        if len({region["name"] for region in normalized}) != len(normalized):
+            raise ValueError("region role names must be distinct")
     return out
 
 
@@ -89,6 +152,18 @@ def apply_spec(scene, spec, rng, *, allowed_objects=()):
         return scene
     if spec.get("area_count", scene.n_areas) != scene.n_areas:
         raise SceneSpecInfeasible("sampled board has the wrong area count")
+    if spec.get("layout") == "courtyard":
+        from .scene_layout import courtyard_layout
+
+        scene = courtyard_layout(scene, rng)
+    if "regions" in spec:
+        scene = _apply_regions(
+            scene,
+            spec["regions"],
+            rng,
+            allowed_objects,
+            arranged=spec.get("layout") == "courtyard",
+        )
     anchors = spec["anchors_per_area"]
     if not anchors:
         return scene
@@ -130,9 +205,178 @@ def apply_spec(scene, spec, rng, *, allowed_objects=()):
     return replace(scene, props=tuple(sorted(props, key=lambda p: p.pid)))
 
 
+def _apply_regions(scene, regions, rng, allowed_objects, *, arranged=False):
+    """Build coherent local footprints before placements or clues exist."""
+    from .scene_layout import _patch, furniture_footprint
+
+    neighbours = {k: scene.neighbours(k) for k in range(scene.n_cells)}
+    terrain = ["floor"] * scene.n_cells
+    footprints = {}
+    reserved = {k for door in scene.doors for k in door}
+    for area in range(scene.n_areas):
+        region = regions[area % len(regions)]
+        cells = set(scene.cells_of_area(area))
+        for k in cells:
+            terrain[k] = region["ground"]
+        free = cells - reserved
+        for kind, rate in region["patches"].items():
+            count = max(1, round(len(cells) * rate))
+            patch = _patch(free, count, neighbours, rng, set())
+            if patch is None:
+                raise SceneSpecInfeasible(f"area {area + 1} cannot fit terrain patch")
+            for k in patch:
+                terrain[k] = kind
+            free -= patch
+        free = {k for k in cells - reserved if TERRAINS[terrain[k]].standable}
+        for pid, rate in region["props"].items():
+            if pid not in allowed_objects:
+                raise ValueError(f"region prop {pid!r} is not allowed by this variant")
+            remaining = max(1, round(len(cells) * rate))
+            # Furniture occupies one compact footprint; trees and flowers form
+            # several small groups rather than a single giant icon.
+            width = 4 if pid in {"table", "carpet", "bed", "car", "golf_cart"} else 2
+            if arranged:
+                width = (
+                    6
+                    if pid in {"table", "bed", "shelf"}
+                    else 2 if pid == "piano" else 1
+                )
+            while remaining:
+                count = min(width, remaining)
+                walls = {
+                    k
+                    for k in free
+                    if len(neighbours[k]) < 4
+                    or any(scene.area_of[m] != area for m in neighbours[k])
+                }
+                nearby = {
+                    k
+                    for k in free
+                    if any(m in footprints.get("table", set()) for m in neighbours[k])
+                }
+                preferred = (
+                    nearby
+                    if pid == "chair"
+                    else (
+                        walls
+                        if pid in {"shelf", "bed", "piano", "crate", "barrel", "tv"}
+                        else set()
+                    )
+                )
+                if arranged and pid in {"table", "bed", "shelf", "piano"}:
+                    patch = furniture_footprint(
+                        free, count, neighbours, rng, preferred, scene.W
+                    )
+                elif arranged and pid == "chair":
+                    seats = {
+                        k
+                        for k in free
+                        if not any(
+                            m in footprints.get("chair", set()) for m in neighbours[k]
+                        )
+                    }
+                    patch = _patch(seats or free, count, neighbours, rng, preferred)
+                else:
+                    patch = _patch(free, count, neighbours, rng, preferred)
+                if patch is None:
+                    raise SceneSpecInfeasible(f"area {area + 1} cannot fit {pid}")
+                footprints.setdefault(pid, set()).update(patch)
+                free -= patch
+                remaining -= count
+    props = tuple(
+        Prop(pid, OBJECTS[pid].occupiable, frozenset(cells), OBJECTS[pid].landmark)
+        for pid, cells in sorted(footprints.items())
+    )
+    blocked = {
+        k for k in range(scene.n_cells) if not TERRAINS[terrain[k]].standable
+    } | {k for p in props if not p.standable for k in p.cells}
+    return replace(
+        scene,
+        obj_of=(None,) * scene.n_cells,
+        terrain_of=tuple(terrain),
+        props=props,
+        doors=frozenset(d for d in scene.doors if not d & blocked),
+    )
+
+
+def theme_for_spec(case, spec, *, title, seed=None):
+    """Use the same region roles for presentation and pre-clue geometry."""
+    from murdoku_lab.core.name_library import preset_theme
+
+    theme = preset_theme(case, seed=seed)
+    regions = spec.get("regions", []) if spec else []
+    if regions:
+        names = [regions[a % len(regions)]["name"] for a in range(case.scene.n_areas)]
+        counts = {name: names.count(name) for name in names}
+        names = tuple(
+            name if counts[name] == 1 else f"{name} {a // len(regions) + 1}"
+            for a, name in enumerate(names)
+        )
+        theme = replace(
+            theme,
+            areas=names,
+            objects={pid: pid.replace("_", " ") for pid in case.scene.prop_by_id},
+        )
+        if case.variant != "course":
+            theme = replace(
+                theme,
+                objects={
+                    **theme.objects,
+                    "fairway": "short grass",
+                    "rough": "long grass",
+                },
+            )
+    theme = replace(theme, title=title)
+    theme.validate(case)
+    return theme
+
+
 def spec_satisfied(scene, spec):
     if spec.get("area_count", scene.n_areas) != scene.n_areas:
         return False
+    if "regions" in spec:
+        from .scene_layout import _connected
+
+        neighbours = {k: scene.neighbours(k) for k in range(scene.n_cells)}
+        for area in range(scene.n_areas):
+            region = spec["regions"][area % len(spec["regions"])]
+            cells = set(scene.cells_of_area(area))
+            patches = {
+                kind: max(1, round(len(cells) * rate))
+                for kind, rate in region["patches"].items()
+            }
+            expected_terrain = {
+                region["ground"]: len(cells) - sum(patches.values()),
+                **patches,
+            }
+            if any(
+                sum(scene.terrain_of[k] == kind for k in cells)
+                != expected_terrain.get(kind, 0)
+                for kind in TERRAINS
+            ):
+                return False
+            if any(
+                not _connected(
+                    {k for k in cells if scene.terrain_of[k] == kind}, neighbours
+                )
+                for kind in patches
+            ):
+                return False
+            expected_props = {
+                pid: max(1, round(len(cells) * rate))
+                for pid, rate in region["props"].items()
+            }
+            if any(
+                sum(scene.obj_of[k] == pid for k in cells) != expected_props.get(pid, 0)
+                for pid in set(scene.prop_by_id) | set(expected_props)
+            ):
+                return False
+        if any(
+            not TERRAINS[scene.terrain_of[k]].standable
+            for p in scene.props
+            for k in p.cells
+        ):
+            return False
     for pid, count in spec.get("anchors_per_area", {}).items():
         prop = scene.prop_by_id.get(pid)
         if prop is None or not prop.standable:

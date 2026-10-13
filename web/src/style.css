@@ -2685,3 +2685,61 @@ button:not(:disabled):active {
 [data-skin="classic"] .person-caption {
   font-weight: 700;
 }
+
+.board-assist-toggle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+.board-assist-toggle input {
+  accent-color: #356e55;
+}
+.board-assist-toggle span {
+  color: #72766d;
+  font-size: 12px;
+}
+
+.board-location strong {
+  color: #356e55;
+}
+.manual-exclusion-key {
+  color: #a44b89;
+}
+.scene-svg [data-axis-active] {
+  fill: #a34529;
+  font-weight: 900;
+  font-size: 20px;
+}
+.board-scroll {
+  touch-action: pan-x pan-y;
+}
+
+/* Keep the board stationary while the location readout changes under a touch. */
+.board-location {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-rows: 20px 20px;
+  height: 56px;
+  padding: 8px 16px;
+  gap: 0 14px;
+  overflow: hidden;
+  font-size: 13px;
+  background: #eef1e6;
+}
+.board-location > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.board-location .manual-exclusion-key {
+  grid-column: 1 / -1;
+  margin-left: 0;
+}
+
+.show-underlay .placement-notes,
+.show-underlay .line-exclusions {
+  display: none;
+}

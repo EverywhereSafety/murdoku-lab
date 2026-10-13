@@ -331,12 +331,19 @@ def gate(
     time_limit_s: float = 20.0,
     exact_count: bool = True,
     cross_check_dfs: bool | None = None,
+    rhythm_policy: dict | None = None,
 ) -> GateReport:
     """Independent re-verification. Trusts nothing the setter said."""
     checks: dict[str, bool] = {}
     detail: dict = {}
 
-    from .quality import direct_verdict_clues, implied_atom_refs
+    from .quality import (
+        direct_verdict_clues,
+        implied_atom_refs,
+        normalize_rhythm_policy,
+    )
+
+    rhythm_policy = normalize_rhythm_policy(rhythm_policy)
 
     direct, implied = direct_verdict_clues(case), implied_atom_refs(case)
     checks["no_direct_verdict_clue"] = not direct
@@ -422,5 +429,40 @@ def gate(
     detail["redundant_clues"] = (
         redundant  # informational: expected on every non-hardest band
     )
+
+    if rhythm_policy is not None:
+        from .quality import check_rhythm, flow_profile, improves_flow, improves_rhythm
+
+        baseline = flow_profile(case)
+        rhythm = check_rhythm(case, rhythm_policy)
+        useless = [
+            i
+            for i in useless
+            if not improves_flow(
+                baseline,
+                flow_profile(
+                    _replace(
+                        case,
+                        clues=case.clues[:i] + case.clues[i + 1 :],
+                        certificate=None,
+                    )
+                ),
+            )
+            and not improves_rhythm(
+                rhythm,
+                check_rhythm(
+                    _replace(
+                        case,
+                        clues=case.clues[:i] + case.clues[i + 1 :],
+                        certificate=None,
+                    ),
+                    rhythm_policy,
+                ),
+            )
+        ]
+        checks["no_useless_clue"] = not useless
+        detail["useless_clues"] = useless
+        checks["rhythm_policy"] = rhythm["ok"]
+        detail["rhythm"] = rhythm
 
     return GateReport(all(checks.values()), checks, detail)

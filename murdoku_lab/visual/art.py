@@ -12,6 +12,7 @@ INK = "#334b42"
 PAPER = "#fafaf3"
 CELL = 100
 PAD = 40
+CLASSIC_PALETTE = ("#ffe095", "#cce8b4", "#f0c5ad", "#c9c0ed", "#b6dedc", "#f5c6db")
 
 
 def esc(value):
@@ -23,9 +24,9 @@ def txt(x, y, text, size=13, fill=INK, **attrs):
     return f'<text x="{x}" y="{y}" font-size="{size}" fill="{fill}" {extra}>{esc(text)}</text>'
 
 
-def portrait_inner(index, victim=False):
-    """Six distinct faces; symbol badges remain the authoritative identity on large casts."""
-    i = index % 8
+def portrait_inner(index, victim=False, *, large_cast=False):
+    """Eight silhouettes with distinct palette combinations for larger casts."""
+    i, group = index % 8, index // 8 if large_cast else 0
     bg = (
         "#f0cf9e",
         "#d4dfeb",
@@ -35,7 +36,7 @@ def portrait_inner(index, victim=False):
         "#d5e1df",
         "#e3d9c3",
         "#e1e2ed",
-    )[i]
+    )[(i + group * 3) % 8]
     skin = (
         "#e6af89",
         "#dfb696",
@@ -45,7 +46,7 @@ def portrait_inner(index, victim=False):
         "#d7b696",
         "#c49171",
         "#e9ba9f",
-    )[i]
+    )[(i + group) % 8]
     coat = (
         "#b65f44",
         "#546e8c",
@@ -55,7 +56,7 @@ def portrait_inner(index, victim=False):
         "#546f6b",
         "#917341",
         "#6b6f9a",
-    )[i]
+    )[(i + group * 5) % 8]
     hair = (
         "#804832",
         "#584337",
@@ -65,7 +66,7 @@ def portrait_inner(index, victim=False):
         "#777c73",
         "#3f322e",
         "#ad8060",
-    )[i]
+    )[(i + group * 2) % 8]
     o = [f'<circle cx="50" cy="50" r="48" fill="{bg}"/>']
     if i in (0, 4, 6):
         o.append(f'<path d="M25 48Q19 12 49 12Q79 11 76 50L79 73H21Z" fill="{hair}"/>')
@@ -158,7 +159,7 @@ def prop_svg(kind):
     return f'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">{prop_shape(kind,100,100)}</svg>'
 
 
-def prop_shape(kind, w, h, name="", *, pack=None, asset=None):
+def prop_shape(kind, w, h, name="", *, pack=None, asset=None, distinguish=False):
     """Draw within a prop's exact footprint, with a quiet flat offset shadow."""
     if pack == "fluent":
         from murdoku_lab.visual.asset_catalog import prop_image
@@ -212,8 +213,12 @@ def prop_shape(kind, w, h, name="", *, pack=None, asset=None):
             inner += f'<rect x="{x}" y="{y}" width="9" height="{h2}" rx="1" fill="{col}" stroke-width="1.2"/>'
     elif kind == "piano":
         inner = '<path d="M20 76V38Q22 14 49 17L75 25Q87 31 79 47L72 76Z" fill="#56655d"/><path d="M27 66h40v15H27Z" fill="#f3ead0"/><path d="M33 66v15m7-15v15m7-15v15m7-15v15m7-15v15" stroke-width="1.3"/><path d="M28 40q21-19 41 0" fill="none" stroke="#93a091"/>'
-    elif kind in ("flag", "tee"):
+    elif kind == "flag" or (kind == "tee" and not distinguish):
         inner = '<ellipse cx="48" cy="79" rx="24" ry="8" fill="#729274" stroke="none"/><ellipse cx="46" cy="76" rx="10" ry="4" fill="#3f584a"/><path d="M47 19v57" stroke-width="3"/><path d="M49 20 78 30 49 42Z" fill="#bd7355"/>'
+    elif kind == "tee":
+        inner = '<ellipse cx="50" cy="80" rx="28" ry="9" fill="#729274" stroke="none"/><path d="M43 44h14l-5 32h-4Z" fill="#c39a73"/><circle cx="50" cy="32" r="18" fill="#fffdf1"/><g fill="#c4c9bd" stroke="none"><circle cx="44" cy="26" r="2"/><circle cx="56" cy="26" r="2"/><circle cx="50" cy="35" r="2"/><circle cx="40" cy="36" r="2"/><circle cx="59" cy="36" r="2"/></g>'
+    elif kind == "sand" and distinguish:
+        inner = '<path d="M13 45Q13 21 41 25Q57 10 76 30Q95 39 82 65Q59 87 26 73Q8 64 13 45Z" fill="#e1cd9e"/><g fill="#aa8c59" stroke="none"><circle cx="26" cy="43" r="2"/><circle cx="42" cy="32" r="2"/><circle cx="60" cy="45" r="2"/><circle cx="40" cy="62" r="2"/><circle cx="70" cy="61" r="2"/></g>'
     elif kind in ("water", "sand"):
         col = "#91bec4" if kind == "water" else "#e1cd9e"
         inner = f'<path d="M13 45Q13 21 41 25Q57 10 76 30Q95 39 82 65Q59 87 26 73Q8 64 13 45Z" fill="{col}"/>'
@@ -279,6 +284,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" class="scene-svg" data-style="{style}" data-revision="{observation["revision"]}" role="group" aria-label="{esc(observation["setting"])}; {scene["width"]} by {scene["height"]} board">',
         '<defs><pattern id="wood" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M0 25H100M0 75H100M45 0V25M76 25V75M30 75V100" fill="none" stroke="#6c644b" stroke-width="1" opacity=".08"/></pattern>',
         '<pattern id="tile" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0H0V25" fill="none" stroke="#6c644b" stroke-width="1" opacity=".12"/><circle cx="12.5" cy="12.5" r="1.5" fill="#6c644b" opacity=".1"/></pattern>',
+        '<pattern id="rug" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M0 0L24 24M24 0L0 24" stroke="#9a606c" stroke-width="2" opacity=".35"/></pattern>',
         '<pattern id="grass" width="32" height="32" patternUnits="userSpaceOnUse"><path d="m5 16 2-4 3 4m14 9 2-5 2 5" fill="none" stroke="#426d4e" stroke-width="1.4" opacity=".16"/></pattern>',
         '<pattern id="water" width="40" height="28" patternUnits="userSpaceOnUse"><path d="M3 8q7 6 14 0m8 14q7 6 14 0" fill="none" stroke="#eff5eb" stroke-width="2" opacity=".55"/></pattern>',
         '<pattern id="sand" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="5" cy="6" r="1.3" fill="#9b885d" opacity=".4"/><circle cx="18" cy="19" r="1" fill="#9b885d" opacity=".3"/></pattern>',
@@ -292,8 +298,9 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
         x, y = PAD + cell["col"] * CELL, PAD + cell["row"] * CELL
         color = areas[cell["area"]]["color"]
         if style == "classic":
-            palette = ("#ffe095", "#cce8b4", "#f0c5ad", "#c9c0ed", "#b6dedc", "#f5c6db")
-            color = palette[list(areas).index(cell["area"]) % len(palette)]
+            color = CLASSIC_PALETTE[
+                list(areas).index(cell["area"]) % len(CLASSIC_PALETTE)
+            ]
         t = cell["terrain"]
         if t == "water":
             color = "#a2cbd0"
@@ -301,11 +308,14 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             color = "#e6d8b0"
         elif t == "rough":
             color = "#adbf96"
+        elif t == "rug":
+            color = "#e3b9b5"
         root.append(f'<rect x="{x}" y="{y}" width="100" height="100" fill="{color}"/>')
         if style in ("art", "classic"):
             pattern = {
                 "floor": "wood",
                 "tile": "tile",
+                "rug": "rug",
                 "water": "water",
                 "sand": "sand",
                 "fairway": "grass",
@@ -359,7 +369,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             for r, c, h, w in spans:
                 x, y = PAD + c * CELL, PAD + r * CELL
                 root.append(
-                    f'<g data-prop="{esc(prop["id"])}" transform="translate({x+10} {y+15})">{prop_shape(prop["art"], w*CELL-20, h*CELL-22, prop["name"], pack="fluent" if style == "fluent" or prop.get("asset") else None, asset=prop.get("asset"))}</g>'
+                    f'<g data-prop="{esc(prop["id"])}" transform="translate({x+10} {y+15})">{prop_shape(prop["art"], w*CELL-20, h*CELL-22, prop["name"], pack="fluent" if style == "fluent" or prop.get("asset") else None, asset=prop.get("asset"), distinguish=style == "classic")}</g>'
                 )
                 if prop["art"] == "generic":
                     label = prop["id"][:13]
@@ -435,6 +445,25 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             p for p, value in observation["placements"].items() if value == label
         ]
         marks = [p for p, values in observation["marks"].items() if label in values]
+        root.append('<g class="placement-notes">')
+        exclusions = [
+            p
+            for p, values in observation.get("exclusions", {}).items()
+            if label in values and (selected is None or selected == p)
+        ]
+        if exclusions and not occupants:
+            root.append(
+                f'<g class="manual-exclusion" pointer-events="none"><path d="m{x+38} {y+38} 24 24m0-24-24 24" stroke="#a44b89" stroke-width="4" stroke-linecap="round"/>'
+                + txt(
+                    x + 50,
+                    y + 78,
+                    " ".join(exclusions),
+                    11,
+                    "#a44b89",
+                    text_anchor="middle",
+                )
+                + "</g>"
+            )
         if label in selected_cells:
             root.append(
                 f'<rect x="{x+4}" y="{y+4}" width="92" height="92" rx="5" fill="#f4f3b642" stroke="#356e55" stroke-width="3" stroke-dasharray="5 3"/>'
@@ -446,7 +475,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
                 f'<circle cx="{x+50}" cy="{y+55}" r="32" fill="{PAPER}" stroke="{ring}" stroke-width="3"/>'
             )
             root.append(
-                f'<g transform="translate({x+20} {y+25}) scale(.6)" clip-path="url(#token-clip)">{portrait_inner(person["portrait"], person["victim"])}</g>'
+                f'<g transform="translate({x+20} {y+25}) scale(.6)" clip-path="url(#token-clip)">{portrait_inner(person["portrait"], person["victim"], large_cast=style == "classic" or len(cast) > 18)}</g>'
             )
             root.append(
                 f'<rect x="{x+63}" y="{y+67}" width="21" height="21" rx="6" fill="{person["color"]}" stroke="{PAPER}" stroke-width="1.5"/>'
@@ -494,6 +523,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
                     font_weight="700",
                 )
             )
+        root.append("</g>")
         if not c["standable"]:
             root.append(
                 f'<circle cx="{x+12}" cy="{y+87}" r="6" fill="{PAPER}" fill-opacity=".9" stroke="#926953" stroke-width="1"/><path d="m{x+9.5} {y+84.5} 5 5m0-5-5 5" stroke="#926953" stroke-width="1.4"/>'
@@ -600,7 +630,7 @@ def board_svg(observation, *, style="art"):
     for i, prop in enumerate(props):
         x, y = 22 + (i % columns) * slot, key_y + (i // columns) * row_height
         out.append(
-            f'<g transform="translate({x} {y})">{prop_shape(prop["art"], 45, 45, pack="fluent" if style == "fluent" or prop.get("asset") else None, asset=prop.get("asset"))}</g>'
+            f'<g transform="translate({x} {y})">{prop_shape(prop["art"], 45, 45, pack="fluent" if style == "fluent" or prop.get("asset") else None, asset=prop.get("asset"), distinguish=style == "classic")}</g>'
         )
         name = (
             f'{prop["id"]} · {prop["name"]}'
@@ -630,12 +660,16 @@ def board_svg(observation, *, style="art"):
     )
     for i, terrain in enumerate(terrains):
         x, y = 24 + (i % columns) * slot, terrain_y + (i // columns) * 55
-        color = {"water": "#a2cbd0", "sand": "#e6d8b0", "rough": "#adbf96"}.get(
-            terrain["id"], "#e1e7d4"
-        )
+        color = {
+            "water": "#a2cbd0",
+            "sand": "#e6d8b0",
+            "rough": "#adbf96",
+            "rug": "#e3b9b5",
+        }.get(terrain["id"], "#e1e7d4")
         pattern = {
             "floor": "wood",
             "tile": "tile",
+            "rug": "rug",
             "water": "water",
             "sand": "sand",
             "fairway": "grass",
@@ -749,8 +783,13 @@ def observation_svg(observation, *, style="art", selected=None, focus_cells=()):
     y = 185 + bh * scale
     for i, area in enumerate(observation["scene"]["areas"]):
         xx, yy = 41 + (i % 3) * (board_display / 3), y + (i // 3) * 29
+        color = (
+            CLASSIC_PALETTE[i % len(CLASSIC_PALETTE)]
+            if style == "classic"
+            else area["color"]
+        )
         o.append(
-            f'<rect x="{xx}" y="{yy-12}" width="14" height="14" rx="3" fill="{area["color"]}" stroke="#7f8b78" stroke-width=".5"/>'
+            f'<rect x="{xx}" y="{yy-12}" width="14" height="14" rx="3" fill="{color}" stroke="#7f8b78" stroke-width=".5"/>'
         )
         o.append(txt(xx + 23, yy, f'{area["number"]:02d} {area["name"]}', 12))
     y += legend_rows * 30 + 24
@@ -767,7 +806,7 @@ def observation_svg(observation, *, style="art", selected=None, focus_cells=()):
     for i, p in enumerate(observation["people"]):
         xx, yy = 38 + (i % 6) * (board_display / 6), y + 15 + (i // 6) * 124
         o.append(
-            f'<g transform="translate({xx+13} {yy}) scale(.63)">{portrait_inner(p["portrait"],p["victim"])}</g>'
+            f'<g transform="translate({xx+13} {yy}) scale(.63)">{portrait_inner(p["portrait"],p["victim"], large_cast=style == "classic" or len(observation["people"]) > 18)}</g>'
         )
         o.append(
             txt(
@@ -835,7 +874,7 @@ def observation_svg(observation, *, style="art", selected=None, focus_cells=()):
             key_y + (i // key_columns) * key_row_height,
         )
         o.append(
-            f'<g transform="translate({px} {py-5})">{prop_shape(prop["art"],39,39)}</g>'
+            f'<g transform="translate({px} {py-5})">{prop_shape(prop["art"],39,39, distinguish=style == "classic")}</g>'
         )
         name = (
             f'{prop["id"]} · {prop["name"]}'
@@ -861,12 +900,16 @@ def observation_svg(observation, *, style="art", selected=None, focus_cells=()):
     yy += 28
     for terrain in observation["scene"]["terrains"]:
         kind = terrain["id"]
-        color = {"water": "#a2cbd0", "sand": "#e6d8b0", "rough": "#adbf96"}.get(
-            kind, "#e1e7d4"
-        )
+        color = {
+            "water": "#a2cbd0",
+            "sand": "#e6d8b0",
+            "rough": "#adbf96",
+            "rug": "#e3b9b5",
+        }.get(kind, "#e1e7d4")
         pattern = {
             "floor": "wood",
             "tile": "tile",
+            "rug": "rug",
             "water": "water",
             "sand": "sand",
             "fairway": "grass",

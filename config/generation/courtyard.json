@@ -1,0 +1,16 @@
+{
+  "strategy": "constraint-first",
+  "variant": "extended",
+  "size": 24,
+  "bands": "any",
+  "n": 2,
+  "shots": 6,
+  "attempts": 1,
+  "workers": 4,
+  "time_limit": 5,
+  "beam": 128,
+  "max_clues": 140,
+  "solution_cap": 32,
+  "scene_spec": "../scene_specs/courtyard.json",
+  "rhythm_policy": "../rhythm/player.json"
+}

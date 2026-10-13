@@ -24,6 +24,9 @@ clue and checks the resulting deduction and uniqueness outcomes.
 | --- | --- |
 | `first_placement_delay` | Non-placement steps before the first registered placement, excluding setup. |
 | `first_determination_step` | First state with a newly singleton character domain; may be setup at step 0. |
+| `first_progress_step` | First exact placement or newly established row, column or area; may be setup at step 0. |
+| `progress_gap_max` | Longest interval without an exact or partial location discovery. |
+| `partial_location_discoveries` | Newly established row, column and area facts after setup, counted only while the character still has several candidate cells. |
 | `placement_gap_*` | Median, P90 and maximum non-placement steps between registered placements. |
 | `determination_gap_max` | Longest gap between states gaining a new singleton. |
 | `longest_placement_run` | Longest consecutive run of registered placements. |
@@ -68,6 +71,38 @@ that no observed domain removed an intended solution cell.
 
 Compare solved status before comparing step counts: an unsolved ablation may
 stop early. Keep answer-side traces separate from model-facing observations.
+
+## Screen generated candidates
+
+Pass `--rhythm-policy config/rhythm/player.json` to `murdoku_lab.setter.farm` to
+apply explicit progression thresholds under canonical, character-shuffled and
+clue-shuffled schedules. The example thresholds are starting points for tuning.
+The same policy is accepted by `gate(case, rhythm_policy=policy)`.
+Pass the same `--rhythm-policy` to `murdoku_lab.setter.export_queries` when
+exporting accepted cases so its independent gate preserves the same flow clues.
+
+With a policy enabled, constraint-first clue pruning retains a clue if removing
+it delays the opening, increases discovery gaps or requires more hypothetical
+tests, even when uniqueness and the difficulty band stay unchanged. It also
+retains clues that help another configured schedule or delay the target reveal. The gate
+uses the same definition of a useful clue. Policies and measurements stay in
+generation reports; they are not added to model-facing queries.
+
+Constraint-first generation also tries a bounded refinement pass, adding up to
+three true clues to bridge stalls. Each edit retains the requested difficulty
+band when specified, checks clue style and rechecks the late reveal. The final
+candidate must pass every configured schedule and the independent export gate.
+Before adding clues, it can select a different victim from a valid two-person
+area. Selection uses observed answer availability across schedules, followed by
+an independent uniqueness proof; late bookkeeping alone is insufficient.
+
+The default generation and gate retain their existing behavior. These metrics
+describe the deduction engine and should be reviewed alongside playable examples.
+
+The player policy excludes selected clue kinds through
+`excluded_kinds`. Constraint-first generation and refinement share this filter;
+the independent gate checks it again. This allows a scene to rely on objects,
+locations and character relationships without region-number arithmetic.
 
 ## Generated query sample
 

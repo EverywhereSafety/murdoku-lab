@@ -49,6 +49,11 @@ Preview assets and boards through the [frontend](../guides/play.md). To extend t
 add licensed source files and catalog metadata, retain upstream attribution, and
 validate labels, compatibility and rendering at the intended cell sizes.
 
+`--artwork-style classic` exports the original illustrated skin. Its golf tee
+uses a ball and peg, distinct from a flag; sand uses a dotted fill, distinct from
+water waves. Casts larger than 18 use additional portrait palette combinations.
+Existing `art` and `fluent` exports retain their rendering defaults.
+
 Other color libraries include [Twemoji](https://github.com/twitter/twemoji),
 [OpenMoji](https://openmoji.org/) and [Noto Emoji](https://github.com/googlefonts/noto-emoji).
 Review each library's artwork license before adding assets.

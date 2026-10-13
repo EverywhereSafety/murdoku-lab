@@ -27,7 +27,7 @@ import random
 import sys
 import time
 from collections import Counter
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -71,8 +71,13 @@ def _attempt(payload) -> dict:
     ) = payload
     n_areas = extra[0] if extra else None
     scene_spec = extra[1] if len(extra) > 1 else None
+    rhythm_policy = extra[2] if len(extra) > 2 else None
+    requested_band = band
+    band = None if band == "any" else band
     t0 = time.time()
-    out = Landed(band=band, variant=variant, size=size, seed=seed, strategy=strategy)
+    out = Landed(
+        band=requested_band, variant=variant, size=size, seed=seed, strategy=strategy
+    )
     try:
         if strategy == "constraint-first":
             from murdoku_lab.setter.constraint_first import generate
@@ -90,6 +95,7 @@ def _attempt(payload) -> dict:
                 time_limit_s=time_limit,
                 n_areas=n_areas,
                 scene_spec=scene_spec,
+                rhythm_policy=rhythm_policy,
             )
             out.reason = r.reason
             out.solves = r.solves
@@ -101,6 +107,7 @@ def _attempt(payload) -> dict:
                     expect_band=band,
                     time_limit_s=time_limit * 3,
                     exact_count=False,
+                    rhythm_policy=rhythm_policy,
                 )
                 if g.ok:
                     out.ok = True
@@ -125,7 +132,12 @@ def _attempt(payload) -> dict:
             )
             out.reason = a.reason
             if a.ok and a.case is not None:
-                g = gate(a.case, expect_band=band, time_limit_s=time_limit * 4)
+                g = gate(
+                    a.case,
+                    expect_band=band,
+                    time_limit_s=time_limit * 4,
+                    rhythm_policy=rhythm_policy,
+                )
                 if g.ok:
                     out.ok = True
                     out.n_clues, out.n_atoms = len(a.case.clues), len(a.case.atoms)
@@ -141,7 +153,7 @@ def _attempt(payload) -> dict:
     return asdict(out)
 
 
-def main(argv=None) -> int:
+def _arguments(argv=None):
     ap = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -150,6 +162,19 @@ def main(argv=None) -> int:
         "--strategy",
         choices=["placement-first", "constraint-first"],
         default="placement-first",
+    )
+    ap.add_argument(
+        "--config", type=Path, help="generation defaults JSON; CLI options override it"
+    )
+    ap.add_argument(
+        "--query-dir",
+        type=Path,
+        help="export paired text and visual queries into a new directory",
+    )
+    ap.add_argument(
+        "--artwork-style",
+        choices=("art", "classic", "fluent", "diagram"),
+        default="classic",
     )
     ap.add_argument("--variant", default="classic")
     ap.add_argument("--n-areas", type=int, default=None)
@@ -160,6 +185,12 @@ def main(argv=None) -> int:
         help="public scene_spec/1 JSON for area count and standable anchors per area",
     )
     ap.add_argument("--size", type=int, default=6)
+    ap.add_argument(
+        "--rhythm-policy",
+        type=Path,
+        default=None,
+        help="optional multi-order deduction quality policy JSON",
+    )
     ap.add_argument("--bands", default="medium")
     ap.add_argument("--n", type=int, default=4, help="how many cases wanted PER BAND")
     ap.add_argument(
@@ -186,7 +217,48 @@ def main(argv=None) -> int:
     )
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)
+    probe = argparse.ArgumentParser(add_help=False)
+    probe.add_argument("--config", type=Path)
+    preliminary, _ = probe.parse_known_args(argv)
+    if preliminary.config:
+        try:
+            defaults = json.loads(preliminary.config.read_text())
+            allowed = {action.dest for action in ap._actions} - {"help", "config"}
+            if not isinstance(defaults, dict) or set(defaults) - allowed:
+                raise ValueError("config must contain known CLI option names")
+            for key in ("scene_spec", "rhythm_policy"):
+                if defaults.get(key):
+                    defaults[key] = str(
+                        (preliminary.config.parent / defaults[key]).resolve()
+                    )
+            ap.set_defaults(**defaults)
+        except (OSError, ValueError, TypeError) as error:
+            ap.error(str(error))
     a = ap.parse_args(argv)
+    if a.strategy == "placement-first" and "any" in a.bands.split(","):
+        ap.error("--bands any requires --strategy constraint-first")
+    if any(
+        b not in ("easy", "medium", "hard", "expert", "any") for b in a.bands.split(",")
+    ):
+        ap.error("unknown difficulty band")
+    if (
+        min(a.n, a.shots, a.attempts, a.workers, a.beam, a.max_clues) < 1
+        or a.solution_cap < 2
+        or a.time_limit <= 0
+    ):
+        ap.error("counts and time limit must be positive; solution cap must be >=2")
+    if a.query_dir and (a.query_dir.exists() or not a.out):
+        ap.error("--query-dir needs --out and must name a new directory")
+    return a
+
+
+def main(argv=None) -> int:
+    a = _arguments(argv)
+    from .quality import normalize_rhythm_policy
+
+    rhythm_policy = normalize_rhythm_policy(
+        json.loads(a.rhythm_policy.read_text()) if a.rhythm_policy else None
+    )
     from murdoku_lab.setter.scene_spec import normalize_spec
 
     spec = normalize_spec(
@@ -211,6 +283,7 @@ def main(argv=None) -> int:
             a.solution_cap,
             a.n_areas,
             spec,
+            rhythm_policy,
         )
         for b in bands
         for _ in range(a.n * a.shots)
@@ -255,6 +328,7 @@ def main(argv=None) -> int:
                     "size": a.size,
                     "n_areas": a.n_areas,
                     "scene_spec": spec,
+                    "rhythm_policy": rhythm_policy,
                     "bands": bands,
                     "requested_per_band": a.n,
                     "shots": a.shots,
@@ -286,26 +360,51 @@ def main(argv=None) -> int:
             + "\n"
         )
 
+    checkpoint()
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
-        futs = {ex.submit(_attempt, j): j for j in jobs}
-        for fut in as_completed(futs):
-            r = fut.result()
-            done += 1
-            total_attempt_s += float(r["wall_s"])
-            b = r["band"]
-            if r["ok"]:
-                accepted_jobs += 1
-                if len(got[b]) < want[b]:
-                    got[b].append(r)
-                    print(
-                        f"  [{done}/{len(jobs)}] {b:7} LANDED clues={r['n_clues']:2} "
-                        f"atoms={r['n_atoms']:2} adv={r['advanced']} depth={r['depth']} "
-                        f"{r['wall_s']}s",
-                        flush=True,
-                    )
-            elif not r["ok"]:
-                rejects[r["reason"][:48] or "?"] += 1
-            checkpoint()
+        remaining = list(jobs)
+        pending = {}
+
+        def fill():
+            needed = sum(max(0, want[b] - len(got[b])) for b in bands)
+            while len(pending) < min(a.workers, needed):
+                scheduled = Counter(job[3] for job in pending.values())
+                index = next(
+                    (
+                        i
+                        for i, job in enumerate(remaining)
+                        if len(got[job[3]]) + scheduled[job[3]] < want[job[3]]
+                    ),
+                    None,
+                )
+                if index is None:
+                    break
+                job = remaining.pop(index)
+                pending[ex.submit(_attempt, job)] = job
+
+        fill()
+        while pending:
+            finished, _ = wait(pending, return_when=FIRST_COMPLETED)
+            for fut in finished:
+                pending.pop(fut)
+                r = fut.result()
+                done += 1
+                total_attempt_s += float(r["wall_s"])
+                b = r["band"]
+                if r["ok"]:
+                    accepted_jobs += 1
+                    if len(got[b]) < want[b]:
+                        got[b].append(r)
+                        print(
+                            f"  [{done}/{len(jobs)}] {b:7} LANDED clues={r['n_clues']:2} "
+                            f"atoms={r['n_atoms']:2} adv={r['advanced']} depth={r['depth']} "
+                            f"{r['wall_s']}s",
+                            flush=True,
+                        )
+                elif not r["ok"]:
+                    rejects[r["reason"][:48] or "?"] += 1
+                checkpoint()
+            fill()
 
     wall = time.time() - t0
     print(f"\n=== {wall:.0f}s wall, {done} attempt(s) finished ===")
@@ -329,11 +428,40 @@ def main(argv=None) -> int:
         f"{wall / max(1, landed):.0f}s per written case at {a.workers} workers"
     )
 
+    if a.query_dir and landed:
+        from .export_queries import write_bundle
+        from .scene_spec import theme_for_spec
+        from murdoku_lab.core.instance import Case
+
+        sources = []
+        for band in bands:
+            for row in sorted(got[band], key=lambda item: item["seed"]):
+                case = Case.from_json(row["record"])
+                theme = theme_for_spec(
+                    case,
+                    spec,
+                    title=(
+                        "The Courtyard Manor"
+                        if spec and spec.get("layout") == "courtyard"
+                        else "The Missing Guest"
+                    ),
+                    seed=row["seed"],
+                )
+                sources.append(
+                    {"murdoku_case": case.to_json(), "murdoku_theme": theme.to_json()}
+                )
+        write_bundle(
+            sources,
+            a.query_dir,
+            artwork_style=a.artwork_style,
+            rhythm_policy=rhythm_policy,
+        )
+        print(f"  queries {a.query_dir}")
     if outp:
         checkpoint()
         print(f"  wrote {outp}")
         print(f"  stats {statsp}")
-    return 0 if landed else 1
+    return 0 if all(len(got[b]) >= want[b] for b in bands) else 1
 
 
 if __name__ == "__main__":

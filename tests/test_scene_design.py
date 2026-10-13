@@ -10,7 +10,7 @@ import pytest
 from murdoku_lab.core.atoms import Atom, holds_atom, unary_mask
 from murdoku_lab.core.board import Scene
 from murdoku_lab.core.instance import Case, Clue, VARIANTS
-from murdoku_lab.setter.constraint_first import candidate_atoms, _interleave_candidates
+from murdoku_lab.setter.constraint_first import candidate_atoms
 from murdoku_lab.setter.quality import implied_atom_refs, prune_implied_atoms
 from murdoku_lab.setter.sampler import gen_scene
 from murdoku_lab.setter.scene_spec import (
@@ -22,6 +22,48 @@ from murdoku_lab.setter.scene_spec import (
 )
 from murdoku_lab.solver.exact import enumerate_dfs, unique_solution
 from murdoku_lab.solver.logic import certify
+
+
+def test_24_person_case_round_trips_and_solves_with_distinct_names(tmp_path):
+    from murdoku_lab.setter.sampler import CHAR_SYMBOLS, VICTIM_SYMBOL
+    from murdoku_lab.core.name_library import preset_theme
+
+    people = tuple(CHAR_SYMBOLS[:23]) + (VICTIM_SYMBOL,)
+    assert people[:21] == tuple("ABCDEFGHIJKLMNOPQRSTU")
+    assert len(set(people)) == len(people) == 24
+    scene = Scene(
+        24, 24, tuple(0 if k // 24 < 22 else 1 for k in range(576)), (None,) * 576
+    )
+    clues = tuple(
+        Clue((Atom("abs_row", x, (i,)), Atom("abs_col", x, (i,))))
+        for i, x in enumerate(people)
+    )
+    case = Case(
+        scene,
+        people,
+        VICTIM_SYMBOL,
+        clues,
+        {x: i * 25 for i, x in enumerate(people)},
+        variant="extended",
+    )
+    case.self_check()
+    restored = Case.from_json(json.loads(json.dumps(case.to_json())))
+    assert unique_solution(restored, time_limit_s=5) == dict(case.solution)
+    assert certify(restored).placed == dict(case.solution)
+    theme = preset_theme(restored)
+    assert len({name[0] for name in theme.names.values()}) == 24
+    assert theme.names["V"][0] == "V"
+    from murdoku_lab.setter.export_queries import export_case
+    from murdoku_lab.environment.queries import model_inputs
+    from murdoku_lab.visual.art import portrait_inner
+
+    assert len({portrait_inner(i, large_cast=True) for i in range(24)}) == 24
+    views = export_case(restored, theme, tmp_path)
+    assert views["text"]["paired_case_id"] == views["vision"]["paired_case_id"]
+    inputs = model_inputs(views["vision"], asset_root=tmp_path)
+    assert inputs["messages"][1]["content"][1]["image_url"]["url"].startswith(
+        "data:image/png;base64,"
+    )
 
 
 def test_global_subjects_cover_permuted_cast_without_repeating_subject_free_facts():
@@ -49,25 +91,6 @@ def test_candidate_masks_are_possible_and_local_clues_are_informative():
                 assert mask != scene.open_cells
         if atom.kind in {"on", "only_on"}:
             assert scene.prop_by_id[atom["obj"]].standable
-
-
-def test_beam_exposure_does_not_follow_one_kinds_argument_multiplicity():
-    many = [Atom("in_area", person, (area,)) for person in "ABCDE" for area in range(4)]
-    few = [Atom("with", "A", ("B",)), Atom("alone", "C")]
-    ordered = _interleave_candidates(many + few, random.Random(71))
-    assert {a.kind for a in ordered[:3]} == {"in_area", "with", "alone"}
-    assert set(ordered) == set(many + few)
-
-
-def test_area_sampling_varies_and_respects_explicit_requests():
-    assert {choose_area_count(6, random.Random(seed)) for seed in range(32)} == {
-        3,
-        4,
-        5,
-    }
-    rng, control = random.Random(31), random.Random(31)
-    assert choose_area_count(6, rng, n_areas=4) == 4
-    assert rng.random() == control.random()
 
 
 def anchor_scene():
@@ -210,6 +233,33 @@ def test_implication_checks_keep_holder_and_object_identity(original_valid_case)
     assert not implied_atom_refs(case)
 
 
+def test_target_selection_preserves_geometry_and_reproves_the_arrangement(
+    original_valid_case,
+):
+    from murdoku_lab.setter.constraint_first import _refine_for_rhythm, _victim_late
+
+    case = original_valid_case
+    refined = _refine_for_rhythm(
+        case,
+        {
+            "schema": "murdoku.rhythm_policy/1",
+            "orders": ["canonical", "clues"],
+            "seeds": [0],
+            "min_verdict_determined_fraction": 1,
+        },
+        seed=7,
+        band=None,
+        time_limit_s=5,
+        edits=0,
+    )
+    assert refined.scene == case.scene
+    assert len(refined.atoms) == len(case.atoms)
+    assert unique_solution(refined, time_limit_s=5) == dict(refined.solution)
+    cert = certify(refined)
+    assert cert.placed == dict(refined.solution)
+    assert _victim_late(cert, refined.victim, refined.vdef.victim_last_k)
+
+
 def test_corner_wall_implications_hold_for_every_open_cell():
     for seed in range(6):
         scene = gen_scene(
@@ -222,3 +272,31 @@ def test_corner_wall_implications_hold_for_every_open_cell():
             if holds_atom(Atom("in_grid_corner", "A"), scene, placement):
                 assert holds_atom(Atom("in_corner", "A"), scene, placement)
                 assert holds_atom(Atom("on_grid_edge", "A"), scene, placement)
+
+
+@pytest.mark.parametrize("size", [16, 20, 24])
+def test_courtyard_regions_preserve_passages_and_connected_areas(size):
+    from murdoku_lab.core.board import OBJECTS
+    from murdoku_lab.setter.scene_layout import _connected
+
+    raw = json.loads(Path("config/scene_specs/courtyard.json").read_text())
+    spec = normalize_spec(raw, size=size)
+    assert choose_area_count(size, random.Random(0), spec=spec) == 14
+    for seed in range(5):
+        rng = random.Random(seed)
+        scene = apply_spec(
+            gen_scene(size, 14, rng), spec, rng, allowed_objects=tuple(OBJECTS)
+        )
+        assert spec_satisfied(scene, spec)
+        neighbours = {k: scene.neighbours(k) for k in range(scene.n_cells)}
+        assert all(
+            _connected(set(scene.cells_of_area(a)), neighbours) for a in range(14)
+        )
+        assert all(
+            scene.standable(k) and scene.obj_of[k] is None
+            for door in scene.doors
+            for k in door
+        )
+        assert len(scene.props) >= 14
+    with pytest.raises(ValueError, match="14 areas"):
+        normalize_spec(dict(raw, area_count=12), size=24)

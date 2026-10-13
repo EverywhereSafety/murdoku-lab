@@ -30,6 +30,9 @@ export function HelpDialog({ dialog, setDialog, state }) {
           <kbd>M</kbd> Pencil candidates
         </span>
         <span>
+          <kbd>E</kbd> Exclude for selected person
+        </span>
+        <span>
           <kbd>X</kbd> Erase
         </span>
         <span>
@@ -50,8 +53,14 @@ export function HelpDialog({ dialog, setDialog, state }) {
         </span>
       </div>
       <p className="fine-print">
-        “Check placements” checks only rows, columns and blocked squares.
-        Ticking a statement is your own note. It does not certify a deduction.
+        Placing a person immediately shows crosses in the rest of their row and
+        column. Undo or unplace to remove those crosses. The display follows
+        your board, including mistaken placements. Purple crosses are your
+        exclusions for the selected person. Use E to toggle them and X to erase.
+        Ctrl + scroll or pinch to zoom; Shift + drag to pan. Selecting a person
+        highlights statements that mention them. “Check placements” checks only
+        rows, columns and blocked squares. Ticking a statement is your own note.
+        It does not certify a deduction.
       </p>
     </Dialog>
   );

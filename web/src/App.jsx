@@ -379,6 +379,14 @@ export default function App() {
           person: who,
           cell,
         }).catch(() => {});
+      else if (mode === "exclude")
+        act({
+          action: state.exclusions?.[who]?.includes(cell)
+            ? "unexclude"
+            : "exclude",
+          person: who,
+          cell,
+        }).catch(() => {});
       else if (mode === "mark")
         act({
           action: state.marks[who]?.includes(cell) ? "unmark" : "mark",
@@ -390,6 +398,8 @@ export default function App() {
           action: "unplace",
           person: who,
         }).catch(() => {});
+      else if (state.exclusions?.[who]?.includes(cell))
+        act({ action: "unexclude", person: who, cell }).catch(() => {});
       else if (state.marks[who]?.includes(cell))
         act({
           action: "unmark",
@@ -438,6 +448,7 @@ export default function App() {
       if (e.key.toLowerCase() === "p") setMode("place");
       if (e.key.toLowerCase() === "m") setMode("mark");
       if (e.key.toLowerCase() === "x") setMode("erase");
+      if (e.key.toLowerCase() === "e") setMode("exclude");
       if (
         (e.key === "Delete" || e.key === "Backspace") &&
         selected &&
@@ -513,7 +524,10 @@ export default function App() {
   const placedCount = Object.keys(state.placements).length;
   const allPlaced = placedCount === state.people.length;
   const clues = onlySelected
-    ? state.clues.filter((c) => c.person === selected)
+    ? state.clues.filter(
+        (c) =>
+          c.person === selected || (person && c.text.includes(person.name)),
+      )
     : state.clues;
   const hoverInfo = state.scene.cells.find((c) => c.cell === hovered);
   const hoverProp =

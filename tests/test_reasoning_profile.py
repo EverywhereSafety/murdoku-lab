@@ -89,3 +89,137 @@ def test_ablation_timeout_is_not_classified_as_unique(case, monkeypatch):
     result = clue_ablation(short)[0]
     assert result["exact_status"] == "timeout"
     assert result["exact_timed_out"]
+
+
+def test_partial_discoveries_are_sound_without_changing_deductions(case):
+    profile = profile_case(case)
+    seen = {axis: set() for axis in ("row", "column", "area")}
+    project = {
+        "row": case.scene.row,
+        "column": case.scene.col,
+        "area": lambda k: case.scene.area_of[k],
+    }
+    for row in profile["trace"]:
+        for axis, names in row["new_partial_locations"].items():
+            for name in names:
+                cells = row["candidates"][name]
+                assert len(cells) > 1
+                assert len({project[axis](k) for k in cells}) == 1
+                assert name not in seen[axis]
+                seen[axis].add(name)
+    assert profile["first_progress_step"] <= profile["first_determination_step"]
+    assert profile["progress_gap_max"] <= profile["determination_gap_max"]
+    assert profile["steps"] == len(certify(case).steps) - 1
+
+
+def test_rhythm_policy_rejects_early_reveal_and_checks_alternate_orders(case, tmp_path):
+    from murdoku_lab.setter.quality import check_rhythm
+
+    baseline = check_rhythm(case, {"schema": "murdoku.rhythm_policy/1"})
+    assert baseline["ok"]
+    assert {row["order"] for row in baseline["runs"]} == {
+        "canonical",
+        "characters",
+        "clues",
+    }
+    strict = check_rhythm(
+        case,
+        {
+            "schema": "murdoku.rhythm_policy/1",
+            "min_verdict_determined_fraction": 1,
+        },
+    )
+    assert not strict["ok"]
+    assert any(
+        not row["checks"]["min_verdict_determined_fraction"] for row in strict["runs"]
+    )
+    from murdoku_lab.setter.export_queries import write_bundle
+
+    manifest = write_bundle(
+        [case.to_json()],
+        tmp_path / "rejected",
+        views=("text",),
+        rhythm_policy={
+            "schema": "murdoku.rhythm_policy/1",
+            "min_verdict_determined_fraction": 1,
+        },
+    )
+    assert manifest["accepted_cases"] == 0
+    assert manifest["admission"][0]["gate_checks"]["rhythm_policy"] is False
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {"max_probe_fraction": 2},
+        {"seeds": []},
+        {"max_progress_gap": float("nan")},
+        {"unknown": 1},
+    ],
+)
+def test_invalid_rhythm_policy_fails_early(fields):
+    from murdoku_lab.setter.quality import normalize_rhythm_policy
+
+    with pytest.raises(ValueError):
+        normalize_rhythm_policy({"schema": "murdoku.rhythm_policy/1", **fields})
+
+
+def test_clue_vocabulary_policy_is_checked_independently(case):
+    from murdoku_lab.setter.quality import check_rhythm, normalize_rhythm_policy
+
+    kind = case.atoms[0].kind
+    report = check_rhythm(
+        case,
+        {
+            "schema": "murdoku.rhythm_policy/1",
+            "orders": ["canonical"],
+            "excluded_kinds": [kind],
+        },
+    )
+    assert not report["ok"]
+    assert report["runs"][0]["checks"]["clue_vocabulary"] is False
+    with pytest.raises(ValueError):
+        normalize_rhythm_policy(
+            {"schema": "murdoku.rhythm_policy/1", "excluded_kinds": ["invented"]}
+        )
+
+
+@pytest.mark.parametrize(
+    "kind,args",
+    [
+        ("row_offset", ("B", -2)),
+        ("col_offset", ("B", 1)),
+        ("with", ("B",)),
+        ("alone_with", ("B",)),
+        ("not_with", ("B",)),
+        ("diagonal", ("B",)),
+        ("adjacent_to", ("B",)),
+    ],
+)
+def test_projected_pair_support_matches_cellwise_relation(case, kind, args):
+    import random
+    from murdoku_lab.core.atoms import Atom
+    from murdoku_lab.solver.logic import Deducer
+
+    engine = Deducer(case)
+    atom = Atom(kind, "A", args)
+    relation = engine._relation(atom)
+    rng = random.Random(71)
+    cells = sorted(case.scene.open_cells)
+    for _ in range(20):
+        left = set(rng.sample(cells, rng.randrange(len(cells) + 1)))
+        right = set(rng.sample(cells, rng.randrange(len(cells) + 1)))
+        expected = (
+            {k for k in left if any(relation(k, m) for m in right)},
+            {m for m in right if any(relation(k, m) for k in left)},
+        )
+        assert engine._pair_supports(atom, left, right) == expected
+
+
+@pytest.mark.parametrize("value", [1])
+@pytest.mark.parametrize("key", ["balance_clues", "simplify_area_options"])
+def test_quality_options_require_booleans(value, key):
+    from murdoku_lab.setter.quality import normalize_rhythm_policy
+
+    with pytest.raises(ValueError, match=key):
+        normalize_rhythm_policy({"schema": "murdoku.rhythm_policy/1", key: value})

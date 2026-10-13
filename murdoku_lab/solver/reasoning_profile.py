@@ -1,4 +1,4 @@
-"""Observational deduction profiles; never used by generation admission.
+"""Deduction profiles for analysis and optional generation quality policies.
 
 The observer calls the production deduction engine. Candidate changes, not
 Step.removed, determine information reduction. Neither scheduling nor verdict
@@ -228,6 +228,7 @@ def profile_case(
         len(c) - 1 for c in engine.snapshots[0]["candidates"].values()
     )
     trace, previous, previous_fixed = [], None, set()
+    previous_locations = {axis: set() for axis in ("row", "column", "area")}
     for index, (snapshot, step) in enumerate(zip(engine.snapshots, certificate.steps)):
         candidates = snapshot["candidates"]
         if previous is not None and any(
@@ -235,6 +236,23 @@ def profile_case(
         ):
             raise RuntimeError("deduction increased a candidate domain")
         fixed = {x for x, cells in candidates.items() if len(cells) == 1}
+        projections = {
+            "row": case.scene.row,
+            "column": case.scene.col,
+            "area": lambda k: case.scene.area_of[k],
+        }
+        locations = {
+            axis: {
+                x
+                for x, cells in candidates.items()
+                if cells and len({project(k) for k in cells}) == 1
+            }
+            for axis, project in projections.items()
+        }
+        partial = {
+            axis: sorted((locations[axis] - previous_locations[axis]) - fixed)
+            for axis in locations
+        }
         uncertainty = sum(max(0, len(c) - 1) for c in candidates.values())
         supported = verdict_support(case, candidates)
         trace.append(
@@ -249,6 +267,7 @@ def profile_case(
                 "determined": len(fixed),
                 "registered": len(snapshot["registered"]),
                 "newly_determined": sorted(fixed - previous_fixed),
+                "new_partial_locations": partial,
                 "verdict_support": supported,
                 "probe_attempts": snapshot["probe_attempts"],
                 "probe_contradictions": snapshot["probe_contradictions"],
@@ -256,12 +275,19 @@ def profile_case(
             }
         )
         previous, previous_fixed = candidates, fixed
+        previous_locations = locations
     placement_indices = [i for i, step in enumerate(certificate.steps) if step.placed]
     gaps = [b - a - 1 for a, b in zip(placement_indices, placement_indices[1:])]
     discovery_indices = [row["step"] for row in trace if row["newly_determined"]]
     discovery_gaps = [
         b - a - 1 for a, b in zip(discovery_indices, discovery_indices[1:])
     ]
+    progress_indices = [
+        row["step"]
+        for row in trace
+        if row["newly_determined"] or any(row["new_partial_locations"].values())
+    ]
+    progress_gaps = [b - a - 1 for a, b in zip(progress_indices, progress_indices[1:])]
     reveal = next(
         (
             row
@@ -309,6 +335,13 @@ def profile_case(
             placement_indices[0] - 1 if placement_indices else None
         ),
         "first_determination_step": discovery_indices[0] if discovery_indices else None,
+        "first_progress_step": progress_indices[0] if progress_indices else None,
+        "progress_gap_max": max(progress_gaps, default=0),
+        "partial_location_discoveries": sum(
+            len(characters)
+            for row in trace[1:]
+            for characters in row["new_partial_locations"].values()
+        ),
         "placement_gap_median": statistics.median(gaps) if gaps else None,
         "placement_gap_p90": percentile(gaps, 0.9),
         "placement_gap_max": max(gaps, default=0),

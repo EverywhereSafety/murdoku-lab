@@ -333,7 +333,11 @@ class _Collector(cp_model.CpSolverSolutionCallback):
 
 
 def enumerate_cp(
-    case: Case, cap: int | None = None, time_limit_s: float = 20.0
+    case: Case,
+    cap: int | None = None,
+    time_limit_s: float = 20.0,
+    *,
+    fast_witnesses: bool = False,
 ) -> CountResult:
     """Enumerate solutions with CP-SAT. `cap=None` means *all* of them (exact count)."""
     enc = CpEncoder(case)
@@ -342,6 +346,11 @@ def enumerate_cp(
     solver.parameters.max_time_in_seconds = time_limit_s
     solver.parameters.num_workers = 1  # enumeration must be deterministic
     solver.parameters.random_seed = 0
+    if fast_witnesses:
+        # Capped generation queries need feasible placements, not an LP
+        # relaxation or a costly presolve of the mostly unconstrained board.
+        solver.parameters.cp_model_presolve = False
+        solver.parameters.linearization_level = 0
     col = _Collector(enc, cap)
     status = solver.Solve(enc.model, col)
     timed_out = status == cp_model.UNKNOWN or (
@@ -429,9 +438,15 @@ def enumerate_dfs(case: Case, cap: int | None = None) -> CountResult:
 # Front doors
 # =============================================================================================
 def count_solutions(
-    case: Case, cap: int | None = None, time_limit_s: float = 20.0
+    case: Case,
+    cap: int | None = None,
+    time_limit_s: float = 20.0,
+    *,
+    fast_witnesses: bool = False,
 ) -> CountResult:
-    return enumerate_cp(case, cap=cap, time_limit_s=time_limit_s)
+    return enumerate_cp(
+        case, cap=cap, time_limit_s=time_limit_s, fast_witnesses=fast_witnesses
+    )
 
 
 def unique_solution(case: Case, time_limit_s: float = 20.0) -> dict[str, int] | None:

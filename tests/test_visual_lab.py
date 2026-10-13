@@ -20,6 +20,26 @@ from murdoku_lab.visual.server import make_server
 from murdoku_lab.visual.session import VisualSession, SessionError, StaleRevision
 
 
+def test_classic_ground_and_area_keys_match_the_board():
+    entry = glasshouse()
+    terrain = list(entry.case.scene.terrain_of)
+    terrain[0], terrain[1] = "rug", "floor"
+    case = replace(
+        entry.case, scene=replace(entry.case.scene, terrain_of=tuple(terrain))
+    )
+    obs = public_observation(Scratchpad(case, entry.theme))
+    root = ET.fromstring(scene_svg(obs, style="classic"))
+    ns = {"s": "http://www.w3.org/2000/svg"}
+    decoration = root.find("s:g[@class='board-decoration']", ns)
+    rugs = decoration.findall("s:rect[@x='40'][@y='40']", ns)
+    floors = decoration.findall("s:rect[@x='140'][@y='40']", ns)
+    assert rugs[0].get("fill") != floors[0].get("fill")
+    assert rugs[1].get("fill") != floors[1].get("fill")
+    full = ET.fromstring(observation_svg(obs, style="classic"))
+    legend = next(r for r in full.findall("s:rect", ns) if r.get("width") == "14")
+    assert legend.get("fill") == floors[0].get("fill")
+
+
 def keys(value):
     if isinstance(value, dict):
         return set(value) | set().union(*(keys(v) for v in value.values()))
@@ -292,3 +312,26 @@ def test_large_scene_retains_native_resolution_and_all_256_targets():
     full = ET.fromstring(observation_svg(state))
     assert int(full.attrib["width"]) > int(root.attrib["width"])
     assert "Victor" in " ".join(full.itertext())
+
+
+def test_personal_exclusions_undo_restore_and_svg():
+    from murdoku_lab.visual.browser import BrowserGame
+
+    game = BrowserGame()
+    session = VisualSession(glasshouse())
+    session.act({"action": "exclude", "person": "A", "cell": "B1"})
+    assert session.observe()["exclusions"] == {"A": ["b1"]}
+    assert 'class="manual-exclusion"' in scene_svg(session.observe(), selected="A")
+    assert 'class="manual-exclusion"' not in scene_svg(session.observe(), selected="B")
+    session.act({"action": "undo"})
+    assert session.observe()["exclusions"] == {}
+    session.act({"action": "redo"})
+    saved = {"case_id": session.entry.slug, "id": session.id, "events": session.events}
+    game.restore(saved)
+    assert game.sessions[session.id].observe()["exclusions"] == {"A": ["b1"]}
+    previous = session.observe()
+    with pytest.raises(SessionError):
+        session.act({"action": "exclude", "person": "A", "cell": "b1 b2"})
+    assert session.observe() == previous
+    session.act({"action": "unexclude", "person": "A", "cell": "b1"})
+    assert session.observe()["exclusions"] == {}

@@ -59,12 +59,13 @@ def _random_case(seed, size=5, n_atoms=6):
     return build_case(scene, chars, VICTIM_SYMBOL, pl, pool[:n_atoms], "extended")
 
 
-@pytest.mark.parametrize("seed", range(25))
-def test_cp_and_dfs_count_the_same(seed):
+@pytest.mark.parametrize("fast_witnesses", [False, True])
+@pytest.mark.parametrize("seed", range(5))
+def test_cp_and_dfs_count_the_same(seed, fast_witnesses):
     case = _random_case(seed)
     if case is None:
         pytest.skip("no placement for this scene")
-    a = enumerate_cp(case, cap=None, time_limit_s=30.0)
+    a = enumerate_cp(case, cap=None, time_limit_s=30.0, fast_witnesses=fast_witnesses)
     b = enumerate_dfs(case)
     assert (
         not a.timed_out

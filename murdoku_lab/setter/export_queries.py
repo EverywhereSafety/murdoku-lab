@@ -64,7 +64,11 @@ def write_bundle(
     views=("text", "vision"),
     time_limit_s=15,
     artwork_style="art",
+    rhythm_policy=None,
 ):
+    from .quality import normalize_rhythm_policy
+
+    rhythm_policy = normalize_rhythm_policy(rhythm_policy)
     if not views or any(view not in ("text", "vision") for view in views):
         raise ValueError("views must contain text and/or vision")
     destination = Path(destination)
@@ -74,11 +78,17 @@ def write_bundle(
     results, seen = [], set()
     for source in records:
         case = Case.from_json(source.get("murdoku_case", source))
-        theme = (
-            Theme.from_json(source["murdoku_theme"])
-            if source.get("murdoku_theme")
-            else preset_theme(case)
-        )
+        if source.get("murdoku_theme"):
+            theme = Theme.from_json(source["murdoku_theme"])
+        elif case.meta.get("scene_spec", {}).get("regions"):
+            from .scene_spec import theme_for_spec
+
+            spec = case.meta["scene_spec"]
+            theme = theme_for_spec(
+                case, spec, title=f'The {spec["regions"][0]["name"]} Case'
+            )
+        else:
+            theme = preset_theme(case)
         identity = case.content_hash()
         if identity in seen:
             continue
@@ -88,6 +98,7 @@ def write_bundle(
             expect_band=case.target_band,
             exact_count=False,
             time_limit_s=time_limit_s,
+            rhythm_policy=rhythm_policy,
         )
         actual_band = report.detail.get("band")
         report.checks["caps_respected"] = bool(actual_band) and respects_caps(
@@ -149,6 +160,7 @@ def write_bundle(
         "image_references": "relative to bundle root; resolve with murdoku_lab.environment.queries.model_inputs",
         "legacy_text_record_schema_preserved": True,
         "model_calls": 0,
+        **({"rhythm_policy": rhythm_policy} if rhythm_policy is not None else {}),
         "private_files": "*.rl.jsonl contain environment cases and answers; send only model_inputs to the model",
     }
     (destination / "manifest.json").write_text(
@@ -163,9 +175,12 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--views", default="text,vision")
     parser.add_argument(
-        "--artwork-style", choices=("art", "diagram", "fluent"), default="art"
+        "--artwork-style",
+        choices=("art", "diagram", "fluent", "classic"),
+        default="art",
     )
     parser.add_argument("--time-limit", type=float, default=15)
+    parser.add_argument("--rhythm-policy", type=Path, default=None)
     args = parser.parse_args()
     views = tuple(dict.fromkeys(args.views.split(",")))
     if not views or any(v not in ("text", "vision") for v in views):
@@ -176,6 +191,9 @@ def main():
         views=views,
         time_limit_s=args.time_limit,
         artwork_style=args.artwork_style,
+        rhythm_policy=(
+            json.loads(args.rhythm_policy.read_text()) if args.rhythm_policy else None
+        ),
     )
     print(
         json.dumps(

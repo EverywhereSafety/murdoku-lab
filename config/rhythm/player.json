@@ -1,0 +1,29 @@
+{
+  "schema": "murdoku.rhythm_policy/1",
+  "orders": [
+    "canonical",
+    "characters",
+    "clues"
+  ],
+  "seeds": [
+    0,
+    1
+  ],
+  "max_first_progress_step": 8,
+  "max_progress_gap": 8,
+  "max_initial_singleton_fraction": 0.25,
+  "min_verdict_determined_fraction": 0.5,
+  "max_probe_fraction": 0.3,
+  "excluded_kinds": [
+    "area_no_parity",
+    "area_no_gt",
+    "area_no_lt",
+    "area_no_offset",
+    "not_area_no_offset",
+    "area_occupancy_parity",
+    "abs_row",
+    "abs_col",
+    "in_grid_corner"
+  ],
+  "simplify_area_options": true
+}

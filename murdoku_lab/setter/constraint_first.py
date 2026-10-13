@@ -31,6 +31,7 @@ parallelised by `murdoku_lab.setter.farm`; `workers` remains in this API for com
 from __future__ import annotations
 
 import random
+from collections import Counter
 from dataclasses import replace
 from dataclasses import dataclass, field
 from typing import Sequence
@@ -311,27 +312,166 @@ def _relabel_for_late_victim(
     return None
 
 
+def _repair_late_reveal(case, *, seed, band, policy, time_limit_s, certificate=None):
+    """Rebuild a few clues around a late target instead of discarding a solved scene.
+
+    Remove target-specific statements, then strengthen other suspects using true
+    statements. Exact uniqueness and the original reveal gate remain mandatory.
+    """
+    from .sampler import derive_pool
+
+    occupants = {}
+    for person, cell in case.solution.items():
+        occupants.setdefault(case.scene.area_of[cell], []).append(person)
+    order = (certificate or certify(case)).place_order
+    targets = [
+        x
+        for x in reversed(order)
+        if len(occupants[case.scene.area_of[case.solution[x]]]) == 2
+    ]
+    for target in targets[:3]:
+        trial = (
+            _swap_symbols(case, case.victim, target) if target != case.victim else case
+        )
+        trial = replace(
+            trial,
+            clues=tuple(
+                clue
+                for clue in trial.clues
+                if not any(_touches_victim(a, trial.victim) for a in clue.atoms)
+            ),
+            certificate=None,
+        )
+        pool = derive_pool(
+            trial.scene,
+            trial.characters,
+            trial.victim,
+            trial.solution,
+            trial.vdef,
+            random.Random(seed),
+            trial.tags,
+        )
+        pool = [
+            a
+            for a in pool
+            if not _touches_victim(a, trial.victim)
+            and a.kind not in policy.get("excluded_kinds", ())
+        ]
+        for _ in range(12):
+            cert = certify(trial, include_probe=False)
+            if cert.solved:
+                break
+            candidates = []
+            for atom in pool:
+                if atom in trial.atoms:
+                    continue
+                live = set(cert.stuck.get(atom.holder, ()))
+                if not live:
+                    continue
+                mask = (
+                    unary_mask(atom, trial.scene)
+                    if atom.spec.mask is not None
+                    else None
+                )
+                gain = len(live - set(mask)) if mask is not None else 0
+                candidates.append(
+                    (
+                        -gain / max(1, len(live)),
+                        atom.kind not in DENSE_KINDS,
+                        atom.kind,
+                        atom.holder,
+                        atom,
+                    )
+                )
+            candidates.sort(key=lambda item: item[:-1])
+            best = None
+            before = _certificate_gap(cert)
+            tested = 0
+            for *_, atom in candidates:
+                candidate = replace(
+                    trial, clues=trial.clues + (Clue((atom,)),), certificate=None
+                )
+                if not respects_caps(candidate, band or "medium") or implied_atom_refs(
+                    candidate
+                ):
+                    continue
+                tested += 1
+                if tested > 16:
+                    break
+                candidate_cert = certify(candidate, include_probe=False)
+                gap = _certificate_gap(candidate_cert)
+                if gap < before and (best is None or gap < best[0]):
+                    best = gap, candidate
+                if candidate_cert.solved:
+                    break
+            if best is None:
+                break
+            trial = best[1]
+        cert = certify(trial, include_probe=False)
+        if (
+            cert.solved
+            and cert.placed == dict(trial.solution)
+            and _victim_late(cert, trial.victim, trial.vdef.victim_last_k)
+            and (band is None or classify(cert) == band)
+            and respects_caps(trial, classify(cert))
+            and style_ok(trial.atoms, classify(cert), len(trial.characters))
+            and unique_solution(trial, time_limit_s=time_limit_s)
+            == dict(trial.solution)
+        ):
+            return trial, cert
+    return None
+
+
 def _prune_useless(
-    case: Case, cert: Certificate, *, time_limit_s: float
+    case: Case,
+    cert: Certificate,
+    *,
+    time_limit_s: float,
+    preserve_flow: bool = False,
+    rhythm_policy: dict | None = None,
 ) -> tuple[Case, Certificate]:
     """Drop clues that preserve uniqueness, band, human solvability and the reveal order."""
     wanted = classify(cert)
     changed = True
     while changed:
         changed = False
+        baseline = None
+        baseline_rhythm = None
         for i in range(len(case.clues)):
             trial = replace(
                 case, clues=case.clues[:i] + case.clues[i + 1 :], certificate=None
             )
+            # An underconstrained deletion can make hypothetical propagation
+            # very expensive. Run the cheap ladder, then the exact uniqueness
+            # check, and probe only a unique case that still needs it.
+            trial_cert = certify(trial, include_probe=False)
+            if trial_cert.solved and (
+                trial_cert.placed != dict(case.solution)
+                or classify(trial_cert) != wanted
+            ):
+                continue
             if unique_solution(trial, time_limit_s=time_limit_s) != dict(case.solution):
                 continue
-            trial_cert = certify(trial)
+            if not trial_cert.solved:
+                trial_cert = certify(trial)
             if (
                 not trial_cert.solved
                 or trial_cert.placed != dict(case.solution)
                 or classify(trial_cert) != wanted
             ):
                 continue
+            if preserve_flow:
+                from .quality import flow_profile, improves_flow
+
+                baseline = baseline or flow_profile(case)
+                if improves_flow(baseline, flow_profile(trial)):
+                    continue
+            if rhythm_policy is not None:
+                from .quality import check_rhythm, improves_rhythm
+
+                baseline_rhythm = baseline_rhythm or check_rhythm(case, rhythm_policy)
+                if improves_rhythm(baseline_rhythm, check_rhythm(trial, rhythm_policy)):
+                    continue
             if not _victim_late(trial_cert, case.victim, case.vdef.victim_last_k):
                 relabelled = _relabel_for_late_victim(
                     trial,
@@ -345,6 +485,155 @@ def _prune_useless(
             case, cert, changed = trial, trial_cert, True
             break
     return case, cert
+
+
+def _refine_for_rhythm(case, policy, *, seed, band, time_limit_s, beam=24, edits=3):
+    """Add true clues to bridge deduction stalls, then recheck the reveal.
+
+    The unique arrangement is already established at this point. It is used only
+    to keep candidate clues true; deduction scheduling never reads it.
+    """
+    from .quality import check_rhythm
+    from murdoku_lab.core.atoms import unary_mask
+    from murdoku_lab.solver.reasoning_profile import profile_case
+
+    def score(report):
+        return (
+            sum(
+                not passed
+                for run in report["runs"]
+                for passed in run["checks"].values()
+            ),
+            max(run["metrics"]["max_progress_gap"] for run in report["runs"]),
+            -min(
+                (run["metrics"]["min_verdict_determined_fraction"] or 0)
+                for run in report["runs"]
+            ),
+            max(run["metrics"]["max_probe_fraction"] for run in report["runs"]),
+        )
+
+    report = check_rhythm(case, policy)
+    if report["ok"]:
+        return case
+    # A late registered victim can still reveal the culprit much earlier.
+    # Try other valid two-person areas before adding clues to the same target.
+    occupants = {}
+    for person, cell in case.solution.items():
+        occupants.setdefault(case.scene.area_of[cell], []).append(person)
+    best_score = score(report)
+    original = case
+    for person in original.characters:
+        if (
+            person == original.victim
+            or len(occupants[original.scene.area_of[original.solution[person]]]) != 2
+        ):
+            continue
+        trial = _swap_symbols(original, original.victim, person)
+        if direct_verdict_clues(trial):
+            continue
+        cert = certify(trial)
+        if (
+            not cert.solved
+            or cert.placed != dict(trial.solution)
+            or not _victim_late(cert, trial.victim, trial.vdef.victim_last_k)
+        ):
+            continue
+        if band is not None and classify(cert) != band:
+            continue
+        trial_report = check_rhythm(trial, policy)
+        if score(trial_report) >= best_score:
+            continue
+        if unique_solution(trial, time_limit_s=time_limit_s) != dict(trial.solution):
+            continue
+        case, best_score = trial, score(trial_report)
+        if trial_report["ok"]:
+            return case
+
+    for edit in range(edits):
+        report = check_rhythm(case, policy)
+        if report["ok"]:
+            return case
+        worst = max(report["runs"], key=lambda run: run["metrics"]["max_progress_gap"])
+        baseline = profile_case(
+            case, order=worst["order"], seed=worst["seed"], measure_opening=False
+        )
+        discoveries = [
+            row["step"]
+            for row in baseline["trace"]
+            if row["newly_determined"] or any(row["new_partial_locations"].values())
+        ]
+        intervals = list(zip(discoveries, discoveries[1:]))
+        start = (
+            max(intervals, key=lambda interval: interval[1] - interval[0])[0]
+            if intervals
+            else 0
+        )
+        stalled = baseline["trace"][start]["candidates"]
+
+        def relevance(atom):
+            cells = set(stalled[atom.holder])
+            mask = unary_mask(atom, case.scene) if atom.spec.mask is not None else cells
+            fraction = len(cells & set(mask)) / max(1, len(cells))
+            return (
+                fraction,
+                atom.kind not in ("in_area", "beside", "on", "only_on", "only_beside"),
+                atom.kind,
+                atom.holder,
+            )
+
+        best_score = score(report)
+        best, tested = None, 0
+        candidates = candidate_atoms(
+            case.scene,
+            case.characters,
+            case.vdef,
+            case.tags,
+            random.Random(seed + edit),
+        )
+        candidates = [
+            a for a in candidates if a.kind not in policy.get("excluded_kinds", ())
+        ]
+        candidates.sort(key=relevance)
+        for atom in candidates:
+            if atom in case.atoms or not holds_atom(
+                atom, case.scene, case.solution, case.tags
+            ):
+                continue
+            trial = replace(case, clues=case.clues + (Clue((atom,)),), certificate=None)
+            if direct_verdict_clues(trial) or implied_atom_refs(trial):
+                continue
+            if not respects_caps(trial, band or "expert") or not style_ok(
+                trial.atoms, band or "expert", len(trial.characters)
+            ):
+                continue
+            tested += 1
+            if tested > beam:
+                break
+            cert = certify(trial)
+            if (
+                not cert.solved
+                or cert.placed != dict(trial.solution)
+                or (band is not None and classify(cert) != band)
+            ):
+                continue
+            relabelled = _relabel_for_late_victim(
+                trial, cert, time_limit_s=time_limit_s, avoid_verdict_hints=True
+            )
+            if relabelled is None:
+                continue
+            trial, cert = relabelled
+            if band is not None and classify(cert) != band:
+                continue
+            trial_report = check_rhythm(trial, policy)
+            if trial_report["ok"]:
+                return trial
+            trial_score = score(trial_report)
+            if trial_score < best_score:
+                best, best_score = trial, trial_score
+        if best is None:
+            break
+        case = best
+    return case
 
 
 def generate(
@@ -361,6 +650,7 @@ def generate(
     attempts: int = 6,
     time_limit_s: float = 10.0,
     scene_spec: dict | None = None,
+    rhythm_policy: dict | None = None,
 ) -> CFResult:
     """Retry the search a few times before giving up.
 
@@ -371,6 +661,9 @@ def generate(
     shape as `no_two_person_area` in the placement-first setter.
     """
     spec = normalize_spec(scene_spec, size=size, n_areas=n_areas)
+    from .quality import normalize_rhythm_policy
+
+    rhythm_policy = normalize_rhythm_policy(rhythm_policy)
     best = CFResult(reason="attempts_exhausted")
     for k in range(attempts):
         r = _generate_once(
@@ -385,8 +678,34 @@ def generate(
             cap=cap,
             time_limit_s=time_limit_s,
             scene_spec=spec,
+            rhythm_policy=rhythm_policy,
         )
         r.solves += best.solves
+        if r.case is not None and not r.reason and rhythm_policy is not None:
+            from .quality import check_rhythm
+
+            original = r.case
+            r.case = _refine_for_rhythm(
+                r.case,
+                rhythm_policy,
+                seed=seed + k * 7919,
+                band=band,
+                time_limit_s=time_limit_s,
+            )
+            r.certificate = certify(r.case)
+            if r.case is not original:
+                r.case, r.certificate = _prune_useless(
+                    r.case,
+                    r.certificate,
+                    time_limit_s=time_limit_s,
+                    preserve_flow=True,
+                    rhythm_policy=rhythm_policy,
+                )
+            r.case = replace(r.case, certificate=r.certificate.to_json())
+            r.band = classify(r.certificate)
+            r.n_clues, r.n_atoms = len(r.case.clues), len(r.case.atoms)
+            if not check_rhythm(r.case, rhythm_policy)["ok"]:
+                r.reason = "rhythm_policy"
         if r.case is not None and not r.reason:
             return r
         if best.case is None and r.case is not None:
@@ -411,6 +730,7 @@ def _generate_once(
     cap: int,
     time_limit_s: float,
     scene_spec: dict | None = None,
+    rhythm_policy: dict | None = None,
 ) -> CFResult:
     """Build a case by choosing clues until exactly one arrangement survives.
 
@@ -467,6 +787,10 @@ def _generate_once(
         return CFResult(reason="board cannot seat the cast")
 
     cands = candidate_atoms(scene, chars, v, tags, rng)
+    if rhythm_policy is not None:
+        cands = [
+            a for a in cands if a.kind not in rhythm_policy.get("excluded_kinds", ())
+        ]
     cands = [a for a in cands if not gives_verdict(a, VICTIM_SYMBOL, v.murderer_rule)]
     cands = _interleave_candidates(cands, rng)
     if not cands:
@@ -476,12 +800,14 @@ def _generate_once(
     solves = 0
     trace: list = []
     base = None
+    exhausted = set()
     for _step in range(max_clues):
         if base is None:
             base = count_solutions(
                 _shell(scene, chars, VICTIM_SYMBOL, variant, tags, chosen),
                 cap=cap,
                 time_limit_s=time_limit_s,
+                fast_witnesses=rhythm_policy is not None,
             )
             solves += 1
         if base.timed_out:
@@ -511,23 +837,59 @@ def _generate_once(
         batch = [a for a in cands if a not in chosen][:beam]
         if not batch:
             return CFResult(reason="ran out of candidates", solves=solves, trace=trace)
+        # Balance only ties in witness elimination; never trade away consistency
+        # or a stronger elimination for variety. Defaults retain the old ordering.
+        balance = bool(rhythm_policy and rhythm_policy.get("balance_clues"))
+        kind_counts = Counter(a.kind for a in chosen) if balance else {}
+        holder_counts = Counter(a.holder for a in chosen) if balance else {}
         viable = []
         for i, atom in enumerate(batch):
-            if not respects_caps(
-                _shell(scene, chars, VICTIM_SYMBOL, variant, tags, chosen + [atom]),
-                cap_band,
-            ):
-                continue
             survivors = sum(
                 1 for pl in base.solutions if holds_atom(atom, scene, pl, tags)
             )
             if 1 <= survivors < base.count:
-                viable.append((_touches_victim(atom, VICTIM_SYMBOL), survivors, i))
-        if not viable:
+                viable.append(
+                    (
+                        _touches_victim(atom, VICTIM_SYMBOL),
+                        survivors,
+                        kind_counts.get(atom.kind, 0),
+                        holder_counts.get(atom.holder, 0),
+                        i,
+                    )
+                )
+        # Check caps in score order, without rebuilding all unary masks for
+        # every loser. With balancing disabled the original tie order is retained.
+        winner = next(
+            (
+                batch[i]
+                for _, _, _, _, i in sorted(viable)
+                if respects_caps(
+                    _shell(
+                        scene, chars, VICTIM_SYMBOL, variant, tags, chosen + [batch[i]]
+                    ),
+                    cap_band,
+                )
+            ),
+            None,
+        )
+        if winner is None:
+            exhausted.update(batch)
+            if all(atom in exhausted or atom in chosen for atom in cands):
+                return CFResult(
+                    reason="no informative admissible clue", solves=solves, trace=trace
+                )
             cands = cands[beam:] + cands[:beam]
             continue
-        viable.sort()
-        chosen.append(batch[viable[0][2]])
+        exhausted.clear()
+        chosen.append(winner)
+        if rhythm_policy is not None:
+            implied = {
+                i
+                for i, _ in implied_atom_refs(
+                    _shell(scene, chars, VICTIM_SYMBOL, variant, tags, chosen)
+                )
+            }
+            chosen = [atom for i, atom in enumerate(chosen) if i not in implied]
         base = None
     else:
         return CFResult(
@@ -632,6 +994,14 @@ def _generate_once(
             if after >= before:
                 continue
         chosen.append(atom)
+        if rhythm_policy is not None:
+            implied = {
+                i
+                for i, _ in implied_atom_refs(
+                    _shell(scene, chars, VICTIM_SYMBOL, variant, tags, chosen)
+                )
+            }
+            chosen = [item for i, item in enumerate(chosen) if i not in implied]
         case = build_case(
             scene,
             chars,
@@ -683,6 +1053,15 @@ def _generate_once(
         relabelled = _relabel_for_late_victim(
             case, cert, time_limit_s=time_limit_s, avoid_verdict_hints=True
         )
+        if relabelled is None and rhythm_policy is not None:
+            relabelled = _repair_late_reveal(
+                case,
+                seed=seed,
+                band=band,
+                policy=rhythm_policy,
+                time_limit_s=time_limit_s,
+                certificate=cert,
+            )
         if relabelled is None:
             return CFResult(
                 reason="victim_not_last",
@@ -718,7 +1097,13 @@ def _generate_once(
             n_clues=len(case.clues),
             n_atoms=len(case.atoms),
         )
-    case, cert, pruned = prune_implied_atoms(case, cert)
+    case, cert, pruned = prune_implied_atoms(
+        case,
+        cert,
+        simplify_options=bool(
+            rhythm_policy and rhythm_policy.get("simplify_area_options")
+        ),
+    )
     if implied_atom_refs(case):
         return CFResult(
             reason="implied_subclause",
@@ -730,7 +1115,13 @@ def _generate_once(
             n_clues=len(case.clues),
             n_atoms=len(case.atoms),
         )
-    case, cert = _prune_useless(case, cert, time_limit_s=time_limit_s)
+    case, cert = _prune_useless(
+        case,
+        cert,
+        time_limit_s=time_limit_s,
+        preserve_flow=rhythm_policy is not None,
+        rhythm_policy=rhythm_policy,
+    )
     if cert.placed != dict(case.solution):
         return CFResult(
             reason="logic_solution_mismatch",

@@ -1,0 +1,161 @@
+{
+  "schema": "murdoku.scene_spec/1",
+  "layout": "courtyard",
+  "area_count": 14,
+  "regions": [
+    {
+      "name": "Library",
+      "ground": "floor",
+      "patches": {
+        "rug": 0.18
+      },
+      "props": {
+        "shelf": 0.16,
+        "table": 0.06,
+        "chair": 0.08
+      }
+    },
+    {
+      "name": "Music Room",
+      "ground": "floor",
+      "patches": {
+        "rug": 0.14
+      },
+      "props": {
+        "piano": 0.08,
+        "chair": 0.08,
+        "plant": 0.05
+      }
+    },
+    {
+      "name": "Dining Hall",
+      "ground": "tile",
+      "patches": {},
+      "props": {
+        "table": 0.2,
+        "chair": 0.12,
+        "plant": 0.04
+      }
+    },
+    {
+      "name": "Conservatory",
+      "ground": "tile",
+      "patches": {},
+      "props": {
+        "plant": 0.14,
+        "palm": 0.08,
+        "chair": 0.06
+      }
+    },
+    {
+      "name": "Master Bedroom",
+      "ground": "floor",
+      "patches": {
+        "rug": 0.22
+      },
+      "props": {
+        "bed": 0.06,
+        "shelf": 0.06,
+        "chair": 0.05
+      }
+    },
+    {
+      "name": "Guest Bedroom",
+      "ground": "floor",
+      "patches": {
+        "rug": 0.16
+      },
+      "props": {
+        "bed": 0.06,
+        "table": 0.05,
+        "chair": 0.06,
+        "plant": 0.04
+      }
+    },
+    {
+      "name": "Games Room",
+      "ground": "floor",
+      "patches": {},
+      "props": {
+        "table": 0.12,
+        "chair": 0.1,
+        "tv": 0.04
+      }
+    },
+    {
+      "name": "Portrait Gallery",
+      "ground": "tile",
+      "patches": {},
+      "props": {
+        "statue": 0.1,
+        "plant": 0.08,
+        "chair": 0.06
+      }
+    },
+    {
+      "name": "Study",
+      "ground": "floor",
+      "patches": {
+        "rug": 0.16
+      },
+      "props": {
+        "shelf": 0.12,
+        "table": 0.08,
+        "chair": 0.06
+      }
+    },
+    {
+      "name": "Store Room",
+      "ground": "floor",
+      "patches": {},
+      "props": {
+        "crate": 0.16,
+        "barrel": 0.1,
+        "box": 0.08
+      }
+    },
+    {
+      "name": "Reception",
+      "ground": "tile",
+      "patches": {},
+      "props": {
+        "table": 0.08,
+        "chair": 0.1,
+        "flowers": 0.06
+      }
+    },
+    {
+      "name": "Garden Terrace",
+      "ground": "fairway",
+      "patches": {
+        "sand": 0.12
+      },
+      "props": {
+        "tree": 0.08,
+        "flowers": 0.12,
+        "chair": 0.06
+      }
+    },
+    {
+      "name": "Cloister",
+      "ground": "tile",
+      "patches": {},
+      "props": {
+        "plant": 0.06,
+        "statue": 0.04
+      }
+    },
+    {
+      "name": "Lily Courtyard",
+      "ground": "fairway",
+      "patches": {
+        "water": 0.27
+      },
+      "props": {
+        "palm": 0.06,
+        "flowers": 0.08,
+        "boulder": 0.05
+      }
+    }
+  ]
+}

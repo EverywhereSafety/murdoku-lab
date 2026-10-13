@@ -2,7 +2,7 @@
 
 [Play now](https://everywheresafety.github.io/murdoku/play/) ·
 [Website](https://everywheresafety.github.io/murdoku/) ·
-[Blog](https://everywheresafety.github.io/blog/murdoku-as-vhd/) · [Project](../../README.md) · [Code](https://github.com/EverywhereSafety/murdoku-lab) ·
+[Blog](https://everywheresafety.github.io/blog/treasure-hunt/) · [Project](../../README.md) · [Code](https://github.com/EverywhereSafety/murdoku-lab) ·
 [Data](data.md) · [Training](https://github.com/EverywhereSafety/agent-horizon)
 
 The illustrated casebook presents a board, the cast and their statements. Place
@@ -18,6 +18,18 @@ Select a character, then tap a square to add or remove a candidate. Hold the
 square briefly or press Space to confirm the placement. Dragging a character
 onto the board also confirms it. Undo and redo work for both notes and placements. An incorrect submission offers
 **Keep investigating**, preserving the board, candidates and notes in a new attempt.
+
+Placing a person immediately crosses out the rest of their row and column.
+Choose **Exclude** (E) to toggle purple exclusions for the selected person;
+**Erase** (X), undo and redo also work on these notes. Exclusions survive refresh
+and appear in the session journal. Selecting a person highlights statements that
+mention them, including statements held by other people.
+
+Hover or focus a square to highlight its row, column, coordinates and room.
+Use Ctrl/Cmd + scroll or a two-finger pinch to zoom around that position.
+Shift + drag pans on desktop; a single finger scrolls on touchscreens.
+**Fit the board** resets the view. **View underlying objects** temporarily hides
+people and notes so you can inspect furniture and terrain without moving anyone.
 
 Use **Focus on the board** to expand the workspace, with the cast and clues
 alongside it. Zoom and scroll for larger boards; Escape returns to the page.

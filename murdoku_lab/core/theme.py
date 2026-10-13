@@ -15,7 +15,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .board import OBJECTS
+from .board import OBJECTS, TERRAINS
 from .instance import Case
 
 THEME_DIR = Path(__file__).resolve().parent.parent / "setter" / "themes"
@@ -48,7 +48,7 @@ class Theme:
         # vocabulary is the theme's, not ours. Only a rename of something neither the board nor the
         # catalogue knows is an error, and that is checked against the case when one is supplied.
         if case is not None:
-            known = set(case.scene.prop_by_id) | set(OBJECTS)
+            known = set(case.scene.prop_by_id) | set(OBJECTS) | set(TERRAINS)
             unknown = [o for o in self.objects if o not in known]
             if unknown:
                 raise ValueError(

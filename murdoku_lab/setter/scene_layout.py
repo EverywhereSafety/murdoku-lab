@@ -25,7 +25,7 @@ def _connected(cells, neighbours):
     return len(seen) == len(cells)
 
 
-def _shape_areas(scene, rng, neighbours):
+def _shape_areas(scene, rng, neighbours, *, protected_areas=frozenset()):
     areas = list(scene.area_of)
     members = {a: set(scene.cells_of_area(a)) for a in range(scene.n_areas)}
     candidates = list(range(scene.n_cells))
@@ -34,7 +34,9 @@ def _shape_areas(scene, rng, neighbours):
     moves = 0
     for k in candidates:
         source = areas[k]
-        targets = sorted({areas[m] for m in neighbours[k]} - {source})
+        if source in protected_areas:
+            continue
+        targets = sorted({areas[m] for m in neighbours[k]} - {source} - protected_areas)
         rng.shuffle(targets)
         for target in targets:
             if max(touches[source], touches[target]) >= 3:
@@ -193,3 +195,62 @@ def enrich_scene(scene, rng, *, anonymous=False, door_rate=0.35, shape_areas=Tru
         terrain_of=scene.terrain_of,
         props=tuple(props),
     )
+
+
+def courtyard_layout(scene, rng):
+    """Four wings around a connected gallery and central open courtyard.
+
+    Applied before props and hidden placements. Room widths vary by seed;
+    area IDs remain aligned with the fourteen regional role profiles.
+    """
+    from dataclasses import replace
+
+    if scene.W != scene.H or scene.W < 16 or scene.n_areas != 14:
+        raise ValueError("courtyard layout needs a square board >=16 and 14 areas")
+    n = scene.W
+    wing = min((n - 8) // 2, n // 4 + rng.choice((-1, 0, 1)))
+    middle = n // 2 + rng.choice((-1, 0, 1))
+    cuts = [0, n // 4, middle, n - n // 4, n]
+    # Vary the two internal subdivisions without creating tiny rooms.
+    cuts[1] += rng.choice((-1, 0, 1))
+    cuts[3] += rng.choice((-1, 0, 1))
+    areas = []
+    for r in range(n):
+        for c in range(n):
+            if r < wing or r >= n - wing:
+                area = next(i for i in range(4) if cuts[i] <= c < cuts[i + 1])
+                area += 0 if r < wing else 4
+            elif c < wing:
+                area = 8 if r < middle else 9
+            elif c >= n - wing:
+                area = 10 if r < middle else 11
+            elif wing + 2 <= r < n - wing - 2 and wing + 2 <= c < n - wing - 2:
+                area = 13
+            else:
+                area = 12
+            areas.append(area)
+    neighbours = {k: scene.neighbours(k) for k in range(scene.n_cells)}
+    shaped = replace(scene, area_of=tuple(areas))
+    areas, _ = _shape_areas(shaped, rng, neighbours, protected_areas={12, 13})
+    doors = _doors(areas, set(range(scene.n_cells)), neighbours, 14, rng, 0.3)
+    return replace(scene, area_of=tuple(areas), doors=doors)
+
+
+def furniture_footprint(available, count, neighbours, rng, preferred, width):
+    """Prefer straight or rectangular furniture instead of bent flood-fill blobs."""
+    shapes = [(h, count // h) for h in range(1, count + 1) if count % h == 0]
+    candidates = []
+    for start in sorted(available):
+        r, c = divmod(start, width)
+        for h, w in shapes:
+            if c + w > width or max(h, w) > 4:
+                continue
+            cells = {((r + dr) * width + c + dc) for dr in range(h) for dc in range(w)}
+            if cells <= available:
+                # Compact tables/beds; wall contact wins ties among similar shapes.
+                score = (max(h, w) - min(h, w), -len(cells & preferred))
+                candidates.append((score, cells))
+    if candidates:
+        rng.shuffle(candidates)
+        return min(candidates, key=lambda item: item[0])[1]
+    return _patch(available, count, neighbours, rng, preferred)

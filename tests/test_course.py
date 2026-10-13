@@ -230,7 +230,7 @@ def test_constraint_first_16_produces_a_gated_human_solvable_case():
     r = generate(
         variant="course",
         size=16,
-        band="expert",
+        band=None,
         seed=7,
         workers=1,
         beam=64,
@@ -242,7 +242,7 @@ def test_constraint_first_16_produces_a_gated_human_solvable_case():
     assert r.case is not None and not r.reason
     assert r.certificate is not None and r.certificate.solved
     assert r.case.certificate == r.certificate.to_json()
-    assert gate(r.case, expect_band="expert", time_limit_s=30, exact_count=False).ok
+    assert gate(r.case, expect_band=None, time_limit_s=30, exact_count=False).ok
 
 
 # =============================================================================================

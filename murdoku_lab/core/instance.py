@@ -228,7 +228,7 @@ register_variant(
     Variant(
         name="extended",
         objects=_MANOR_OBJECTS,
-        sizes=(6, 7, 8, 9, 10, 11, 12),
+        sizes=tuple(range(6, 25)),
         murderer_rule="classic",
         answer="murderer",
         # Exclude tag predicates *structurally* rather than by name: listing "tag_in_area" by hand
@@ -257,7 +257,7 @@ _COURSE = frozenset(SPECS) - {
 register_variant(
     Variant(
         name="anon",
-        sizes=(6, 7, 8, 9, 10, 11, 12),
+        sizes=tuple(range(6, 25)),
         murderer_rule="classic",
         answer="murderer",
         allowed_kinds=frozenset(k for k, sp in SPECS.items() if not sp.needs_tags),
@@ -272,7 +272,7 @@ register_variant(
     Variant(
         name="course",
         objects=_GOLF_OBJECTS,
-        sizes=tuple(range(10, 19)),
+        sizes=tuple(range(10, 25)),
         murderer_rule="classic",
         answer="murderer",
         allowed_kinds=_COURSE,
@@ -282,7 +282,7 @@ register_variant(
         # With sixteen suspects, demanding the victim be in the final two deductions is a 2-in-16
         # constraint on the deduction order and rejects almost everything. Widen it with the cast.
         victim_last_k=4,
-        notes="Large boards (10-18) with the full catalogue: terrain regions, area-number arithmetic, "
+        notes="Large boards (10-24) with the full catalogue: terrain regions, area-number arithmetic, "
         "occupancy parity as a general clue, gendered tags, and compass/extreme anchors. This is "
         "the shape of the reference game's 16x16 Golf Course.",
     )

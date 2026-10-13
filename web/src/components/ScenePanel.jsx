@@ -1,4 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -17,8 +23,15 @@ import {
   Redo2,
   Undo2,
   Clock3,
+  X,
 } from "lucide-react";
+import { useBoardNavigation, useBoardGuides } from "../lib/use-board-view.js";
+import { assistMarkup } from "../lib/board-assist.js";
 import { IconButton } from "./Controls.jsx";
+const BoardArtwork = React.memo(function BoardArtwork({ markup }) {
+  return <div dangerouslySetInnerHTML={{ __html: markup }} />;
+});
+
 export function ScenePanel({
   busy,
   exportImage,
@@ -50,6 +63,34 @@ export function ScenePanel({
   viewOnly,
   zoom,
 }) {
+  const [assist, setAssist] = useState(true);
+  const [showUnderlay, setShowUnderlay] = useState(false);
+  const { scrollRef, changeZoom, fitBoard } = useBoardNavigation({
+    zoom,
+    setZoom,
+    sessionId: state.session_id,
+    onPinch: () => {
+      cancelPress();
+      press.current.consumed = true;
+    },
+  });
+  const boardMarkup = useMemo(
+    () => assistMarkup(svg, state, selected, assist),
+    [svg, state, selected, assist],
+  );
+  useBoardGuides({ sceneRef, hoverInfo, boardMarkup, state });
+  const focusedCell = useRef(null);
+  useLayoutEffect(() => {
+    const active = document.activeElement;
+    if (
+      focusedCell.current &&
+      (active === document.body || sceneRef.current?.contains(active))
+    ) {
+      sceneRef.current
+        ?.querySelector(`[data-cell="${focusedCell.current}"]`)
+        ?.focus({ preventScroll: true });
+    }
+  }, [boardMarkup, sceneRef]);
   const press = useRef({ timer: null, consumed: false });
   const cancelPress = () => {
     clearTimeout(press.current.timer);
@@ -136,6 +177,15 @@ export function ScenePanel({
           </div>
         </div>
       </div>
+      <label className="board-assist-toggle">
+        <input
+          type="checkbox"
+          checked={assist}
+          onChange={(e) => setAssist(e.target.checked)}
+        />
+        Show row and column exclusions
+        <span>× marks rows and columns occupied by placed people</span>
+      </label>
       {review && (
         <div className="review-banner">
           <Clock3 size={15} />
@@ -153,6 +203,28 @@ export function ScenePanel({
           </button>
         </div>
       )}
+      <label className="board-assist-toggle">
+        <input
+          type="checkbox"
+          checked={showUnderlay}
+          onChange={(event) => setShowUnderlay(event.target.checked)}
+        />
+        View underlying objects
+        <span>Temporarily hide people and notes · placements are kept</span>
+      </label>
+      <div className="board-location" aria-live="polite">
+        <strong>{hoverInfo?.cell.toUpperCase() || "Explore the board"}</strong>
+        <span>
+          {hoverInfo
+            ? state.scene.areas.find((area) => area.id === hoverInfo.area)?.name
+            : "Ctrl + scroll to zoom · Shift + drag to pan"}
+        </span>
+        <span className="manual-exclusion-key">
+          × Your exclusions for{" "}
+          {state.people.find((p) => p.id === selected)?.name ||
+            "selected person"}
+        </span>
+      </div>
       <div className="map-layout">
         <div className="tool-rail" aria-label="Placement tools">
           <IconButton
@@ -170,6 +242,14 @@ export function ScenePanel({
             onClick={() => setMode("mark")}
           >
             <Pencil size={18} />
+          </IconButton>
+          <IconButton
+            label="Exclude square for selected person (E)"
+            active={mode === "exclude"}
+            disabled={viewOnly}
+            onClick={() => setMode("exclude")}
+          >
+            <X size={18} />
           </IconButton>
           <IconButton
             label="Erase selected person's mark or placement (X)"
@@ -203,15 +283,25 @@ export function ScenePanel({
             <Redo2 size={18} />
           </IconButton>
         </div>
-        <div className="board-scroll" data-testid="board-scroll">
+        <div
+          className="board-scroll"
+          data-testid="board-scroll"
+          ref={scrollRef}
+        >
           <div
-            className="board-frame"
+            className={`board-frame ${showUnderlay ? "show-underlay" : ""}`}
             style={{
               width: `${zoom}%`,
             }}
             aria-busy={busy}
             ref={sceneRef}
+            onFocusCapture={(e) => {
+              focusedCell.current =
+                e.target.closest("[data-cell]")?.dataset.cell || null;
+              if (focusedCell.current) setHovered(focusedCell.current);
+            }}
             onClick={(e) => {
+              if (showUnderlay) return;
               if (press.current.consumed) {
                 press.current.consumed = false;
                 return;
@@ -222,12 +312,25 @@ export function ScenePanel({
             onPointerDown={(e) => {
               cancelPress();
               press.current.consumed = false;
+              if (e.shiftKey && e.button === 0) {
+                press.current.pan = {
+                  x: e.clientX,
+                  y: e.clientY,
+                  left: scrollRef.current.scrollLeft,
+                  top: scrollRef.current.scrollTop,
+                };
+                press.current.consumed = true;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                e.preventDefault();
+                return;
+              }
               const hit = e.target.closest("[data-cell]");
               if (
                 e.button !== 0 ||
                 !hit ||
                 mode !== "mark" ||
                 viewOnly ||
+                showUnderlay ||
                 busy ||
                 !selected
               )
@@ -241,6 +344,13 @@ export function ScenePanel({
               }, 450);
             }}
             onPointerMove={(e) => {
+              if (press.current.pan) {
+                scrollRef.current.scrollLeft =
+                  press.current.pan.left - (e.clientX - press.current.pan.x);
+                scrollRef.current.scrollTop =
+                  press.current.pan.top - (e.clientY - press.current.pan.y);
+                return;
+              }
               if (
                 press.current.timer &&
                 Math.hypot(
@@ -252,8 +362,14 @@ export function ScenePanel({
                 cancelPress();
               }
             }}
-            onPointerUp={cancelPress}
-            onPointerCancel={cancelPress}
+            onPointerUp={() => {
+              press.current.pan = null;
+              cancelPress();
+            }}
+            onPointerCancel={() => {
+              press.current.pan = null;
+              cancelPress();
+            }}
             onPointerLeave={cancelPress}
             onContextMenu={(e) => {
               if (mode === "mark") e.preventDefault();
@@ -263,10 +379,13 @@ export function ScenePanel({
               if (hit) setHovered(hit.dataset.cell);
             }}
             onMouseLeave={() => setHovered(null)}
-            onKeyDown={gridKey}
+            onKeyDown={(event) => {
+              if (!showUnderlay) gridKey(event);
+            }}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
               e.preventDefault();
+              if (showUnderlay) return;
               const hit = e.target.closest("[data-cell]");
               const who = e.dataTransfer.getData("application/murdoku-person");
               if (hit && state.people.some((p) => p.id === who)) {
@@ -274,10 +393,9 @@ export function ScenePanel({
                 setSelected(who);
               }
             }}
-            dangerouslySetInnerHTML={{
-              __html: svg,
-            }}
-          />
+          >
+            <BoardArtwork markup={boardMarkup} />
+          </div>
         </div>
       </div>
       <div className="map-legend" aria-label="Area legend">
@@ -313,7 +431,7 @@ export function ScenePanel({
           ) : (
             <>
               <span className="blocked-key">×</span>
-              <span>Cross = blocked</span>
+              <span>Small cross = obstacle</span>
               <span className="footer-dot">·</span>
               <span>Other squares are standable</span>
             </>
@@ -323,7 +441,7 @@ export function ScenePanel({
           <IconButton
             label="Zoom out"
             disabled={zoom <= 75}
-            onClick={() => setZoom((z) => Math.max(75, z - 25))}
+            onClick={() => changeZoom(zoom - 25)}
           >
             <Minus size={13} />
           </IconButton>
@@ -331,11 +449,11 @@ export function ScenePanel({
           <IconButton
             label="Zoom in"
             disabled={zoom >= 250}
-            onClick={() => setZoom((z) => Math.min(250, z + 25))}
+            onClick={() => changeZoom(zoom + 25)}
           >
             <Plus size={13} />
           </IconButton>
-          <IconButton label="Fit the board" onClick={() => setZoom(100)}>
+          <IconButton label="Fit the board" onClick={fitBoard}>
             <Maximize size={13} />
           </IconButton>
         </div>

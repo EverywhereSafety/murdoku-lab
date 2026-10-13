@@ -5,6 +5,7 @@ import threading
 import uuid
 
 from murdoku_lab.environment.state import Scratchpad
+from murdoku_lab.core.render import cell_label, parse_cell
 from murdoku_lab.environment.actions import apply_structured_action
 from murdoku_lab.visual.projection import public_observation
 
@@ -32,6 +33,7 @@ class VisualSession:
         self.terminal = None
         self.reviewed = set()
         self.notebook = ""
+        self.exclusions = {}
         self.pending_note = None
         self.undo_stack = []
         self.redo_stack = []
@@ -40,13 +42,27 @@ class VisualSession:
         self.frames = [self.observe()]
 
     def _snapshot(self):
-        return deepcopy((self.pad.placed, self.pad.marks, self.reviewed, self.notebook))
+        return deepcopy(
+            (
+                self.pad.placed,
+                self.pad.marks,
+                self.reviewed,
+                self.notebook,
+                self.exclusions,
+            )
+        )
 
     def _restore(self, snap):
-        self.pad.placed, self.pad.marks, self.reviewed, self.notebook = deepcopy(snap)
+        (
+            self.pad.placed,
+            self.pad.marks,
+            self.reviewed,
+            self.notebook,
+            self.exclusions,
+        ) = deepcopy(snap)
 
     def observe(self):
-        return public_observation(
+        state = public_observation(
             self.pad,
             session_id=self.id,
             case_id=self.entry.slug,
@@ -61,6 +77,10 @@ class VisualSession:
             eyebrow=self.entry.eyebrow,
             last_event=self.events[-1] if self.events else None,
         )
+        state["exclusions"] = {
+            p: sorted(cells) for p, cells in self.exclusions.items() if cells
+        }
+        return state
 
     def act(self, args, *, note=None, expected_revision=None, source="tool"):
         with self.lock:
@@ -100,6 +120,20 @@ class VisualSession:
                     "observations": [
                         "Last edit undone." if action == "undo" else "Edit restored."
                     ],
+                }
+            elif action in ("exclude", "unexclude"):
+                if set(args) != {"action", "person", "cell"}:
+                    raise SessionError("exclusion needs person and one cell")
+                validate_tool_action({**args, "action": "place"}, self.pad)
+                person = self.pad.sym(args["person"])
+                cell = cell_label(
+                    self.pad.case, parse_cell(self.pad.case, args["cell"])
+                )
+                cells = self.exclusions.setdefault(person, set())
+                (cells.add if action == "exclude" else cells.discard)(cell)
+                result = {
+                    "done": False,
+                    "observations": ["Personal exclusion updated."],
                 }
             elif action == "review_clue":
                 if (

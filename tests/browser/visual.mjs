@@ -60,6 +60,23 @@ try {
   await page.keyboard.press("Space");
   await revision(2);
   assert.equal((await state()).placements.A, "b1");
+  const underlayRevision = (await state()).revision;
+  const underlay = page.getByRole("checkbox", { name: "View underlying objects" });
+  await underlay.check();
+  assert.equal(await page.locator(".placement-notes").first().isVisible(), false);
+  await page.locator('[data-cell="c2"]').click();
+  assert.equal((await state()).revision, underlayRevision);
+  await underlay.uncheck();
+  assert.equal((await state()).placements.A, "b1");
+  checks.push("underlying objects visible without changing placements");
+
+  await page.locator('[data-cell="b2"][data-line-excluded]').waitFor();
+  assert.equal(await page.locator('[data-cell="b1"][data-line-excluded]').count(), 0);
+  await page.locator(".person-card").nth(1).click();
+  await page.locator('[data-cell="b2"][data-line-excluded]').waitFor();
+  assert.equal(await page.locator('[data-cell="c2"][data-line-excluded]').count(), 0);
+  await page.locator(".person-card").first().click();
+  checks.push("immediate row-column exclusions for placed and selected people");
   await page.locator('[data-cell="c2"]').hover();
   await page.mouse.down();
   await page.waitForTimeout(550);
@@ -376,6 +393,35 @@ try {
     fullPage: true,
   });
   checks.push("16x16 mobile layout / scrolling and candidate placement");
+  await phone.locator('[data-testid="board-scroll"]').scrollIntoViewIfNeeded();
+  const pinchBox = await phone
+    .locator('[data-testid="board-scroll"]')
+    .boundingBox();
+  const pinchX = pinchBox.x + pinchBox.width / 2;
+  const pinchY = pinchBox.y + pinchBox.height / 2;
+  const zoomBeforePinch = parseInt(
+    await phone.locator(".zoom-controls > span").textContent(),
+  );
+  const revisionBeforePinch = (
+    await phone.evaluate(() => window.murdokuAgent.observe())
+  ).revision;
+  for (const [type, spread] of [["touchStart", 30], ["touchMove", 55], ["touchEnd", 0]]) {
+    await touch.send("Input.dispatchTouchEvent", {
+      type,
+      touchPoints: spread ? [{ x: pinchX - spread, y: pinchY }, { x: pinchX + spread, y: pinchY }] : [],
+    });
+  }
+  await phone.waitForFunction(
+    (before) =>
+      parseInt(document.querySelector(".zoom-controls > span").textContent) >
+      before,
+    zoomBeforePinch,
+  );
+  assert.equal(
+    (await phone.evaluate(() => window.murdokuAgent.observe())).revision,
+    revisionBeforePinch,
+  );
+  checks.push("two-finger zoom without changing candidates or placements");
   await mobile.close();
 
   await page.evaluate(() => window.murdokuAgent.newSession("lily-pond"));
@@ -463,6 +509,74 @@ try {
     assert.equal((await state()).terminal.reward, 1);
     checks.push(`${caseId} / complete arrangement and correct answer`);
   }
+  await page.evaluate(() => window.murdokuAgent.newSession("glasshouse"));
+  await revision(0);
+  await page
+    .getByRole("button", {
+      name: "Exclude square for selected person (E)",
+      exact: true,
+    })
+    .click();
+  await page.locator('[data-cell="b1"]').click();
+  await revision(1);
+  assert.deepEqual((await state()).exclusions.A, ["b1"]);
+  assert.equal(await page.locator('[data-manual-excluded="true"]').count(), 1);
+  await page.locator(".person-card").nth(1).click();
+  await page.waitForLoadState("networkidle");
+  assert.equal(await page.locator('[data-manual-excluded="true"]').count(), 0);
+  await page.locator(".person-card").first().click();
+  await page.waitForLoadState("networkidle");
+  assert.equal(await page.locator('[data-manual-excluded="true"]').count(), 1);
+  await page.reload({ waitUntil: "networkidle" });
+  await page.locator('[data-manual-excluded="true"]').waitFor();
+  assert.deepEqual((await state()).exclusions.A, ["b1"]);
+  await page.locator('[data-cell="c2"]').hover();
+  assert.equal(
+    await page.locator(".board-location strong").textContent(),
+    "C2",
+  );
+  const scrollBox = await page
+    .locator('[data-testid="board-scroll"]')
+    .boundingBox();
+  await page.mouse.move(
+    scrollBox.x + scrollBox.width / 2,
+    scrollBox.y + scrollBox.height / 2,
+  );
+  await page.keyboard.down("Control");
+  await page.mouse.wheel(0, -120);
+  await page.keyboard.up("Control");
+  await page.waitForFunction(
+    () =>
+      parseInt(document.querySelector(".zoom-controls > span").textContent) >
+      100,
+  );
+  const beforePan = await page
+    .locator('[data-testid="board-scroll"]')
+    .evaluate((node) => node.scrollLeft);
+  await page.keyboard.down("Shift");
+  await page.mouse.down();
+  await page.mouse.move(
+    scrollBox.x + scrollBox.width / 2 - 50,
+    scrollBox.y + scrollBox.height / 2,
+  );
+  await page.mouse.up();
+  await page.keyboard.up("Shift");
+  const afterPan = await page
+    .locator('[data-testid="board-scroll"]')
+    .evaluate((node) => node.scrollLeft);
+  assert(afterPan > beforePan);
+  assert.equal((await state()).revision, 1);
+  await page
+    .getByRole("button", { name: "Fit the board", exact: true })
+    .click();
+  assert.equal(
+    await page.locator(".zoom-controls > span").textContent(),
+    "100%",
+  );
+  checks.push("personal exclusions / per-person view / refresh");
+  checks.push(
+    "hover row-column guides / coordinate labels / anchored wheel zoom / drag pan",
+  );
   assert.deepEqual(errors, []);
   assert.deepEqual(externalRequests, []);
   checks.push("all gameplay resources hosted on the same origin");

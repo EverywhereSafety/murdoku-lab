@@ -6,7 +6,7 @@
 
 [![Queries](https://img.shields.io/badge/Queries-Text_%2B_Vision-0F766E?style=flat-square)](#export-text-and-vision-queries) [![Models](https://img.shields.io/badge/Trained_solver-4B-D97706?style=flat-square)](docs/guides/model.md)
 
-[Play now](https://everywheresafety.github.io/murdoku/play/) · [Website](https://everywheresafety.github.io/murdoku/) · [Blog](https://everywheresafety.github.io/blog/murdoku-as-vhd/) · [Generate](#generate-and-solve) · [Data](docs/guides/data.md) · [Trained example](#trained-example-a-small-model-solving-larger-puzzles) · [Agent Horizon](https://github.com/EverywhereSafety/agent-horizon)
+[Play now](https://everywheresafety.github.io/murdoku/play/) · [Website](https://everywheresafety.github.io/murdoku/) · [Blog](https://everywheresafety.github.io/blog/treasure-hunt/) · [Generate](#generate-and-solve) · [Data](docs/guides/data.md) · [Trained example](#trained-example-a-small-model-solving-larger-puzzles) · [Agent Horizon](https://github.com/EverywhereSafety/agent-horizon)
 
 </div>
 
@@ -25,15 +25,15 @@ providing **gold rewards** for training.
 
 ![Semantic setter, paired queries, agent interaction and verification](docs/assets/semantic-pipeline.png)
 
-Read the motivation: **[Puzzles for people, verifiable worlds for agents](https://everywheresafety.github.io/blog/murdoku-as-vhd/)**.
+Read the motivation: **[How we solved the Treasure Hunt in 20 minutes](https://everywheresafety.github.io/blog/treasure-hunt/)**.
 
 ## Features
 
 | Component            | What you can do                                                                                 |
 | -------------------- | ----------------------------------------------------------------------------------------------- |
-| Setter               | Compose varied scenes and semantic themes over verified puzzle structures                       |
+| Setter               | Generate boards up to 24×24 with scene roles, semantic themes and verified solutions                       |
 | Solver               | Verify accepted cases with CP-SAT and independent DFS; inspect deduction and difficulty signals |
-| Playable frontend    | Read clues, place characters and inspect an illustrated board                                   |
+| Playable frontend    | Place characters with row/column exclusions, personal notes, clue focus and board navigation                                   |
 | Text + vision export | Produce paired inputs for the same verified case: text or board PNG + clues                     |
 | Semantic diversity   | Vary settings, cast and scene labels through optional LLM theming                               |
 | Agent environment    | Execute stateful tools and check placement and murderer answers                                 |
