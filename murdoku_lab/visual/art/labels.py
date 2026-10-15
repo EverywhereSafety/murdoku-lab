@@ -115,11 +115,22 @@ def plaques(observation, colours, *, styles=None, skins=None, show_names=True):
     return "".join(out)
 
 
-def axes(observation, colours):
+def axes(observation, colours, *, colour=AXIS, halo=None):
     """Column letters and row numbers engraved on the plinth. The Lab locates axis labels by
     x === 20 and y === 25, so those exact positions are kept."""
     scene = observation["scene"]
     width, height = dimensions(observation)
+    # Tall furniture on the first row rises into the band; a halo keeps the letters readable.
+    ring = (
+        {
+            "stroke": halo,
+            "stroke_width": 3.4,
+            "stroke_linejoin": "round",
+            "paint_order": "stroke",
+        }
+        if halo
+        else {}
+    )
     out = []
     for c in range(scene["width"]):
         letter = chr(97 + c).upper()
@@ -131,10 +142,11 @@ def axes(observation, colours):
                     y,
                     letter,
                     13,
-                    AXIS,
+                    colour,
                     anchor="middle",
                     weight="600",
                     family=FONT_MONO,
+                    **ring,
                 )
             )
     for r in range(scene["height"]):
@@ -146,10 +158,11 @@ def axes(observation, colours):
                     y,
                     r + 1,
                     13,
-                    AXIS,
+                    colour,
                     anchor="middle",
                     weight="600",
                     family=FONT_MONO,
+                    **ring,
                 )
             )
     return "".join(out)

@@ -1,0 +1,95 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "chalet",
+  "name": "Edelweiss Lodge",
+  "eyebrow": "Snowed in at Edelweiss Lodge",
+  "titles": [
+    "Snowed In",
+    "Murder on the Black Run",
+    "A Cold Night for It",
+    "Footprints in the Snow",
+    "The Avalanche Weekend",
+    "Fondue for Eight",
+    "Whiteout",
+    "The Last Lift Down"
+  ],
+  "blurbs": [
+    "The pass is closed, the phone line is down, and someone at the lodge has very cold blood.",
+    "Eight guests, one blizzard and a weekend that nobody will ever forget.",
+    "Hot chocolate, a roaring blaze and a body that went cold long before morning.",
+    "By the time the snowploughs arrive, the lodge will have one guest fewer."
+  ],
+  "rooms": [
+    {"name": "Great Room", "suits": ["chair", "carpet", "register", "piano"], "finish": "planks", "wallpaper": "log_wall"},
+    {"name": "Ski Room", "suits": ["shelf", "box", "car", "bear"], "finish": "boards", "wallpaper": "knotty_pine"},
+    {"name": "Boot Room", "suits": ["shelf", "crate", "palm", "box"], "finish": "flagstone", "wallpaper": "knotty_pine"},
+    {"name": "Kitchen", "suits": ["table", "crate", "barrel", "plant"], "finish": "flagstone", "wallpaper": "knotty_pine"},
+    {"name": "Wine Cellar", "suits": ["barrel", "crate", "boulder"], "finish": "flagstone", "wallpaper": "stone"},
+    {"name": "Loft", "suits": ["bed", "carpet", "chair"], "finish": "planks", "wallpaper": "log_wall"},
+    {"name": "Games Room", "suits": ["table", "tv", "chair", "boulder"], "finish": "herringbone", "wallpaper": "tartan"},
+    {"name": "Sauna", "suits": ["chair", "barrel", "bear"], "finish": "boards", "wallpaper": "knotty_pine"},
+    {"name": "Hot Tub Deck", "suits": ["shrub", "tree", "chair"], "finish": "deck", "wallpaper": "log_wall"},
+    {"name": "Library", "suits": ["shelf", "chair", "register", "carpet"], "finish": "parquet", "wallpaper": "tartan"},
+    {"name": "Trophy Room", "suits": ["bear", "statue", "tv", "register"], "finish": "planks", "wallpaper": "log_wall"},
+    {"name": "Mud Room", "suits": ["box", "crate", "palm", "shelf"], "finish": "flagstone", "wallpaper": "knotty_pine"},
+    {"name": "Bunk Room", "suits": ["bed", "chair", "box"], "finish": "boards", "wallpaper": "tartan"},
+    {"name": "Observatory", "suits": ["tv", "statue", "chair"], "finish": "planks", "wallpaper": "knotty_pine"},
+    {"name": "Sun Terrace", "suits": ["shrub", "tree", "chair", "plant"], "finish": "paving", "wallpaper": "log_wall"},
+    {"name": "Wood Store", "suits": ["crate", "boulder", "barrel"], "finish": "boards", "wallpaper": "stone"}
+  ],
+  "objects": {
+    "bed": "feather bed",
+    "chair": "rocking chair",
+    "carpet": "sheepskin rug",
+    "car": "snowmobile",
+    "table": "pine table",
+    "tv": "cuckoo clock",
+    "shelf": "ski rack",
+    "plant": "houseplant",
+    "tree": "fir tree",
+    "flowers": "alpine flowers",
+    "shrub": "snowman",
+    "crate": "log pile",
+    "box": "toboggan",
+    "register": "fireplace",
+    "palm": "coat stand",
+    "bear": "teddy bear",
+    "statue": "stone bust",
+    "piano": "upright piano",
+    "boulder": "curling stone",
+    "barrel": "cider keg"
+  },
+  "visual": {
+    "accent": "#a23b2c",
+    "finishes": ["planks", "boards", "herringbone", "parquet", "flagstone", "carpet", "deck", "paving"],
+    "wallpapers": ["log_wall", "knotty_pine", "tartan", "stone"],
+    "variants": {"carpet": ["rose", "sage"], "planks": ["oak", "walnut"], "flagstone": ["grey"]},
+    "frame": "chalet",
+    "skins": {
+      "chair": "rocking_chair",
+      "carpet": "sheepskin",
+      "car": "snowmobile",
+      "tv": "cuckoo_clock",
+      "shelf": "ski_rack",
+      "tree": "fir_tree",
+      "shrub": "snowman",
+      "crate": "firewood",
+      "box": "sled",
+      "register": "stone_fireplace",
+      "palm": "coat_stand",
+      "boulder": "curling_stone"
+    }
+  },
+  "motives": [
+    "the lodge had been left to the wrong side of the family",
+    "a skiing accident twenty winters ago had never been an accident",
+    "the avalanche report had been signed by the wrong person",
+    "a promise made on the summit had been broken on the way down",
+    "the gold in the old mine shaft was real after all"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were the only two in the {area} while the storm hammered the shutters. When the snow stopped, only {murderer} came out, because {motive}.",
+    "Nobody else went into the {area} that night. {murderer} made sure of it: {motive}.",
+    "The {area} had two people in it when the lights flickered. {murderer} had a reason older than the lodge itself: {motive}."
+  ]
+}

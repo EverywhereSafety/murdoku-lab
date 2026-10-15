@@ -20,22 +20,22 @@
     "The clocks were wound, the silver polished, and by morning the house had a new heir."
   ],
   "rooms": [
-    {"name": "Library", "suits": ["shelf", "chair", "register", "carpet"], "finish": "parquet"},
-    {"name": "Study", "suits": ["register", "shelf", "chair", "bear"], "finish": "herringbone"},
-    {"name": "Drawing Room", "suits": ["chair", "piano", "carpet", "flowers"], "finish": "carpet"},
-    {"name": "Dining Room", "suits": ["table", "chair", "flowers"], "finish": "planks"},
-    {"name": "Kitchen", "suits": ["table", "crate", "barrel", "box"], "finish": "checker"},
-    {"name": "Conservatory", "suits": ["plant", "palm", "flowers", "tree", "shrub"], "finish": "flagstone"},
-    {"name": "Music Room", "suits": ["piano", "chair", "statue"], "finish": "parquet"},
-    {"name": "Morning Room", "suits": ["chair", "flowers", "table", "bed"], "finish": "marble"},
-    {"name": "Gallery", "suits": ["statue", "carpet", "boulder"], "finish": "marble"},
-    {"name": "Billiard Room", "suits": ["table", "tv", "chair"], "finish": "carpet"},
-    {"name": "Cellar", "suits": ["barrel", "crate", "box", "boulder"], "finish": "flagstone"},
-    {"name": "Guest Bedroom", "suits": ["bed", "carpet", "box"], "finish": "carpet"},
-    {"name": "Orangery", "suits": ["palm", "tree", "plant", "shrub"], "finish": "flagstone"},
-    {"name": "Coach House", "suits": ["car", "crate", "box", "boulder"], "finish": "boards"},
-    {"name": "Trophy Room", "suits": ["bear", "statue", "shelf"], "finish": "planks"},
-    {"name": "Sitting Room", "suits": ["chair", "tv", "carpet", "plant"], "finish": "boards"}
+    {"name": "Library", "suits": ["shelf", "chair", "register", "carpet"], "finish": "parquet", "wallpaper": "panel_wood"},
+    {"name": "Study", "suits": ["register", "shelf", "chair", "bear"], "finish": "herringbone", "wallpaper": "stripe_green"},
+    {"name": "Drawing Room", "suits": ["chair", "piano", "carpet", "flowers"], "finish": "carpet", "wallpaper": "damask_rose"},
+    {"name": "Dining Room", "suits": ["table", "chair", "flowers"], "finish": "planks", "wallpaper": "floral_yellow"},
+    {"name": "Kitchen", "suits": ["table", "crate", "barrel", "box"], "finish": "checker", "wallpaper": "tile_cream"},
+    {"name": "Conservatory", "suits": ["plant", "palm", "flowers", "tree", "shrub"], "finish": "flagstone", "wallpaper": "glass_pane"},
+    {"name": "Music Room", "suits": ["piano", "chair", "statue"], "finish": "parquet", "wallpaper": "panel_blue"},
+    {"name": "Morning Room", "suits": ["chair", "flowers", "table", "bed"], "finish": "marble", "wallpaper": "floral_yellow"},
+    {"name": "Gallery", "suits": ["statue", "carpet", "boulder"], "finish": "marble", "wallpaper": "damask_rose"},
+    {"name": "Billiard Room", "suits": ["table", "tv", "chair"], "finish": "carpet", "wallpaper": "stripe_green"},
+    {"name": "Cellar", "suits": ["barrel", "crate", "box", "boulder"], "finish": "flagstone", "wallpaper": "stone"},
+    {"name": "Guest Bedroom", "suits": ["bed", "carpet", "box"], "finish": "carpet", "wallpaper": "panel_blue"},
+    {"name": "Orangery", "suits": ["palm", "tree", "plant", "shrub"], "finish": "flagstone", "wallpaper": "glass_pane"},
+    {"name": "Coach House", "suits": ["car", "crate", "box", "boulder"], "finish": "boards", "wallpaper": "brick"},
+    {"name": "Trophy Room", "suits": ["bear", "statue", "shelf"], "finish": "planks", "wallpaper": "panel_wood"},
+    {"name": "Sitting Room", "suits": ["chair", "tv", "carpet", "plant"], "finish": "boards", "wallpaper": "damask_rose"}
   ],
   "objects": {
     "bed": "chaise longue",
@@ -60,6 +60,7 @@
     "barrel": "wine cask"
   },
   "visual": {
+    "accent": "#3d6a5b",
     "tints": [
       "#f1d8b4",
       "#d3e4c3",

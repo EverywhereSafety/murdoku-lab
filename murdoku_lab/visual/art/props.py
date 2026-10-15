@@ -53,7 +53,7 @@ def grad(name):
 def defs():
     """Gradients and filters every drawer relies on. Include once per SVG document."""
     out = []
-    for name, (top, bottom) in _GRADIENTS.items():
+    for name, (top, bottom) in {**_GRADIENTS, **_theme().GRADIENTS}.items():
         out.append(
             f'<linearGradient id="{gid(name)}" x1="0" y1="0" x2="0" y2="1">'
             f'<stop offset="0" stop-color="{top}"/><stop offset="1" stop-color="{bottom}"/></linearGradient>'
@@ -223,7 +223,11 @@ def _sofa_side(w, h, fabric, scroll=False):
     """A sofa running down a column: its back along the left, its seat facing east."""
     x0, x1 = 12, w - 12
     top, bottom = 4, h - 16
-    o = [shadow(w / 2, bottom - 4, (x1 - x0) / 2 + 6, (bottom - top) / 2, 0.26)]
+    o = [
+        shadow(
+            w / 2, (top + bottom) / 2 + 6, (x1 - x0) / 2 + 6, (bottom - top) / 2, 0.26
+        )
+    ]
     o.append(
         f'<rect x="{f(x0)}" y="{top}" width="22" height="{f(bottom - top)}" rx="10" fill="{grad(fabric)}" {s()}/>'
     )
@@ -1374,26 +1378,42 @@ TALL = {
 }
 
 
+def _theme():
+    from . import skins
+
+    return skins
+
+
+def all_skins():
+    return {**SKINS, **_theme().SKINS}
+
+
 def drawer(kind, skin=None):
-    if skin and skin in SKINS:
-        return SKINS[skin], skin
+    if skin:
+        theme = _theme().SKINS
+        if skin in SKINS:
+            return SKINS[skin], skin
+        if skin in theme:
+            return theme[skin], skin
     return BASE.get(kind, generic), kind
 
 
 def draw(kind, w, h, skin=None):
     fn, name = drawer(kind, skin)
-    if h > 100 and name not in STRETCH:
+    if h > 100 and not stretches(kind, skin):
         # Fixed-size pieces stand at the bottom of a tall footprint, like real furniture.
         return f'<g transform="translate(0 {f(h - 100)})">{fn(w, 100)}</g>'
     return fn(w, h)
 
 
 def stretches(kind, skin=None):
-    return (skin or kind) in STRETCH
+    name = skin or kind
+    return name in STRETCH or name in _theme().STRETCH
 
 
 def is_tall(kind, skin=None):
-    return (skin or kind) in TALL
+    name = skin or kind
+    return name in TALL or name in _theme().TALL
 
 
 def glyph(kind, size, skin=None):

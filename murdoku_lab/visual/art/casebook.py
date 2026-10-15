@@ -6,7 +6,7 @@ painted back to front, row by row. The geometry contract is unchanged (CELL=100,
 it the same way. Everything is drawn from the public observation; nothing here sees a solution.
 """
 
-from . import labels, materials, props, tokens
+from . import frames, labels, materials, props, tokens
 from .geometry import (
     CELL,
     PAD,
@@ -61,6 +61,10 @@ def room_styles(observation):
     ] or ["planks"]
     explicit = {int(k): v for k, v in (visual.get("area_finishes") or {}).items()}
     wallpapers = [w for w in (visual.get("wallpapers") or materials.WALLPAPERS)]
+    room_papers = {int(k): v for k, v in (visual.get("area_wallpapers") or {}).items()}
+    # A setting may prefer some colourways of a finish (green velvet aboard a train, red carpet
+    # in a theatre); others remain as a fallback when touching rooms would otherwise match.
+    palette = visual.get("variants") or {}
     cells = scene["cells"]
     outdoor = {}
     for area in scene["areas"]:
@@ -82,9 +86,15 @@ def room_styles(observation):
         candidates = [preferred] + [f for f in allowed if f != preferred]
         best = None
         for finish in candidates:
+            liked = palette.get(finish)
             for name, base, _, _ in materials.FLOOR_VARIANTS[finish]:
                 gap = min((delta_e(base, u) for u in used), default=100.0)
-                key = (gap >= MIN_FLOOR_GAP, finish == preferred, gap)
+                key = (
+                    gap >= MIN_FLOOR_GAP,
+                    finish == preferred,
+                    not liked or name in liked,
+                    gap,
+                )
                 if best is None or key > best[0]:
                     best = (key, finish, name, base)
             if best[0][0] and best[1] == preferred:
@@ -95,7 +105,9 @@ def room_styles(observation):
             "variant": name,
             "base": base,
             "wallpaper": (
-                "hedge" if outdoor[area] else wallpapers[area % len(wallpapers)]
+                "hedge"
+                if outdoor[area]
+                else room_papers.get(area) or wallpapers[area % len(wallpapers)]
             ),
             "outdoor": outdoor[area],
         }
@@ -129,9 +141,16 @@ def scene_svg(
     styles = room_styles(observation)
     visual = visual_of(observation)
     skins = visual.get("skins") or {}
+    frame = frames.get(visual.get("frame"))
+    caps = frame["caps"]
     terrain_ids = sorted({c["terrain"] for c in cells if c["terrain"] != "floor"})
 
-    defs = [props.defs(), materials.hatch_pattern("#3b2418"), tokens.clip_defs()]
+    defs = [
+        props.defs(),
+        frames.defs(),
+        materials.hatch_pattern("#3b2418"),
+        tokens.clip_defs(),
+    ]
     for style in {(s["finish"], s["variant"]) for s in styles.values()}:
         defs.append(materials.floor_pattern(*style))
     for wp in sorted({s["wallpaper"] for s in styles.values()}):
@@ -155,7 +174,7 @@ def scene_svg(
         "</style>",
     ]
     if "paper" in show:
-        root.append(_plinth(observation, colours))
+        root.append(frames.plinth(observation, colours, visual.get("frame")))
     root.append('<g class="board-decoration">')
     if "floor" in show:
         root.append(_floors(cells, styles))
@@ -176,11 +195,11 @@ def scene_svg(
         if "walls" in show:
             root.append(_north_faces(observation, styles, runs, y_top))
         if "doors" in show:
-            root.append(_face_doorways(door_list, styles, cells_by_label, y_top))
+            root.append(_face_doorways(door_list, styles, cells_by_label, y_top, caps))
         if "walls" in show:
-            root.append(_horizontal_caps(runs, y_top, observation))
+            root.append(_horizontal_caps(runs, y_top, observation, caps))
         if "doors" in show:
-            root.append(_cap_doorways(door_list, y_top))
+            root.append(_cap_doorways(door_list, y_top, caps))
         if "props" in show:
             for bottom_row, x, y, ww, hh, prop_id, kind, skin in prop_spans:
                 if bottom_row == r:
@@ -200,10 +219,10 @@ def scene_svg(
                             )
                         )
     if "walls" in show:
-        root.append(_bottom_caps(runs, observation))
-        root.append(_vertical_caps(runs))
+        root.append(_bottom_caps(runs, observation, caps))
+        root.append(_vertical_caps(runs, caps))
     if "doors" in show:
-        root.append(_side_doorways(door_list))
+        root.append(_side_doorways(door_list, caps))
     if theme == "night":
         root.append(_night(observation))
     if "blocked" in show:
@@ -223,7 +242,9 @@ def scene_svg(
             )
         )
     if "axes" in show:
-        root.append(labels.axes(observation, colours))
+        root.append(
+            labels.axes(observation, colours, colour=frame["axis"], halo=frame["halo"])
+        )
     root.append("</g>")
     if "hit" in show:
         root.append(
@@ -234,19 +255,6 @@ def scene_svg(
 
 
 # ------------------------------------------------------------------------------- layers
-def _plinth(observation, colours):
-    width, height = dimensions(observation)
-    m = 10
-    x, y, w, h = m, m, width - 2 * m, height - 2 * m
-    return (
-        f'<rect width="{width}" height="{height}" fill="{colours["paper"]}"/>'
-        f'<rect x="{x + 4}" y="{y + 8}" width="{w}" height="{h}" rx="16" fill="#1b130e" fill-opacity=".22" filter="url(#mk-soft)"/>'
-        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{props.grad("walnut")}" stroke="{CAP_DARK}" stroke-width="2.4"/>'
-        f'<rect x="{x + 5}" y="{y + 5}" width="{w - 10}" height="{h - 10}" rx="12" fill="none" stroke="#b07a52" stroke-width="1.6" stroke-opacity=".8"/>'
-        f'<rect x="{PAD - 4}" y="{PAD - 4}" width="{width - 2 * PAD + 8}" height="{height - 2 * PAD + 8}" rx="3" fill="#1b130e" fill-opacity=".35"/>'
-    )
-
-
 def _floors(cells, styles):
     out = []
     for c in cells:
@@ -366,7 +374,7 @@ def _north_faces(observation, styles, runs, y_top):
     return "".join(out)
 
 
-def _face_doorways(door_list, styles, cells_by_label, y_top):
+def _face_doorways(door_list, styles, cells_by_label, y_top, caps):
     out = []
     for x, y, vertical_wall, (a, b) in door_list:
         if vertical_wall or y != y_top:
@@ -379,61 +387,68 @@ def _face_doorways(door_list, styles, cells_by_label, y_top):
             f'<rect x="{x - 24}" y="{y}" width="48" height="{FACE}" fill="#3b2a20"/>'
             f'<rect x="{x - 20}" y="{y + 4}" width="40" height="{FACE - 4}" fill="{floor}"/>'
             f'<rect x="{x - 20}" y="{y + 4}" width="40" height="{FACE - 4}" fill="#1b130e" fill-opacity=".3"/>'
-            f'<path d="M{x - 24} {y}v{FACE}M{x + 24} {y}v{FACE}" stroke="{CAP_DARK}" stroke-width="5"/></g>'
+            f'<path d="M{x - 24} {y}v{FACE}M{x + 24} {y}v{FACE}" stroke="{caps[0]}" stroke-width="5"/></g>'
         )
     return "".join(out)
 
 
-def _cap(x1, y1, x2, y2, width=12):
+def _cap(x1, y1, x2, y2, width=12, caps=(CAP_DARK, CAP_LIGHT)):
     return (
-        f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{CAP_DARK}" stroke-width="{width}" stroke-linecap="square"/>'
-        f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{CAP_LIGHT}" stroke-width="{width / 2:.0f}" stroke-linecap="square"/>'
+        f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{caps[0]}" stroke-width="{width}" stroke-linecap="square"/>'
+        f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{caps[1]}" stroke-width="{width / 2:.0f}" stroke-linecap="square"/>'
     )
 
 
-def _horizontal_caps(runs, y_top, observation):
+def _horizontal_caps(runs, y_top, observation, caps):
     return "".join(
-        _cap(x1, y1, x2, y2, 14 if is_outer((x1, y1, x2, y2), observation) else 12)
+        _cap(
+            x1,
+            y1,
+            x2,
+            y2,
+            14 if is_outer((x1, y1, x2, y2), observation) else 12,
+            caps,
+        )
         for x1, y1, x2, y2 in runs
         if y1 == y2 == y_top
     )
 
 
-def _cap_doorways(door_list, y_top):
+def _cap_doorways(door_list, y_top, caps):
     out = []
     for x, y, vertical_wall, (a, b) in door_list:
         if vertical_wall or y != y_top:
             continue
         out.append(
             f'<rect x="{x - 24}" y="{y - 7}" width="48" height="14" fill="#3b2a20"/>'
-            f'<path d="M{x - 24} {y - 7}h48" stroke="{CAP_DARK}" stroke-width="5"/>'
-            f'<path d="M{x - 24} {y - 7}v14M{x + 24} {y - 7}v14" stroke="{CAP_DARK}" stroke-width="5"/>'
+            f'<path d="M{x - 24} {y - 7}h48" stroke="{caps[0]}" stroke-width="5"/>'
+            f'<path d="M{x - 24} {y - 7}v14M{x + 24} {y - 7}v14" stroke="{caps[0]}" stroke-width="5"/>'
         )
     return "".join(out)
 
 
-def _bottom_caps(runs, observation):
+def _bottom_caps(runs, observation, caps):
     _, height = dimensions(observation)
     return "".join(
-        _cap(x1, y1, x2, y2, 14) for x1, y1, x2, y2 in runs if y1 == y2 == height - PAD
+        _cap(x1, y1, x2, y2, 14, caps)
+        for x1, y1, x2, y2 in runs
+        if y1 == y2 == height - PAD
     )
 
 
-def _vertical_caps(runs):
+def _vertical_caps(runs, caps):
     out, light = [], []
     for x1, y1, x2, y2 in runs:
         if x1 != x2:
             continue
         out.append(
-            f'<path d="M{x1} {y1 - 6}V{y2 + 6}" stroke="{CAP_DARK}" stroke-width="12"/>'
+            f'<path d="M{x1} {y1 - 6}V{y2 + 6}" stroke="{caps[0]}" stroke-width="12"/>'
         )
-        light.append(
-            f'<path d="M{x1} {y1}V{y2}" stroke="{CAP_LIGHT}" stroke-width="6"/>'
-        )
+        light.append(f'<path d="M{x1} {y1}V{y2}" stroke="{caps[1]}" stroke-width="6"/>')
     return "".join(out + light)
 
 
-def _side_doorways(door_list):
+def _side_doorways(door_list, caps):
     out = []
     for x, y, vertical_wall, (a, b) in door_list:
         if not vertical_wall:
@@ -442,7 +457,7 @@ def _side_doorways(door_list):
             f'<g data-door="{esc(a)}:{esc(b)}">'
             f'<rect x="{x - 8}" y="{y - 24}" width="16" height="48" fill="#b98a54"/>'
             f'<path d="M{x - 4} {y - 22}v44M{x + 4} {y - 22}v44" stroke="#9a6b3e" stroke-width="1.2"/>'
-            f'<path d="M{x - 9} {y - 24}h18M{x - 9} {y + 24}h18" stroke="{CAP_DARK}" stroke-width="4.5"/></g>'
+            f'<path d="M{x - 9} {y - 24}h18M{x - 9} {y + 24}h18" stroke="{caps[0]}" stroke-width="4.5"/></g>'
         )
     return "".join(out)
 

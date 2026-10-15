@@ -112,6 +112,13 @@ def validate(pack):
             problems.append(
                 f"room {room['name']!r} has unknown finish {room['finish']!r}"
             )
+        if room.get("wallpaper"):
+            try:
+                materials.wallpaper_pattern(room["wallpaper"])
+            except ValueError:
+                problems.append(
+                    f"room {room['name']!r} has unknown wallpaper {room['wallpaper']!r}"
+                )
     objects = pack["objects"]
     missing = [k for k in CLASSIC_KINDS if k not in objects]
     if missing:
@@ -120,17 +127,27 @@ def validate(pack):
     if len(set(nouns)) != len(nouns):
         problems.append("object nouns must be distinct")
     visual = pack["visual"]
+    known_skins = props.all_skins()
     for kind, skin in (visual.get("skins") or {}).items():
         if kind not in OBJECTS:
             problems.append(f"skin for unknown kind {kind!r}")
-        if skin not in props.SKINS and skin not in props.BASE:
+        if skin not in known_skins and skin not in props.BASE:
             problems.append(f"unknown skin {skin!r}")
+    for wp in visual.get("wallpapers") or ():
+        try:
+            materials.wallpaper_pattern(wp)
+        except ValueError:
+            problems.append(f"unknown wallpaper {wp!r}")
     for finish in visual.get("finishes") or ():
         if finish not in materials.FINISHES:
             problems.append(f"unknown finish {finish!r}")
-    for tint in visual.get("tints") or ():
+    for finish, colourways in (visual.get("variants") or {}).items():
+        known = {v[0] for v in materials.FLOOR_VARIANTS.get(finish, ())}
+        if not known or set(colourways) - known:
+            problems.append(f"unknown floor variants {finish}: {colourways}")
+    for tint in list(visual.get("tints") or ()) + [visual.get("accent", "#000000")]:
         if not re.fullmatch(r"#[0-9a-fA-F]{6}", tint):
-            problems.append(f"bad tint {tint!r}")
+            problems.append(f"bad colour {tint!r}")
     # Blurbs and titles are read before the case is solved: they must name no room, object,
     # person or direction, so they carry no information.
     phrases = [n.lower() for n in names] + [v.lower() for v in objects.values()]
@@ -152,6 +169,10 @@ def validate(pack):
             problems.append(
                 f"epilogue uses unknown fields {sorted(fields - EPILOGUE_FIELDS)}"
             )
+    from murdoku_lab.visual.art import frames
+
+    if visual.get("frame") and visual["frame"] not in frames.FRAMES:
+        problems.append(f"unknown frame {visual['frame']!r}")
     if problems:
         raise ValueError(f"setting {pack['id']!r}: " + "; ".join(problems))
 
@@ -220,11 +241,14 @@ def dress(case, setting_id, *, salt=""):
     objects = {k: v for k, v in pack["objects"].items() if k in present}
     visual = dict(pack["visual"])
     visual["setting"] = setting_id
-    visual["area_finishes"] = {
-        str(a): rooms[chosen[a]]["finish"]
-        for a in range(case.scene.n_areas)
-        if rooms[chosen[a]].get("finish")
-    }
+    for field, key in (("finish", "area_finishes"), ("wallpaper", "area_wallpapers")):
+        chosen_values = {
+            str(a): rooms[chosen[a]][field]
+            for a in range(case.scene.n_areas)
+            if rooms[chosen[a]].get(field)
+        }
+        if chosen_values:
+            visual[key] = chosen_values
     theme = Theme(
         theme_id=f"{setting_id}-{hashlib.sha256(key.encode()).hexdigest()[:8]}",
         title=pack["titles"][_pick(key + "|title", len(pack["titles"]))],

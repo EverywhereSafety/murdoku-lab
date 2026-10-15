@@ -288,16 +288,13 @@ def catalogue(record_path: str | None = None):
                 raise ValueError("invalid visual_case_id")
             if any(entry.slug == slug for entry in entries):
                 raise ValueError(f"duplicate visual_case_id: {slug}")
-            entries.append(
-                Entry(
-                    slug,
-                    case,
-                    theme,
-                    f"Imported case {i + 1}",
-                    "Imported scene",
-                    theme.blurb,
-                )
-            )
+            eyebrow, setting = f"Imported case {i + 1}", "Imported scene"
+            if theme.setting_id:
+                from murdoku_lab.setter import settings
+
+                pack = settings.load(theme.setting_id)
+                eyebrow, setting = pack.get("eyebrow", eyebrow), pack["name"]
+            entries.append(Entry(slug, case, theme, eyebrow, setting, theme.blurb))
     return {entry.slug: entry for entry in entries}
 
 

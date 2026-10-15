@@ -23,6 +23,7 @@ FINISHES = (
     "paving",
     "deck",
     "lawn",
+    "terrazzo",
 )
 
 # finish -> formal terrains it could be confused with
@@ -31,6 +32,7 @@ FINISH_CONFLICTS = {
     "terracotta": {"tile"},
     "paving": {"tile"},
     "marble": {"tile"},
+    "terrazzo": {"tile"},
     "carpet": {"rug"},
     "lawn": {"fairway", "rough"},
 }
@@ -78,6 +80,11 @@ FLOOR_VARIANTS = {
     "paving": (("stone", "#d9d2c3", "#e4ddcf", "#a89e8a"),),
     "deck": (("teak", "#c48a57", "#d09764", "#8a5a33"),),
     "lawn": (("grass", "#9cc57f", "#acd18f", "#6f9a5a"),),
+    "terrazzo": (
+        ("cream", "#e9e0cf", "#c9b89c", "#8f7f66"),
+        ("rose", "#e7cfc4", "#c39a8c", "#8f6a5c"),
+        ("slate", "#c3c8c6", "#8f9894", "#5f6864"),
+    ),
 }
 
 WALLPAPERS = (
@@ -208,6 +215,25 @@ def floor_pattern(finish, name):
             f'<path d="m6 18 2-5 2 5m12 9 2-6 2 6m-8-20 1-4 2 4" stroke="{line}" stroke-width="1.4" fill="none" stroke-linecap="round"/>'
         )
         return _pattern(pid, 32, 32, body)
+    if finish == "terrazzo":
+        chips = "".join(
+            f'<circle cx="{x}" cy="{y}" r="{r}" fill="{c}"/>'
+            for x, y, r, c in (
+                (6, 7, 1.6, light),
+                (19, 4, 1.1, line),
+                (31, 11, 1.9, light),
+                (12, 19, 1.2, line),
+                (26, 24, 1.5, light),
+                (4, 30, 1.0, line),
+                (35, 33, 1.3, line),
+                (17, 34, 2.0, light),
+            )
+        )
+        body = (
+            f'<rect width="40" height="40" fill="{base}"/>{chips}'
+            f'<path d="M0 0H40V40" fill="none" stroke="{line}" stroke-width=".9" stroke-opacity=".35"/>'
+        )
+        return _pattern(pid, 40, 40, body)
     raise ValueError(f"unknown finish {finish!r}")
 
 
@@ -237,6 +263,10 @@ def wallpaper_pattern(name):
     if name == "stone":
         body = '<rect width="34" height="26" fill="#9a9a8c"/><path d="M0 0H34M0 13H34M12 0V13M28 13V26" stroke="#c9c8bb" stroke-width="1.4"/>'
         return _pattern(pid, 34, 26, body)
+    from . import skins
+
+    if name in skins.WALLPAPERS:
+        return skins.WALLPAPERS[name](pid)
     if name == "hedge":
         body = '<rect width="20" height="26" fill="#4f8452"/><circle cx="5" cy="6" r="5" fill="#5d9154"/><circle cx="15" cy="12" r="6" fill="#5d9154"/><circle cx="6" cy="20" r="5" fill="#6ea65f"/>'
         return _pattern(pid, 20, 26, body)
