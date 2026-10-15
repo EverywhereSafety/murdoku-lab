@@ -1,26 +1,28 @@
-"""Floor finishes and terrain as SVG patterns.
+"""Floors, wallpapers and terrain for the 3/4 casebook board.
 
-Finishes are decoration: they give each room an identity and never touch the formal terrain.
-Terrain patterns are information: tile, rug, water, sand, fairway and rough must stay readable
-and must never be mistaken for a finish, so a finish that resembles a terrain on the same board
-is skipped (see `FINISH_CONFLICTS`).
+Floors are real materials (oak, checker tiles, carpets…) so rooms read as places; touching rooms
+always get visibly different floors. Wallpapers dress the south face of each room's north wall.
+Formal terrain (tile, rug, water, sand, fairway, rough) is information, not decoration: it is
+drawn as its own inset patch, and a floor that could be mistaken for a terrain on the same board
+is never chosen (`FINISH_CONFLICTS`).
 """
 
 PREFIX = "mk-"
+FACE = 26  # height of a wall's visible south face
 
 FINISHES = (
     "planks",
+    "boards",
     "herringbone",
     "parquet",
-    "flagstone",
     "carpet",
     "checker",
     "terracotta",
     "marble",
-    "deck",
-    "boards",
-    "lawn",
+    "flagstone",
     "paving",
+    "deck",
+    "lawn",
 )
 
 # finish -> formal terrains it could be confused with
@@ -28,21 +30,83 @@ FINISH_CONFLICTS = {
     "checker": {"tile"},
     "terracotta": {"tile"},
     "paving": {"tile"},
+    "marble": {"tile"},
     "carpet": {"rug"},
     "lawn": {"fairway", "rough"},
 }
 
+# finish -> variants: (name, base, light, line)
+FLOOR_VARIANTS = {
+    "planks": (
+        ("oak", "#d4a26c", "#ddb07c", "#a8743f"),
+        ("ash", "#e1c18f", "#e9cd9f", "#b8925f"),
+        ("walnut", "#a77452", "#b2805d", "#6e472f"),
+    ),
+    "boards": (
+        ("walnut", "#9c6b47", "#a8774f", "#664128"),
+        ("driftwood", "#bcae99", "#c8bba6", "#857761"),
+    ),
+    "herringbone": (
+        ("honey", "#c9935f", "#d6a46f", "#9c6a40"),
+        ("smoke", "#b8a28a", "#c6b29a", "#83705a"),
+    ),
+    "parquet": (
+        ("amber", "#c98f58", "#d8a26c", "#94612f"),
+        ("chestnut", "#a8714b", "#b8835b", "#6b4428"),
+    ),
+    "carpet": (
+        ("teal", "#6e9a92", "#86b0a7", "#e3c98f"),
+        ("rose", "#c48078", "#d69a91", "#f3d7a6"),
+        ("navy", "#506b8b", "#6984a3", "#e3c98f"),
+        ("sage", "#8ca981", "#a5c19a", "#f3e3b8"),
+        ("plum", "#8b6280", "#a37b98", "#e9c98f"),
+    ),
+    "checker": (
+        ("sage", "#f3ead2", "#b9d0b2", "#8fa58b"),
+        ("noir", "#f1ead8", "#57605c", "#3a413e"),
+        ("blue", "#f3ecdc", "#a9c1d8", "#7f97ad"),
+    ),
+    "terracotta": (("terra", "#d58b62", "#e09c74", "#a9603d"),),
+    "marble": (
+        ("white", "#efebe3", "#f7f4ee", "#c4bdb0"),
+        ("verde", "#cfe0d3", "#e0ece3", "#93ad9a"),
+    ),
+    "flagstone": (
+        ("grey", "#c9c6bb", "#d6d3c9", "#8f8b7e"),
+        ("sandstone", "#d6c4a3", "#e1d2b5", "#a38d68"),
+    ),
+    "paving": (("stone", "#d9d2c3", "#e4ddcf", "#a89e8a"),),
+    "deck": (("teak", "#c48a57", "#d09764", "#8a5a33"),),
+    "lawn": (("grass", "#9cc57f", "#acd18f", "#6f9a5a"),),
+}
+
+WALLPAPERS = (
+    "stripe_green",
+    "damask_rose",
+    "tile_cream",
+    "panel_blue",
+    "floral_yellow",
+    "panel_wood",
+    "brick",
+    "stone",
+)
+
 TERRAIN_BASE = {
-    "water": "#94c4cf",
+    "water": "#8fc5d1",
     "sand": "#ecd9a8",
-    "rug": "#e7b3ad",
-    "fairway": "#b7d398",
-    "rough": "#9cb985",
+    "rug": "#d98a7f",
+    "fairway": "#a9d08d",
+    "rough": "#86ad6c",
+    "tile": "#f7f4ec",
 }
 
 
-def finish_id(name):
-    return f"{PREFIX}fin-{name}"
+def floor_id(finish, variant):
+    return f"{PREFIX}fl-{finish}-{variant}"
+
+
+def wallpaper_id(name):
+    return f"{PREFIX}wp-{name}"
 
 
 def terrain_id(name):
@@ -52,101 +116,155 @@ def terrain_id(name):
 HATCH_ID = PREFIX + "hatch"
 
 
-def _pattern(pid, w, h, body, transform=""):
-    extra = f' patternTransform="{transform}"' if transform else ""
-    return (
-        f'<pattern id="{pid}" width="{w}" height="{h}" patternUnits="userSpaceOnUse"{extra}>'
-        f"{body}</pattern>"
-    )
+def variant(finish, name):
+    for v in FLOOR_VARIANTS[finish]:
+        if v[0] == name:
+            return v
+    return FLOOR_VARIANTS[finish][0]
 
 
-def finish_pattern(name, ink, strength=1.0):
-    """A finish drawn in `ink` at low opacity; `strength` scales every opacity."""
-    o = lambda v: f"{min(1, v * strength):.3f}"  # noqa: E731
-    line = f'fill="none" stroke="{ink}" stroke-linecap="round"'
-    if name == "planks":
+def _pattern(pid, w, h, body):
+    return f'<pattern id="{pid}" width="{w}" height="{h}" patternUnits="userSpaceOnUse">{body}</pattern>'
+
+
+def floor_pattern(finish, name):
+    _, base, light, line = variant(finish, name)
+    pid = floor_id(finish, name)
+    if finish == "planks":
         body = (
-            f'<path d="M0 20H100M0 40H100M0 60H100M0 80H100M0 100H100" {line} stroke-width="1.2" stroke-opacity="{o(.10)}"/>'
-            f'<path d="M30 0V20M78 20V40M14 40V60M55 60V80M90 80V100" {line} stroke-width="1.2" stroke-opacity="{o(.10)}"/>'
-            f'<path d="M8 9h9M62 31h7M33 52h10M74 71h6M20 90h8" {line} stroke-width="1" stroke-opacity="{o(.06)}"/>'
+            f'<rect width="100" height="40" fill="{base}"/><rect width="100" height="20" fill="{light}"/>'
+            f'<path d="M0 20H100M0 40H100M62 0V20M18 20V40" stroke="{line}" stroke-width="1.6" stroke-opacity=".8"/>'
+            f'<path d="M8 9h10M70 30h8" stroke="{line}" stroke-width="1" stroke-opacity=".35" stroke-linecap="round"/>'
         )
-        return _pattern(finish_id(name), 100, 100, body)
-    if name == "boards":
+        return _pattern(pid, 100, 40, body)
+    if finish == "boards":
         body = (
-            f'<path d="M0 25H100M0 50H100M0 75H100M0 100H100" {line} stroke-width="1.6" stroke-opacity="{o(.12)}"/>'
-            f'<path d="M62 0V25M18 25V50M80 50V75M40 75V100" {line} stroke-width="1.4" stroke-opacity="{o(.10)}"/>'
-            f'<circle cx="31" cy="12" r="2.4" {line} stroke-width="1" stroke-opacity="{o(.10)}"/>'
-            f'<circle cx="57" cy="62" r="2" {line} stroke-width="1" stroke-opacity="{o(.10)}"/>'
+            f'<rect width="100" height="50" fill="{base}"/><rect width="100" height="25" fill="{light}"/>'
+            f'<path d="M0 25H100M0 50H100M40 0V25M84 25V50" stroke="{line}" stroke-width="2" stroke-opacity=".75"/>'
+            f'<circle cx="20" cy="12" r="2.2" fill="none" stroke="{line}" stroke-opacity=".5"/><circle cx="64" cy="37" r="1.8" fill="none" stroke="{line}" stroke-opacity=".5"/>'
         )
-        return _pattern(finish_id(name), 100, 100, body)
-    if name == "deck":
+        return _pattern(pid, 100, 50, body)
+    if finish == "herringbone":
         body = (
-            f'<path d="M0 16.5H100M0 33H100M0 49.5H100M0 66H100M0 82.5H100M0 99H100" {line} stroke-width="2" stroke-opacity="{o(.14)}"/>'
-            f'<g fill="{ink}" fill-opacity="{o(.12)}"><circle cx="20" cy="8" r="1.3"/><circle cx="70" cy="25" r="1.3"/><circle cx="35" cy="41" r="1.3"/><circle cx="85" cy="58" r="1.3"/><circle cx="12" cy="74" r="1.3"/><circle cx="58" cy="91" r="1.3"/></g>'
+            f'<rect width="40" height="40" fill="{base}"/>'
+            f'<path d="M0 0L20 20 20 30 0 10ZM20 20L40 0 40 10 20 30ZM0 20L20 40 10 40 0 30ZM40 20 20 40 30 40 40 30Z" fill="{light}"/>'
+            f'<path d="M0 10L20 30M20 20L40 0M0 0L20 20M20 30L40 10M0 20 20 40M40 20 20 40" stroke="{line}" stroke-width="1.2" stroke-opacity=".6"/>'
         )
-        return _pattern(finish_id(name), 100, 99, body)
-    if name == "herringbone":
+        return _pattern(pid, 40, 40, body)
+    if finish == "parquet":
         body = (
-            f'<path d="M0 10L10 0M0 30L30 0M10 40L40 10M30 40L40 30" {line} stroke-width="1.2" stroke-opacity="{o(.11)}"/>'
-            f'<path d="M10 10L30 30M0 20L20 40M20 0L40 20" {line} stroke-width="1.2" stroke-opacity="{o(.07)}"/>'
+            f'<rect width="50" height="50" fill="{base}"/><path d="M0 0h25v25H0ZM25 25h25v25H25Z" fill="{light}"/>'
+            f'<path d="M0 0H50V50M25 0V50M0 25H50" fill="none" stroke="{line}" stroke-width="1.3" stroke-opacity=".7"/>'
+            f'<path d="M0 8.3H25M0 16.6H25M33.3 0V25M41.6 0V25M8.3 25V50M16.6 25V50M25 33.3H50M25 41.6H50" stroke="{line}" stroke-width=".8" stroke-opacity=".4"/>'
         )
-        return _pattern(finish_id(name), 40, 40, body)
-    if name == "parquet":
+        return _pattern(pid, 50, 50, body)
+    if finish == "carpet":
         body = (
-            f'<path d="M0 0H50V50H0Z" {line} stroke-width="1.2" stroke-opacity="{o(.10)}"/>'
-            f'<path d="M25 0V25M0 25H50M12.5 25V50M37.5 25V50" {line} stroke-width="1" stroke-opacity="{o(.08)}"/>'
-            f'<path d="M0 8.3H25M0 16.6H25M33.3 0V25M41.6 0V25" {line} stroke-width=".8" stroke-opacity="{o(.06)}"/>'
+            f'<rect width="34" height="34" fill="{base}"/><path d="M17 5 29 17 17 29 5 17Z" fill="none" stroke="{light}" stroke-width="1.6"/>'
+            f'<circle cx="17" cy="17" r="2.2" fill="{line}"/><circle cx="0" cy="0" r="1.6" fill="{line}" fill-opacity=".6"/><circle cx="34" cy="34" r="1.6" fill="{line}" fill-opacity=".6"/>'
         )
-        return _pattern(finish_id(name), 50, 50, body)
-    if name == "flagstone":
-        body = f'<path d="M0 34L38 30 44 0M38 30 52 62 0 66M52 62 100 58M44 0 100 4M70 4 66 32 100 36M66 32 52 62M52 62 48 100M80 58 84 100M0 66V100" {line} stroke-width="1.6" stroke-opacity="{o(.11)}"/>'
-        return _pattern(finish_id(name), 100, 100, body)
-    if name == "carpet":
-        body = f'<g fill="{ink}" fill-opacity="{o(.07)}"><circle cx="3" cy="3" r="1.1"/><circle cx="9" cy="9" r="1.1"/></g>'
-        return _pattern(finish_id(name), 12, 12, body)
-    if name == "checker":
-        body = f'<path d="M0 0h25v25H0ZM25 25h25v25H25Z" fill="{ink}" fill-opacity="{o(.055)}"/>'
-        return _pattern(finish_id(name), 50, 50, body)
-    if name == "terracotta":
-        body = f'<path d="M0 0H33.33V33.33" {line} stroke-width="2.2" stroke-opacity="{o(.12)}"/>'
-        return _pattern(finish_id(name), 33.33, 33.33, body)
-    if name == "paving":
-        body = f'<path d="M0 0H50M0 25H50M25 0V25M0 25V50M50 25V50" {line} stroke-width="1.6" stroke-opacity="{o(.11)}"/>'
-        return _pattern(finish_id(name), 50, 50, body)
-    if name == "marble":
+        return _pattern(pid, 34, 34, body)
+    if finish == "checker":
         body = (
-            f'<path d="M0 30Q30 22 46 40T100 46M8 100Q28 70 60 76T100 90M70 0Q66 18 84 26" {line} stroke-width="1.1" stroke-opacity="{o(.08)}"/>'
-            f'<path d="M0 0H100V100" {line} stroke-width="1.4" stroke-opacity="{o(.06)}"/>'
+            f'<rect width="50" height="50" fill="{base}"/><path d="M0 0h25v25H0ZM25 25h25v25H25Z" fill="{light}"/>'
+            f'<path d="M0 0H50V50M25 0V50M0 25H50" fill="none" stroke="{line}" stroke-width="1" stroke-opacity=".55"/>'
         )
-        return _pattern(finish_id(name), 100, 100, body)
-    if name == "lawn":
-        body = f'<path d="m6 18 2-5 2 5m12 9 2-6 2 6m-8-20 1-4 2 4" {line} stroke="#3f6a45" stroke-width="1.4" stroke-opacity="{o(.22)}"/>'
-        return _pattern(finish_id(name), 32, 32, body)
-    raise ValueError(f"unknown finish {name!r}")
+        return _pattern(pid, 50, 50, body)
+    if finish == "terracotta":
+        body = (
+            f'<rect width="33.34" height="33.34" fill="{base}"/><rect x="2" y="2" width="29.3" height="29.3" rx="3" fill="{light}"/>'
+            f'<path d="M0 0H33.34V33.34" fill="none" stroke="{line}" stroke-width="2.4" stroke-opacity=".7"/>'
+        )
+        return _pattern(pid, 33.34, 33.34, body)
+    if finish == "marble":
+        body = (
+            f'<rect width="50" height="50" fill="{base}"/><rect width="25" height="25" fill="{light}"/><rect x="25" y="25" width="25" height="25" fill="{light}"/>'
+            f'<path d="M0 0H50V50M25 0V50M0 25H50" fill="none" stroke="{line}" stroke-width="1" stroke-opacity=".6"/>'
+            f'<path d="M3 18Q12 10 22 14M28 40Q38 32 47 36" stroke="{line}" stroke-width=".9" stroke-opacity=".45" fill="none"/>'
+        )
+        return _pattern(pid, 50, 50, body)
+    if finish == "flagstone":
+        body = (
+            f'<rect width="100" height="100" fill="{base}"/>'
+            f'<path d="M3 3H44L40 30H3ZM48 3H97V36H52ZM3 34H36L44 64H3ZM40 34H97V62L48 66ZM3 68H50V97H3ZM54 70L97 66V97H56Z" fill="{light}" stroke="{line}" stroke-width="1.6" stroke-opacity=".7"/>'
+        )
+        return _pattern(pid, 100, 100, body)
+    if finish == "paving":
+        body = (
+            f'<rect width="50" height="50" fill="{base}"/>'
+            f'<path d="M2 2H48V23H2ZM2 27H23V48H2ZM27 27H48V48H27Z" fill="{light}" stroke="{line}" stroke-width="1.2" stroke-opacity=".6"/>'
+        )
+        return _pattern(pid, 50, 50, body)
+    if finish == "deck":
+        body = (
+            f'<rect width="100" height="33.34" fill="{base}"/><rect width="100" height="16.67" fill="{light}"/>'
+            f'<path d="M0 16.67H100M0 33.34H100" stroke="{line}" stroke-width="2.4" stroke-opacity=".8"/>'
+            f'<g fill="{line}" fill-opacity=".6"><circle cx="20" cy="8" r="1.3"/><circle cx="70" cy="25" r="1.3"/></g>'
+        )
+        return _pattern(pid, 100, 33.34, body)
+    if finish == "lawn":
+        body = (
+            f'<rect width="32" height="32" fill="{base}"/><rect width="32" height="16" fill="{light}" fill-opacity=".6"/>'
+            f'<path d="m6 18 2-5 2 5m12 9 2-6 2 6m-8-20 1-4 2 4" stroke="{line}" stroke-width="1.4" fill="none" stroke-linecap="round"/>'
+        )
+        return _pattern(pid, 32, 32, body)
+    raise ValueError(f"unknown finish {finish!r}")
+
+
+def wallpaper_pattern(name):
+    pid = wallpaper_id(name)
+    if name == "stripe_green":
+        body = '<rect width="18" height="40" fill="#3d6a5b"/><rect width="6" height="40" fill="#46775f"/><circle cx="12" cy="13" r="1.4" fill="#d9c08a" fill-opacity=".7"/>'
+        return _pattern(pid, 18, 40, body)
+    if name == "damask_rose":
+        body = '<rect width="22" height="26" fill="#c98d84"/><path d="M11 5q4 4 0 8q-4-4 0-8ZM0 18q4 4 0 8M22 18q-4 4 0 8" fill="#dca69c"/>'
+        return _pattern(pid, 22, 26, body)
+    if name == "tile_cream":
+        body = '<rect width="16" height="12" fill="#f1e9d5"/><path d="M0 0H16M0 6H16M8 0V6M0 6V12" stroke="#cfc3a6" stroke-width="1"/>'
+        return _pattern(pid, 16, 12, body)
+    if name == "panel_blue":
+        body = '<rect width="30" height="26" fill="#6f8fa8"/><rect x="4" y="4" width="22" height="13" rx="2" fill="none" stroke="#89a7bd" stroke-width="1.4"/>'
+        return _pattern(pid, 30, 26, body)
+    if name == "floral_yellow":
+        body = '<rect width="24" height="26" fill="#e9c97e"/><circle cx="12" cy="9" r="3" fill="#f6e2ac"/><circle cx="0" cy="22" r="2.4" fill="#d7b268"/><circle cx="24" cy="22" r="2.4" fill="#d7b268"/>'
+        return _pattern(pid, 24, 26, body)
+    if name == "panel_wood":
+        body = '<rect width="40" height="26" fill="#8a5a37"/><rect x="3" y="3" width="34" height="17" rx="2" fill="#9a6847" stroke="#6e4527" stroke-width="1"/>'
+        return _pattern(pid, 40, 26, body)
+    if name == "brick":
+        body = '<rect width="30" height="16" fill="#b5654a"/><path d="M0 0H30M0 8H30M15 0V8M0 8V16M30 8V16" stroke="#e3c3ad" stroke-width="1.2"/>'
+        return _pattern(pid, 30, 16, body)
+    if name == "stone":
+        body = '<rect width="34" height="26" fill="#9a9a8c"/><path d="M0 0H34M0 13H34M12 0V13M28 13V26" stroke="#c9c8bb" stroke-width="1.4"/>'
+        return _pattern(pid, 34, 26, body)
+    if name == "hedge":
+        body = '<rect width="20" height="26" fill="#4f8452"/><circle cx="5" cy="6" r="5" fill="#5d9154"/><circle cx="15" cy="12" r="6" fill="#5d9154"/><circle cx="6" cy="20" r="5" fill="#6ea65f"/>'
+        return _pattern(pid, 20, 26, body)
+    raise ValueError(f"unknown wallpaper {name!r}")
 
 
 def terrain_pattern(name):
     if name == "water":
-        body = '<path d="M4 9q7 6 14 0t14 0M22 25q7 6 14 0t14 0" fill="none" stroke="#f3fbf8" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".75"/>'
+        body = '<rect width="44" height="32" fill="#8fc5d1"/><path d="M4 9q7 6 14 0t14 0M22 25q7 6 14 0t14 0" fill="none" stroke="#eaf8f8" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".85"/>'
         return _pattern(terrain_id(name), 44, 32, body)
     if name == "sand":
-        body = '<g fill="#8f7445" fill-opacity=".38"><circle cx="5" cy="6" r="1.4"/><circle cx="17" cy="15" r="1.1"/><circle cx="9" cy="20" r="1"/><circle cx="21" cy="3" r=".9"/></g>'
+        body = '<rect width="24" height="24" fill="#ecd9a8"/><g fill="#a5884f" fill-opacity=".45"><circle cx="5" cy="6" r="1.4"/><circle cx="17" cy="15" r="1.1"/><circle cx="9" cy="20" r="1"/><circle cx="21" cy="3" r=".9"/></g>'
         return _pattern(terrain_id(name), 24, 24, body)
     if name == "rug":
-        body = '<path d="M0 0L18 18M18 0L0 18" stroke="#8c4552" stroke-width="1.6" stroke-opacity=".32"/>'
-        return _pattern(terrain_id(name), 18, 18, body)
+        body = '<rect width="20" height="20" fill="#d98a7f"/><path d="M0 0L20 20M20 0L0 20" stroke="#a24f48" stroke-width="1.6" stroke-opacity=".5"/><circle cx="10" cy="10" r="2" fill="#f3d39b"/>'
+        return _pattern(terrain_id(name), 20, 20, body)
     if name == "tile":
-        body = '<path d="M25 0H0V25" fill="none" stroke="#2f4a46" stroke-width="1.6" stroke-opacity=".22"/><circle cx="12.5" cy="12.5" r="2" fill="#2f4a46" fill-opacity=".14"/>'
+        body = '<rect width="25" height="25" fill="#f7f4ec"/><path d="M25 0H0V25" fill="none" stroke="#7d98a2" stroke-width="1.8" stroke-opacity=".7"/><rect x="9" y="9" width="7" height="7" fill="#9fc4d0" fill-opacity=".7"/>'
         return _pattern(terrain_id(name), 25, 25, body)
     if name == "fairway":
-        body = '<path d="M0 0H50V25H0Z" fill="#ffffff" fill-opacity=".14"/>'
+        body = '<rect width="50" height="50" fill="#a9d08d"/><rect width="50" height="25" fill="#b8da9d"/>'
         return _pattern(terrain_id(name), 50, 50, body)
     if name == "rough":
-        body = '<path d="m4 14 2-6 2 6m8 10 2-7 2 7m4-18 2-5 2 5" fill="none" stroke="#2f5a3a" stroke-width="1.5" stroke-linecap="round" stroke-opacity=".38"/>'
+        body = '<rect width="30" height="30" fill="#86ad6c"/><path d="m4 14 2-6 2 6m8 10 2-7 2 7m4-18 2-5 2 5" fill="none" stroke="#3d6a3e" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".7"/>'
         return _pattern(terrain_id(name), 30, 30, body)
     return None
 
 
-def hatch_pattern(color):
-    body = f'<path d="M-2 2L2 -2M0 12L12 0M10 14L14 10" stroke="{color}" stroke-width="1.6" stroke-opacity=".22"/>'
+def hatch_pattern(colour):
+    body = f'<path d="M-2 2L2 -2M0 12L12 0M10 14L14 10" stroke="{colour}" stroke-width="1.6" stroke-opacity=".25"/>'
     return _pattern(HATCH_ID, 12, 12, body)

@@ -1,18 +1,19 @@
-"""The casebook board: an illustrated floor plan in the Everywhere Safety palette.
+"""The casebook board: a 3/4 dollhouse floor plan.
 
-Same geometry contract as the legacy renderer (CELL=100, PAD=40, one `g.cell-hit[data-cell]`
-per square, axis labels at x=20 / y=25), so the interactive frontends and the exports read it
-the same way. Everything is drawn from the public observation; nothing here can see a solution.
+Rooms have real floors and wallpapered north walls; furniture shows its front; everything is
+painted back to front, row by row. The geometry contract is unchanged (CELL=100, PAD=40, one
+`g.cell-hit[data-cell]` per square, axis labels at x=20 / y=25), so frontends and exports read
+it the same way. Everything is drawn from the public observation; nothing here sees a solution.
 """
 
 from . import labels, materials, props, tokens
 from .geometry import (
     CELL,
     PAD,
-    by_label,
-    colour_areas,
-    connected,
+    area_adjacency,
     bounds,
+    by_label,
+    connected,
     dimensions,
     door_geometry,
     is_outer,
@@ -20,58 +21,90 @@ from .geometry import (
     origin,
     wall_runs,
 )
-from .palette import ROOM_TINTS, THEMES, mix, night_tint
+from .palette import THEMES, delta_e
 from .styles import ALL_LAYERS, check_theme
-from .svg import esc, num
+from .svg import esc
 
+FACE = materials.FACE
 DEFAULT_FINISHES = (
-    "planks",
     "parquet",
-    "herringbone",
-    "flagstone",
-    "carpet",
     "checker",
+    "carpet",
+    "planks",
+    "herringbone",
     "marble",
+    "flagstone",
     "boards",
     "terracotta",
     "paving",
 )
+OUTDOOR_TERRAIN = {"fairway", "rough", "sand", "water"}
+MIN_FLOOR_GAP = 12.0
+CAP_DARK = "#2a221d"
+CAP_LIGHT = "#e7d6b6"
 
 
 def visual_of(observation):
-    """The theme's optional visual block, or an empty one."""
     return observation["scene"].get("visual") or {}
 
 
-def room_tints(observation, theme):
+def room_styles(observation):
+    """Floor material, colour variant and wallpaper per area. Touching rooms differ."""
+    scene = observation["scene"]
     visual = visual_of(observation)
-    tints = tuple(visual.get("tints") or ROOM_TINTS)
-    chosen = colour_areas(observation, tints)
-    out = {}
-    for area in observation["scene"]["areas"]:
-        tint = tints[chosen[area["id"]]]
-        out[area["id"]] = night_tint(tint) if theme == "night" else tint
-    return out
-
-
-def room_finishes(observation):
-    """Decorative floor per area: the theme's choice, else a deterministic cycle, never a
-    finish that could be read as one of the board's formal terrains."""
-    visual = visual_of(observation)
-    terrains = {t["id"] for t in observation["scene"]["terrains"]}
+    terrains = {t["id"] for t in scene["terrains"]}
     allowed = [
         f
         for f in (visual.get("finishes") or DEFAULT_FINISHES)
-        if not (materials.FINISH_CONFLICTS.get(f, set()) & terrains)
+        if f in materials.FLOOR_VARIANTS
+        and not (materials.FINISH_CONFLICTS.get(f, set()) & terrains)
     ] or ["planks"]
     explicit = {int(k): v for k, v in (visual.get("area_finishes") or {}).items()}
-    out = {}
-    for area in observation["scene"]["areas"]:
-        finish = explicit.get(area["id"])
-        if finish is None or finish not in allowed:
-            finish = allowed[area["id"] % len(allowed)]
-        out[area["id"]] = finish
-    return out
+    wallpapers = [w for w in (visual.get("wallpapers") or materials.WALLPAPERS)]
+    cells = scene["cells"]
+    outdoor = {}
+    for area in scene["areas"]:
+        own = [c for c in cells if c["area"] == area["id"]]
+        outdoor[area["id"]] = sum(
+            c["terrain"] in OUTDOOR_TERRAIN for c in own
+        ) * 2 > len(own)
+    neighbours = {a["id"]: set() for a in scene["areas"]}
+    for a, b in area_adjacency(observation):
+        neighbours[a].add(b)
+        neighbours[b].add(a)
+    chosen = {}
+    order = sorted(neighbours, key=lambda a: (-len(neighbours[a]), a))
+    for area in order:
+        used = [chosen[n]["base"] for n in neighbours[area] if n in chosen]
+        preferred = explicit.get(area)
+        if preferred not in allowed:
+            preferred = allowed[area % len(allowed)]
+        candidates = [preferred] + [f for f in allowed if f != preferred]
+        best = None
+        for finish in candidates:
+            for name, base, _, _ in materials.FLOOR_VARIANTS[finish]:
+                gap = min((delta_e(base, u) for u in used), default=100.0)
+                key = (gap >= MIN_FLOOR_GAP, finish == preferred, gap)
+                if best is None or key > best[0]:
+                    best = (key, finish, name, base)
+            if best[0][0] and best[1] == preferred:
+                break
+        _, finish, name, base = best
+        chosen[area] = {
+            "finish": finish,
+            "variant": name,
+            "base": base,
+            "wallpaper": (
+                "hedge" if outdoor[area] else wallpapers[area % len(wallpapers)]
+            ),
+            "outdoor": outdoor[area],
+        }
+    return chosen
+
+
+def room_tints(observation, theme="day"):
+    """The colour that identifies each area (its floor), for legends and the overlay."""
+    return {a: style["base"] for a, style in room_styles(observation).items()}
 
 
 def scene_svg(
@@ -93,29 +126,20 @@ def scene_svg(
     cells = scene["cells"]
     cells_by_label = by_label(observation)
     areas = {a["id"]: a for a in scene["areas"]}
-    tints = room_tints(observation, theme)
-    finishes = room_finishes(observation)
+    styles = room_styles(observation)
     visual = visual_of(observation)
     skins = visual.get("skins") or {}
     terrain_ids = sorted({c["terrain"] for c in cells if c["terrain"] != "floor"})
-    finish_strength = 0.85 if export else 1.0
-    if theme == "night":
-        finish_strength *= 1.6
 
-    defs = [materials.hatch_pattern(colours["blocked"])]
-    for name in sorted(set(finishes.values())):
-        defs.append(
-            materials.finish_pattern(
-                name,
-                colours["ink"] if theme == "day" else "#f6edd9",
-                finish_strength,
-            )
-        )
+    defs = [props.defs(), materials.hatch_pattern("#3b2418"), tokens.clip_defs()]
+    for style in {(s["finish"], s["variant"]) for s in styles.values()}:
+        defs.append(materials.floor_pattern(*style))
+    for wp in sorted({s["wallpaper"] for s in styles.values()}):
+        defs.append(materials.wallpaper_pattern(wp))
     for t in terrain_ids:
         pattern = materials.terrain_pattern(t)
         if pattern:
             defs.append(pattern)
-    defs.append(tokens.clip_defs())
 
     root = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
@@ -131,31 +155,61 @@ def scene_svg(
         "</style>",
     ]
     if "paper" in show:
-        root.append(
-            f'<rect width="{width}" height="{height}" rx="14" fill="{colours["paper"]}"/>'
-        )
-        root.append(_frame(observation, colours, visual))
+        root.append(_plinth(observation, colours))
     root.append('<g class="board-decoration">')
     if "floor" in show:
-        root.append(_floor(cells, tints, finishes, colours))
+        root.append(_floors(cells, styles))
     if "terrain" in show:
-        root.append(_terrain(cells, cells_by_label, tints, colours, theme))
+        root.append(_terrain(cells))
     if "floor" in show:
-        root.append(_grid(observation, colours))
+        root.append(_grid(observation))
     if "blocked" in show:
         root.append(_blocked_hatch(cells))
     if "walls" in show:
-        root.append(_wall_shadows(cells, colours))
-    if "props" in show:
-        root.append(_props(scene, cells_by_label, skins))
+        root.append(_wall_occlusion(observation))
+    # Painter's order: each row's north wall (face, doorway, cap), then that row's furniture.
+    runs = wall_runs(observation)
+    door_list = [door_geometry(observation, d) + (d,) for d in scene["doors"]]
+    prop_spans = _prop_spans(scene, cells_by_label, skins)
+    for r in range(scene["height"]):
+        y_top = PAD + r * CELL
+        if "walls" in show:
+            root.append(_north_faces(observation, styles, runs, y_top))
+        if "doors" in show:
+            root.append(_face_doorways(door_list, styles, cells_by_label, y_top))
+        if "walls" in show:
+            root.append(_horizontal_caps(runs, y_top, observation))
+        if "doors" in show:
+            root.append(_cap_doorways(door_list, y_top))
+        if "props" in show:
+            for bottom_row, x, y, ww, hh, prop_id, kind, skin in prop_spans:
+                if bottom_row == r:
+                    root.append(
+                        f'<g data-prop="{esc(prop_id)}" transform="translate({x} {y})">'
+                        f"{props.draw(kind, ww, hh, skin=skin)}</g>"
+                    )
+                    if kind == "generic":
+                        root.append(
+                            labels.text(
+                                x + ww / 2,
+                                y + hh - 22,
+                                prop_id[:13],
+                                11,
+                                colours["ink"],
+                                anchor="middle",
+                            )
+                        )
     if "walls" in show:
-        root.append(_walls(observation, colours))
+        root.append(_bottom_caps(runs, observation))
+        root.append(_vertical_caps(runs))
     if "doors" in show:
-        root.append(_doors(observation, colours, tints))
+        root.append(_side_doorways(door_list))
+    if theme == "night":
+        root.append(_night(observation))
     if "blocked" in show:
         root.append(_blocked_badges(cells, colours))
     if "plaques" in show:
-        root.append(labels.plaques(observation, colours, show_names=True))
+        root.append(labels.plaques(observation, colours, styles=styles, skins=skins))
     if "notes" in show or "people" in show:
         root.append(
             tokens.cell_layer(
@@ -180,44 +234,37 @@ def scene_svg(
 
 
 # ------------------------------------------------------------------------------- layers
-def _frame(observation, colours, visual):
+def _plinth(observation, colours):
     width, height = dimensions(observation)
-    x, y, w, h = PAD - 14, PAD - 14, width - 2 * PAD + 28, height - 2 * PAD + 28
-    out = [
-        f'<rect x="{x + 4}" y="{y + 6}" width="{w}" height="{h}" rx="10" '
-        f'fill="{colours["shadow"]}" fill-opacity=".10"/>',
-        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="{colours["mat"]}" '
-        f'stroke="{colours["ink"]}" stroke-opacity=".55" stroke-width="1.5"/>',
-        f'<rect x="{x + 5}" y="{y + 5}" width="{w - 10}" height="{h - 10}" rx="7" fill="none" '
-        f'stroke="{colours["brass"]}" stroke-opacity=".7" stroke-width="1.2"/>',
-    ]
-    return "".join(out)
+    m = 10
+    x, y, w, h = m, m, width - 2 * m, height - 2 * m
+    return (
+        f'<rect width="{width}" height="{height}" fill="{colours["paper"]}"/>'
+        f'<rect x="{x + 4}" y="{y + 8}" width="{w}" height="{h}" rx="16" fill="#1b130e" fill-opacity=".22" filter="url(#mk-soft)"/>'
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{props.grad("walnut")}" stroke="{CAP_DARK}" stroke-width="2.4"/>'
+        f'<rect x="{x + 5}" y="{y + 5}" width="{w - 10}" height="{h - 10}" rx="12" fill="none" stroke="#b07a52" stroke-width="1.6" stroke-opacity=".8"/>'
+        f'<rect x="{PAD - 4}" y="{PAD - 4}" width="{width - 2 * PAD + 8}" height="{height - 2 * PAD + 8}" rx="3" fill="#1b130e" fill-opacity=".35"/>'
+    )
 
 
-def _floor(cells, tints, finishes, colours):
+def _floors(cells, styles):
     out = []
     for c in cells:
         x, y = origin(c)
-        out.append(
-            f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" fill="{tints[c["area"]]}"/>'
-        )
-    for c in cells:
-        if c["terrain"] != "floor":
-            continue
-        x, y = origin(c)
+        s = styles[c["area"]]
         out.append(
             f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" '
-            f'fill="url(#{materials.finish_id(finishes[c["area"]])})"/>'
+            f'fill="url(#{materials.floor_id(s["finish"], s["variant"])})"/>'
         )
     return "".join(out)
 
 
-def _terrain(cells, cells_by_label, tints, colours, theme):
+def _terrain(cells):
     grid = {(c["row"], c["col"]): c for c in cells}
     out = []
     for c in cells:
         t = c["terrain"]
-        if t == "floor":
+        if t == "floor" or materials.terrain_pattern(t) is None:
             continue
         x, y = origin(c)
         insets = []
@@ -226,28 +273,16 @@ def _terrain(cells, cells_by_label, tints, colours, theme):
             same = n is not None and n["terrain"] == t and n["area"] == c["area"]
             insets.append(0 if same else 6)
         top, right, bottom, left = insets
-        base = materials.TERRAIN_BASE.get(t)
-        if t == "tile":
-            base = mix(tints[c["area"]], "#ffffff", 0.45)
-        if base is None:
-            continue
-        if theme == "night":
-            base = (
-                night_tint(base)
-                if t != "tile"
-                else mix(tints[c["area"]], "#ffffff", 0.12)
-            )
-        rx = 6 if any(insets) else 0
-        geometry = (
-            f'x="{x + left}" y="{y + top}" width="{CELL - left - right}" '
-            f'height="{CELL - top - bottom}" rx="{rx}"'
+        rx = 7 if any(insets) else 0
+        out.append(
+            f'<rect x="{x + left}" y="{y + top}" width="{CELL - left - right}" '
+            f'height="{CELL - top - bottom}" rx="{rx}" fill="url(#{materials.terrain_id(t)})" '
+            f'stroke="#2a221d" stroke-opacity=".25" stroke-width="1.4"/>'
         )
-        out.append(f'<rect {geometry} fill="{base}"/>')
-        out.append(f'<rect {geometry} fill="url(#{materials.terrain_id(t)})"/>')
     return "".join(out)
 
 
-def _grid(observation, colours):
+def _grid(observation):
     scene = observation["scene"]
     width, height = dimensions(observation)
     d = []
@@ -258,20 +293,19 @@ def _grid(observation, colours):
         y = PAD + r * CELL
         d.append(f"M{PAD} {y}H{width - PAD}")
     return (
-        f'<path d="{"".join(d)}" fill="none" stroke="{colours["grid"]}" '
-        f'stroke-opacity=".13" stroke-width="1" stroke-dasharray="3 4"/>'
+        f'<path d="{"".join(d)}" fill="none" stroke="#2a221d" stroke-opacity=".16" '
+        f'stroke-width="1.2" stroke-dasharray="3 4"/>'
     )
 
 
 def _blocked_hatch(cells):
     out = []
     for c in cells:
-        if c["standable"]:
+        if c["standable"] or c["prop"]:
             continue
         x, y = origin(c)
         out.append(
-            f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" '
-            f'fill="url(#{materials.HATCH_ID})"/>'
+            f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" fill="url(#{materials.HATCH_ID})"/>'
         )
     return "".join(out)
 
@@ -282,98 +316,147 @@ def _blocked_badges(cells, colours):
         if c["standable"]:
             continue
         x, y = origin(c)
-        cx, cy = x + 14, y + 86
+        cx, cy = x + 12, y + 88
         out.append(
-            f'<g class="blocked-mark"><circle cx="{cx}" cy="{cy}" r="7.5" fill="{colours["paper"]}" '
-            f'fill-opacity=".95" stroke="{colours["blocked"]}" stroke-width="1.4"/>'
-            f'<path d="m{cx - 3} {cy - 3} 6 6m0-6-6 6" stroke="{colours["blocked"]}" '
-            f'stroke-width="1.6" stroke-linecap="round"/></g>'
+            f'<g class="blocked-mark"><circle cx="{cx}" cy="{cy}" r="7.5" fill="#fbf7ee" '
+            f'fill-opacity=".92" stroke="#6d5444" stroke-width="1.4"/>'
+            f'<path d="m{cx - 3} {cy - 3} 6 6m0-6-6 6" stroke="#6d5444" stroke-width="1.7" '
+            f'stroke-linecap="round"/></g>'
         )
     return "".join(out)
 
 
-def _wall_shadows(cells, colours):
+def _wall_occlusion(observation):
     out = []
-    for c in cells:
-        x, y = origin(c)
-        for wall in c["walls"]:
-            if wall == "north":
-                band = (x, y, CELL, 9)
-            elif wall == "south":
-                band = (x, y + CELL - 5, CELL, 5)
-            elif wall == "west":
-                band = (x, y, 9, CELL)
-            else:
-                band = (x + CELL - 5, y, 5, CELL)
-            bx, by, bw, bh = band
+    for x1, y1, x2, y2 in wall_runs(observation):
+        if x1 == x2:
             out.append(
-                f'<rect x="{bx}" y="{by}" width="{bw}" height="{bh}" '
-                f'fill="{colours["shadow"]}" fill-opacity=".07"/>'
+                f'<rect x="{x1 - 9}" y="{y1}" width="18" height="{y2 - y1}" fill="#1b130e" '
+                f'fill-opacity=".16" filter="url(#mk-softer)"/>'
             )
     return "".join(out)
 
 
-def _walls(observation, colours):
-    runs = wall_runs(observation)
+def _north_faces(observation, styles, runs, y_top):
+    """South-facing wallpaper under every horizontal wall at the top of this row."""
     out = []
-    for run in runs:
-        x1, y1, x2, y2 = run
-        w = 10 if is_outer(run, observation) else 7.5
-        out.append(
-            f'<path d="M{x1 + 2} {y1 + 3}L{x2 + 2} {y2 + 3}" stroke="{colours["shadow"]}" '
-            f'stroke-opacity=".16" stroke-width="{w + 1.5}" stroke-linecap="round"/>'
-        )
-    for run in runs:
-        x1, y1, x2, y2 = run
-        w = 10 if is_outer(run, observation) else 7.5
-        out.append(
-            f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{colours["wall"]}" '
-            f'stroke-width="{w}" stroke-linecap="round"/>'
-        )
-        out.append(
-            f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{colours["wall_light"]}" '
-            f'stroke-opacity=".35" stroke-width="1.4"/>'
-        )
+    cells = {(c["row"], c["col"]): c for c in observation["scene"]["cells"]}
+    r = (y_top - PAD) // CELL
+    for x1, y1, x2, y2 in runs:
+        if y1 != y2 or y1 != y_top or r >= observation["scene"]["height"]:
+            continue
+        for x in range(x1, x2, CELL):
+            c = cells.get((r, (x - PAD) // CELL))
+            if c is None:
+                continue
+            wp = styles[c["area"]]["wallpaper"]
+            out.append(
+                f'<rect x="{x}" y="{y_top}" width="{CELL}" height="{FACE}" '
+                f'fill="url(#{materials.wallpaper_id(wp)})"/>'
+            )
+            if wp != "hedge":
+                out.append(
+                    f'<rect x="{x}" y="{y_top + FACE - 7}" width="{CELL}" height="7" fill="#4a3022"/>'
+                )
+            out.append(
+                f'<rect x="{x}" y="{y_top + FACE}" width="{CELL}" height="10" fill="#1b130e" '
+                f'fill-opacity=".18" filter="url(#mk-softer)"/>'
+                f'<rect x="{x}" y="{y_top}" width="{CELL}" height="5" fill="#1b130e" fill-opacity=".22"/>'
+            )
     return "".join(out)
 
 
-def _doors(observation, colours, tints):
+def _face_doorways(door_list, styles, cells_by_label, y_top):
     out = []
-    cells_by_label = by_label(observation)
-    for a, b in observation["scene"]["doors"]:
-        x, y, vertical_wall = door_geometry(observation, (a, b))
-        ca = cells_by_label[a]
-        tint = tints[ca["area"]]
-        if vertical_wall:
-            gap = (
-                f'<rect x="{x - 6}" y="{y - 22}" width="12" height="44" fill="{tint}"/>'
-            )
-            sill = (
-                f'<rect x="{x - 4.5}" y="{y - 22}" width="9" height="44" rx="2.5" '
-                f'fill="{colours["brass"]}" stroke="{colours["brass_dark"]}" stroke-width="1.4"/>'
-            )
-            ends = f"M{x - 7} {y - 22}h14M{x - 7} {y + 22}h14"
-            swing = f"M{x} {y - 22}A44 44 0 0 1 {x + 30} {y + 10}"
-        else:
-            gap = (
-                f'<rect x="{x - 22}" y="{y - 6}" width="44" height="12" fill="{tint}"/>'
-            )
-            sill = (
-                f'<rect x="{x - 22}" y="{y - 4.5}" width="44" height="9" rx="2.5" '
-                f'fill="{colours["brass"]}" stroke="{colours["brass_dark"]}" stroke-width="1.4"/>'
-            )
-            ends = f"M{x - 22} {y - 7}v14M{x + 22} {y - 7}v14"
-            swing = f"M{x - 22} {y}A44 44 0 0 0 {x + 10} {y + 30}"
+    for x, y, vertical_wall, (a, b) in door_list:
+        if vertical_wall or y != y_top:
+            continue
+        upper = min(cells_by_label[a], cells_by_label[b], key=lambda c: c["row"])
+        s = styles[upper["area"]]
+        floor = f"url(#{materials.floor_id(s['finish'], s['variant'])})"
         out.append(
-            f'<g data-door="{esc(a)}:{esc(b)}">{gap}'
-            f'<path d="{swing}" fill="none" stroke="{colours["brass_dark"]}" stroke-opacity=".55" '
-            f'stroke-width="1.4" stroke-dasharray="3 4"/>{sill}'
-            f'<path d="{ends}" stroke="{colours["wall"]}" stroke-width="3" stroke-linecap="round"/></g>'
+            f'<g data-door="{esc(a)}:{esc(b)}">'
+            f'<rect x="{x - 24}" y="{y}" width="48" height="{FACE}" fill="#3b2a20"/>'
+            f'<rect x="{x - 20}" y="{y + 4}" width="40" height="{FACE - 4}" fill="{floor}"/>'
+            f'<rect x="{x - 20}" y="{y + 4}" width="40" height="{FACE - 4}" fill="#1b130e" fill-opacity=".3"/>'
+            f'<path d="M{x - 24} {y}v{FACE}M{x + 24} {y}v{FACE}" stroke="{CAP_DARK}" stroke-width="5"/></g>'
         )
     return "".join(out)
 
 
-def _props(scene, cells_by_label, skins):
+def _cap(x1, y1, x2, y2, width=12):
+    return (
+        f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{CAP_DARK}" stroke-width="{width}" stroke-linecap="square"/>'
+        f'<path d="M{x1} {y1}L{x2} {y2}" stroke="{CAP_LIGHT}" stroke-width="{width / 2:.0f}" stroke-linecap="square"/>'
+    )
+
+
+def _horizontal_caps(runs, y_top, observation):
+    return "".join(
+        _cap(x1, y1, x2, y2, 14 if is_outer((x1, y1, x2, y2), observation) else 12)
+        for x1, y1, x2, y2 in runs
+        if y1 == y2 == y_top
+    )
+
+
+def _cap_doorways(door_list, y_top):
+    out = []
+    for x, y, vertical_wall, (a, b) in door_list:
+        if vertical_wall or y != y_top:
+            continue
+        out.append(
+            f'<rect x="{x - 24}" y="{y - 7}" width="48" height="14" fill="#3b2a20"/>'
+            f'<path d="M{x - 24} {y - 7}h48" stroke="{CAP_DARK}" stroke-width="5"/>'
+            f'<path d="M{x - 24} {y - 7}v14M{x + 24} {y - 7}v14" stroke="{CAP_DARK}" stroke-width="5"/>'
+        )
+    return "".join(out)
+
+
+def _bottom_caps(runs, observation):
+    _, height = dimensions(observation)
+    return "".join(
+        _cap(x1, y1, x2, y2, 14) for x1, y1, x2, y2 in runs if y1 == y2 == height - PAD
+    )
+
+
+def _vertical_caps(runs):
+    out, light = [], []
+    for x1, y1, x2, y2 in runs:
+        if x1 != x2:
+            continue
+        out.append(
+            f'<path d="M{x1} {y1 - 6}V{y2 + 6}" stroke="{CAP_DARK}" stroke-width="12"/>'
+        )
+        light.append(
+            f'<path d="M{x1} {y1}V{y2}" stroke="{CAP_LIGHT}" stroke-width="6"/>'
+        )
+    return "".join(out + light)
+
+
+def _side_doorways(door_list):
+    out = []
+    for x, y, vertical_wall, (a, b) in door_list:
+        if not vertical_wall:
+            continue
+        out.append(
+            f'<g data-door="{esc(a)}:{esc(b)}">'
+            f'<rect x="{x - 8}" y="{y - 24}" width="16" height="48" fill="#b98a54"/>'
+            f'<path d="M{x - 4} {y - 22}v44M{x + 4} {y - 22}v44" stroke="#9a6b3e" stroke-width="1.2"/>'
+            f'<path d="M{x - 9} {y - 24}h18M{x - 9} {y + 24}h18" stroke="{CAP_DARK}" stroke-width="4.5"/></g>'
+        )
+    return "".join(out)
+
+
+def _night(observation):
+    width, height = dimensions(observation)
+    return (
+        f'<rect x="{PAD - 6}" y="{PAD - 6}" width="{width - 2 * PAD + 12}" height="{height - 2 * PAD + 12}" '
+        f'fill="#0c1a26" fill-opacity=".42"/>'
+    )
+
+
+def _prop_spans(scene, cells_by_label, skins):
+    """(bottom row, x, y, w, h, prop id, kind, skin) for every drawing, in left-to-right order."""
     out = []
     for prop in scene["props"]:
         kind = prop["art"]
@@ -385,25 +468,16 @@ def _props(scene, cells_by_label, skins):
             else:
                 spans = [(c["row"], c["col"], 1, 1) for c in group]
             for r, c, hh, ww in spans:
-                x, y = PAD + c * CELL, PAD + r * CELL
-                fw, fh = ww * CELL - 16, hh * CELL - 18
-                drawing = props.draw(kind, fw, fh, skin=skin)
                 out.append(
-                    f'<g data-prop="{esc(prop["id"])}" transform="translate({x + 8} {y + 10})">'
-                    f"{drawing}</g>"
-                )
-                if kind == "generic":
-                    out.append(
-                        labels.text(
-                            x + ww * CELL / 2,
-                            y + hh * CELL - 22,
-                            prop["id"][:13],
-                            11,
-                            "#102725",
-                            anchor="middle",
-                        )
+                    (
+                        r + hh - 1,
+                        PAD + c * CELL,
+                        PAD + r * CELL,
+                        ww * CELL,
+                        hh * CELL,
+                        prop["id"],
+                        kind,
+                        skin,
                     )
-    return "".join(out)
-
-
-__all__ = ["scene_svg", "room_tints", "room_finishes", "num"]
+                )
+    return sorted(out, key=lambda p: (p[0], p[1]))

@@ -20,7 +20,7 @@ def _skin(observation, prop):
 
 
 def _prop_glyph(observation, prop, x, y, size):
-    drawing = props.draw(prop["art"], size, size, skin=_skin(observation, prop))
+    drawing = props.glyph(prop["art"], size, skin=_skin(observation, prop))
     return f'<g transform="translate({num(x)} {num(y)})">{drawing}</g>'
 
 
@@ -41,7 +41,7 @@ def _heading(x, y, label, colours, size=15):
 def _key_defs(observation):
     terrains = [t["id"] for t in observation["scene"]["terrains"]]
     defs = [materials.terrain_pattern(t) for t in terrains]
-    return "<defs>" + "".join(d for d in defs if d) + "</defs>"
+    return "<defs>" + props.defs() + "".join(d for d in defs if d) + "</defs>"
 
 
 def board_svg(observation, *, theme="day"):
@@ -198,7 +198,7 @@ def observation_svg(observation, *, theme="day", selected=None, focus_cells=()):
         ),
         f'<g transform="translate(20 172)">{casebook.scene_svg(observation, theme=theme, selected=selected, focus_cells=focus_cells, export=True)}</g>',
     ]
-    tints = casebook.room_tints(observation, theme)
+    tints = casebook.room_tints(observation, theme)  # each area's floor colour
     y = 190 + bh
     for i, area in enumerate(observation["scene"]["areas"]):
         xx, yy = 42 + (i % 3) * (bw / 3), y + (i // 3) * 30

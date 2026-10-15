@@ -109,11 +109,11 @@ def main():
         len(poses),
         220,
         20,
-        lambda p, x, y: f'<g transform="translate({x} {y}) scale({220 / 128})">{brand.snail(p)}</g>',
+        lambda p, x, y: f'<g transform="translate({x} {y}) scale({220 / 128})">{brand.donut_detective(p)}</g>',
     )
     sections.append(
         (
-            "蜗牛侦探 The Inspector（草案）",
+            "吉祥物：甜甜圈侦探（ES 原标识 + 猎鹿帽）",
             [
                 (
                     _png(mascot, img / "mascot.png"),
@@ -156,12 +156,14 @@ def main():
         kind, skin = item
         label = skin or kind
         return (
-            f'<rect x="{x}" y="{y}" width="120" height="120" rx="10" fill="#efe0a6"/>'
-            f'<g transform="translate({x + 14} {y + 10})">{props.draw(kind or "generic", 92, 84, skin=skin)}</g>'
-            f'<text x="{x + 60}" y="{y + 114}" font-size="12" text-anchor="middle" font-family="DM Mono" fill="#102725">{html.escape(label)}</text>'
+            f'<rect x="{x}" y="{y + 30}" width="120" height="120" rx="10" fill="#e8d6b4"/>'
+            f'<g transform="translate({x + 10} {y + 40})">{props.draw(kind or "generic", 100, 100, skin=skin)}</g>'
+            f'<text x="{x + 60}" y="{y + 164}" font-size="12" text-anchor="middle" font-family="DM Mono" fill="#102725">{html.escape(label)}</text>'
         )
 
-    zoo = _sheet(kinds, 8, 120, 14, zoo_cell)
+    zoo = _sheet(kinds, 8, 120, 50, zoo_cell).replace(
+        "<rect width=", f"<defs>{props.defs()}</defs><rect width=", 1
+    )
     sections.append(
         (
             "物件图鉴：26 种基础画法 + 庄园换皮",

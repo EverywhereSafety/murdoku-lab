@@ -13,11 +13,12 @@ CLIP_ID = "mk-token-clip"
 
 TOKEN = {
     "cx": 50,
-    "cy": 52,
-    "r": 34,
-    "ring": 4,
-    "portrait_r": 31,
-    "badge": {"x": 66, "y": 66, "size": 24, "rx": 7, "font": 14},
+    "cy": 38,
+    "r": 30,
+    "ring": 4.5,
+    "portrait_r": 27,
+    "base": {"cy": 80, "rx": 22, "ry": 8},
+    "badge": {"x": 63, "y": 50, "size": 22, "rx": 6, "font": 13},
 }
 
 
@@ -45,12 +46,22 @@ def portrait_group(person, x, y, size, reveal=None, cast_size=0):
 
 
 def token(person, x, y, colours, *, selected=False, reveal=None, cast_size=0):
+    """A standee: a portrait disc on a little turned-wood base, casting a soft shadow."""
     t = TOKEN
     cx, cy, r = x + t["cx"], y + t["cy"], t["r"]
+    b = t["base"]
     ring = colours["brass"] if selected else accent(person)
     out = [
-        f'<circle cx="{cx + 2.5}" cy="{cy + 3.5}" r="{r}" fill="{colours["shadow"]}" fill-opacity=".2"/>',
-        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{colours["paper"]}" stroke="{ring}" stroke-width="{t["ring"]}"/>',
+        f'<ellipse cx="{cx + 3}" cy="{y + b["cy"] + 5}" rx="{b["rx"] + 4}" ry="{b["ry"]}" '
+        f'fill="#1b130e" fill-opacity=".38" filter="url(#mk-soft)"/>',
+        f'<ellipse cx="{cx}" cy="{y + b["cy"] + 3}" rx="{b["rx"]}" ry="{b["ry"]}" fill="#5a3826" '
+        f'stroke="#2a221d" stroke-width="1.8"/>',
+        f'<ellipse cx="{cx}" cy="{y + b["cy"]}" rx="{b["rx"]}" ry="{b["ry"]}" fill="#9a6847" '
+        f'stroke="#2a221d" stroke-width="1.8"/>',
+        f'<rect x="{cx - 3}" y="{cy + r - 2}" width="6" height="{y + b["cy"] - cy - r + 2}" '
+        f'fill="url(#mk-g-brass)" stroke="#2a221d" stroke-width="1.4"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{colours["paper"]}" stroke="{ring}" '
+        f'stroke-width="{t["ring"]}"/>',
         portrait_group(
             person,
             cx - t["portrait_r"],
@@ -59,23 +70,24 @@ def token(person, x, y, colours, *, selected=False, reveal=None, cast_size=0):
             reveal,
             cast_size,
         ),
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#2a221d" stroke-width="1.6"/>',
     ]
     if person.get("victim"):
         out.append(
             f'<circle cx="{cx}" cy="{cy}" r="{r + 4.5}" fill="none" stroke="{colours["ink"]}" '
-            f'stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="4 4"/>'
+            f'stroke-opacity=".6" stroke-width="1.8" stroke-dasharray="4 4"/>'
         )
-    b = t["badge"]
+    bd = t["badge"]
     out.append(
-        f'<rect x="{x + b["x"]}" y="{y + b["y"]}" width="{b["size"]}" height="{b["size"]}" '
-        f'rx="{b["rx"]}" fill="{accent(person)}" stroke="{colours["paper"]}" stroke-width="2"/>'
+        f'<rect x="{x + bd["x"]}" y="{y + bd["y"]}" width="{bd["size"]}" height="{bd["size"]}" '
+        f'rx="{bd["rx"]}" fill="{accent(person)}" stroke="{colours["paper"]}" stroke-width="2"/>'
     )
     out.append(
         text(
-            x + b["x"] + b["size"] / 2,
-            y + b["y"] + b["size"] / 2 + 5,
+            x + bd["x"] + bd["size"] / 2,
+            y + bd["y"] + bd["size"] / 2 + 4.6,
             person["id"],
-            b["font"],
+            bd["font"],
             "#ffffff",
             anchor="middle",
             weight="700",
