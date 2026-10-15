@@ -135,6 +135,28 @@ def donut_detective(pose="idle", *, mono=False):
     return "".join(o)
 
 
+def icon_svg(size=128):
+    """App icon and favicon: the detective donut alone, in solid shapes that survive 16px."""
+    sprinkles = "".join(
+        f'<path d="M{64 + 26 * math.cos(math.radians(a)):.1f} {80 + 26 * math.sin(math.radians(a)):.1f}h7" '
+        f'stroke="{INK}" stroke-width="4.4" stroke-linecap="round" '
+        f'transform="rotate({a + 70} {64 + 26 * math.cos(math.radians(a)):.1f} {80 + 26 * math.sin(math.radians(a)):.1f})"/>'
+        for a in range(10, 360, 45)
+    )
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 128 128" '
+        f'role="img" aria-label="Detective Donut">'
+        f'<rect width="128" height="128" rx="30" fill="{INK}"/>'
+        f'<circle cx="64" cy="80" r="26" fill="none" stroke="{PAPER}" stroke-width="20"/>'
+        f"{sprinkles}"
+        f'<g transform="rotate(-12 64 44)">'
+        f'<path d="M24 48Q22 56 36 56H92Q106 56 104 48Q64 40 24 48Z" fill="{HAT}" stroke="{PAPER}" stroke-width="3"/>'
+        f'<path d="M36 50Q34 16 64 16Q94 16 92 50Z" fill="{HAT}" stroke="{PAPER}" stroke-width="3"/>'
+        f'<path d="M42 30H86M38 41H90M54 18V50M74 18V50" stroke="{CHECK}" stroke-width="3"/>'
+        f'<circle cx="64" cy="16" r="4.4" fill="{HAT_DARK}" stroke="{PAPER}" stroke-width="2"/></g></svg>'
+    )
+
+
 def placeholder(pose="idle"):
     """Neutral stand-in with the same footprint: a magnifier over a case folder."""
     return (

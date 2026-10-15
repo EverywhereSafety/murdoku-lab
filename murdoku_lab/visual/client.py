@@ -3,6 +3,8 @@
 import json
 from urllib.request import Request, urlopen
 
+from murdoku_lab.visual.art.styles import DEFAULT_STYLE, STYLES
+
 
 class MurdokuClient:
     def __init__(
@@ -46,11 +48,11 @@ class MurdokuClient:
             },
         )
 
-    def image(self, *, scope="full", format="png", style="art"):
+    def image(self, *, scope="full", format="png", style=DEFAULT_STYLE):
         if (
             scope not in ("full", "scene")
             or format not in ("png", "svg")
-            or style not in ("art", "diagram")
+            or style not in STYLES
         ):
             raise ValueError("invalid image options")
         resource = "observation" if scope == "full" else "scene"

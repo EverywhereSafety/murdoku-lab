@@ -42,3 +42,6 @@ artifacts/
 # Python packaging outputs.
 *.egg-info/
 build/
+
+# Generated player case bundles (python -m murdoku_lab.visual.play_export).
+web/public/cases/

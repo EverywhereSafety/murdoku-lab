@@ -46,7 +46,7 @@ export default function App() {
   const [selected, setSelected] = useState("A");
   const [mode, setMode] = useState("mark");
   const [focusMode, setFocusMode] = useState(false);
-  const [style, setStyle] = useState("art");
+  const [style, setStyle] = useState("casebook");
   const [zoom, setZoom] = useState(100);
   const [svg, setSvg] = useState("");
   const [busy, setBusy] = useState(false);

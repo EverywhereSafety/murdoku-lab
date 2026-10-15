@@ -6,7 +6,11 @@ STYLES = (CASEBOOK,) + LEGACY_STYLES
 
 # Records exported before the casebook existed carry no style field and were drawn as `art`.
 RECORD_DEFAULT_STYLE = "art"
-DEFAULT_STYLE = "art"
+# The Lab, the player app and new previews draw the casebook. RL exports choose their style
+# explicitly (export_queries / farm --artwork-style) and keep it in the record.
+DEFAULT_STYLE = CASEBOOK
+# Bumped whenever casebook output changes in a way a dataset should record.
+CASEBOOK_VERSION = "casebook/1"
 
 THEMES = ("day", "night")
 
@@ -32,6 +36,11 @@ def check_style(style):
     if style not in STYLES:
         raise ValueError("style must be one of: " + ", ".join(STYLES))
     return style
+
+
+def record_style(record):
+    """The style a record's images were drawn in; later frames of its episode match it."""
+    return check_style(record.get("artwork_style") or RECORD_DEFAULT_STYLE)
 
 
 def check_theme(theme):

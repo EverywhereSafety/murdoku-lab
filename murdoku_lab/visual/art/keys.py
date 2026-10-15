@@ -5,6 +5,7 @@ squares, coordinates, a key naming every prop and terrain), so every key glyph i
 same drawer, with the same skin, as on the board.
 """
 
+import functools
 import math
 import textwrap
 
@@ -12,6 +13,9 @@ from . import casebook, materials, portraits, props
 from .geometry import dimensions
 from .palette import THEMES, mix
 from .svg import FONT_MONO, FONT_SANS, FONT_SERIF, esc, num, text
+
+# Clue text must read back verbatim from the image, so never split "south-east" at its hyphen.
+wrap_text = functools.partial(textwrap.wrap, break_on_hyphens=False)
 
 
 def _skin(observation, prop):
@@ -54,7 +58,7 @@ def board_svg(observation, *, theme="day"):
     slot = bw / columns
     wrap = max(14, int((slot - 78) / 8))
     row_height = max(
-        [82] + [50 + 18 * len(textwrap.wrap(p["name"], wrap)) for p in props_list]
+        [82] + [50 + 18 * len(wrap_text(p["name"], wrap)) for p in props_list]
     )
     key_y = bh + 44
     terrain_y = key_y + math.ceil(len(props_list) / columns) * row_height + 32
@@ -77,7 +81,7 @@ def board_svg(observation, *, theme="day"):
             if prop["art"] == "generic"
             else prop["name"]
         )
-        lines = textwrap.wrap(name, wrap)
+        lines = wrap_text(name, wrap)
         for j, line in enumerate(lines):
             out.append(
                 text(x + 70, y + 16 + j * 18, line, 15, colours["ink"], weight="600")
@@ -129,7 +133,7 @@ def observation_svg(observation, *, theme="day", selected=None, focus_cells=()):
     left = bw + 64
     side = 540
     width = left + side + 42
-    wraps = [(c, textwrap.wrap(c["text"], width=50)) for c in observation["clues"]]
+    wraps = [(c, wrap_text(c["text"], width=50)) for c in observation["clues"]]
     clue_h = sum(54 + len(lines) * 23 for _, lines in wraps)
     people = observation["people"]
     cast_cols = 6
@@ -144,7 +148,7 @@ def observation_svg(observation, *, theme="day", selected=None, focus_cells=()):
         + [
             15
             * len(
-                textwrap.wrap(
+                wrap_text(
                     f'{p["id"]} · {p["name"]}' if p["art"] == "generic" else p["name"],
                     key_wrap,
                 )
@@ -156,8 +160,7 @@ def observation_svg(observation, *, theme="day", selected=None, focus_cells=()):
     prop_key_height = math.ceil(len(props_list) / key_columns) * key_row_height
     rule_height = max(
         400,
-        116
-        + sum(len(textwrap.wrap(rule, 58)) * 19 + 12 for rule in observation["rules"]),
+        116 + sum(len(wrap_text(rule, 58)) * 19 + 12 for rule in observation["rules"]),
     )
     height = max(
         int(210 + bh + cast_rows * 136 + legend_rows * 30 + 140 + prop_key_height),
@@ -278,7 +281,7 @@ def observation_svg(observation, *, theme="day", selected=None, focus_cells=()):
     o.append(_heading(left + 10, yy + 9, "Rules and symbols", colours, 12.5))
     yy += 40
     for rule in observation["rules"]:
-        for line in textwrap.wrap(rule, 58):
+        for line in wrap_text(rule, 58):
             o.append(text(left + 10, yy, line, 13.5, colours["ink_soft"]))
             yy += 19
         yy += 12
@@ -296,7 +299,7 @@ def observation_svg(observation, *, theme="day", selected=None, focus_cells=()):
             if prop["art"] == "generic"
             else prop["name"]
         )
-        lines = textwrap.wrap(name, key_wrap)
+        lines = wrap_text(name, key_wrap)
         for j, line in enumerate(lines):
             o.append(
                 text(

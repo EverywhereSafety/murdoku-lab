@@ -129,11 +129,11 @@ class IllustratedMurdokuEnvironment(MurdokuToolEnvironment):
             last_event=self.events[-1] if self.events else None,
         )
 
-    def render_svg(self, *, scope="full", style="art"):
+    def render_svg(self, *, scope="full", style=None):
         renderers = {"full": observation_svg, "scene": scene_svg, "board": board_svg}
         if scope not in renderers:
             raise ValueError("scope must be full, scene or board")
-        return renderers[scope](self.observe(), style=style)
+        return renderers[scope](self.observe(), style=style or self.artwork_style)
 
     def export_trace(self, case_id="local"):
         return {
@@ -146,10 +146,11 @@ class IllustratedMurdokuEnvironment(MurdokuToolEnvironment):
             "steps": deepcopy(self.events),
         }
 
-    def render_png(self, *, scope="full", style="art"):
-        from murdoku_lab.visual.raster import png_from_svg
+    def render_png(self, *, scope="full", style=None):
+        from murdoku_lab.visual.raster import png_for_style
 
-        return png_from_svg(self.render_svg(scope=scope, style=style))
+        style = style or self.artwork_style
+        return png_for_style(self.render_svg(scope=scope, style=style), style)
 
     async def finalize(self, reason):
         result = await super().finalize(reason)

@@ -25,6 +25,42 @@ def bundled_profile(fit_width=None):
     return profile
 
 
+def profile_for(style):
+    """Casebook art renders with the bundled fonts; the frozen legacy styles keep the system
+    fonts they were published with."""
+    from murdoku_lab.visual.art.styles import CASEBOOK
+
+    return bundled_profile() if style == CASEBOOK else None
+
+
+def png_for_style(svg, style):
+    return png_from_svg(svg, profile=profile_for(style))
+
+
+def renderer_info(style):
+    """Provenance for dataset manifests: what drew the images and with which fonts."""
+    from murdoku_lab.visual.art.styles import CASEBOOK, CASEBOOK_VERSION, check_style
+
+    check_style(style)
+    info = {
+        "style": style,
+        "renderer_version": CASEBOOK_VERSION if style == CASEBOOK else "legacy/1",
+    }
+    package = ROOT / "node_modules" / "@resvg" / "resvg-js" / "package.json"
+    if package.exists():
+        info["resvg_version"] = json.loads(package.read_text()).get("version")
+    if style == CASEBOOK:
+        import hashlib
+
+        digest = hashlib.sha256()
+        for path in sorted(FONT_DIR.glob("*.ttf")):
+            digest.update(path.name.encode() + b"\0" + path.read_bytes())
+        info["font_sha256"] = digest.hexdigest()
+    else:
+        info["fonts"] = "system"
+    return info
+
+
 def png_from_svg(svg, *, profile=None):
     """`profile=None` keeps the legacy system-font rendering; pass `bundled_profile()` for
     casebook art."""

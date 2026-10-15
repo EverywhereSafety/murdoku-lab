@@ -9,6 +9,9 @@ PLAQUE_SIZE = 10.5
 PLAQUE_SPACING = 0.7
 # Axis labels are engraved on the wooden plinth around the board.
 AXIS = "#f3e3c3"
+# Plaque ink: names on brass or wooden plates, numbers on the dark chip (WCAG AA on both).
+PLAQUE_INK = "#2a1d0c"
+PLAQUE_NUMBER = ("#f3e3c3", "#2a221d")
 
 
 def plaque_width(name, size=PLAQUE_SIZE):
@@ -87,13 +90,13 @@ def plaques(observation, colours, *, styles=None, skins=None, show_names=True):
             f'fill="#1b130e" fill-opacity=".3"/>'
             f'<rect x="{num(x)}" y="{num(y)}" width="{num(w)}" height="17" rx="3.5" fill="{plate}" '
             f'stroke="#2a221d" stroke-width="1.4"/>'
-            f'<rect x="{num(x + 2.5)}" y="{num(y + 2.5)}" width="17" height="12" rx="2.5" fill="#2a221d"/>'
+            f'<rect x="{num(x + 2.5)}" y="{num(y + 2.5)}" width="17" height="12" rx="2.5" fill="{PLAQUE_NUMBER[1]}"/>'
             + text(
                 x + 11,
                 y + 12.2,
                 number,
                 9,
-                "#f3e3c3",
+                PLAQUE_NUMBER[0],
                 anchor="middle",
                 weight="600",
                 family=FONT_MONO,
@@ -106,7 +109,7 @@ def plaques(observation, colours, *, styles=None, skins=None, show_names=True):
                     y + 12.4,
                     name,
                     9.5,
-                    "#3a2a15",
+                    PLAQUE_INK,
                     weight="700",
                     spacing=PLAQUE_SPACING,
                 )

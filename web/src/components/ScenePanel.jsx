@@ -123,6 +123,14 @@ export function ScenePanel({
           </IconButton>
           <div className="segmented view-switch" aria-label="Map style">
             <button
+              aria-pressed={style === "casebook"}
+              className={style === "casebook" ? "active" : ""}
+              onClick={() => setStyle("casebook")}
+            >
+              <House size={14} />
+              <span>Casebook</span>
+            </button>
+            <button
               aria-pressed={style === "art"}
               className={style === "art" ? "active" : ""}
               onClick={() => setStyle("art")}

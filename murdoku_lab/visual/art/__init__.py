@@ -8,6 +8,8 @@ No remote fonts, bitmap dependencies or official-game artwork. Geometry is read 
 public observation; illustration can never access the hidden solution.
 """
 
+import re
+
 from . import casebook, legacy
 from .legacy import (
     CELL,
@@ -91,6 +93,26 @@ def observation_svg(
     )
 
 
+def thumbnail_svg(observation, *, px=320, theme="day"):
+    """A case-library thumbnail: the static casebook scene (rooms, walls, furniture, frame)
+    with no people, notes, axes or hit targets, sized to `px` wide."""
+    svg = casebook.scene_svg(
+        observation,
+        theme=check_theme(theme),
+        layers=STATIC_LAYERS,
+        cell_labels="none",
+    )
+    width, height = dimensions(observation)
+    size = f'width="{px}" height="{round(px * height / width)}"'
+    return re.sub(r'width="\d+" height="\d+"', size, svg, count=1)
+
+
+def share_card_svg(card, layout="og"):
+    from . import cards
+
+    return cards.share_card_svg(card, layout)
+
+
 __all__ = [
     "CASEBOOK",
     "CELL",
@@ -116,5 +138,7 @@ __all__ = [
     "prop_shape",
     "prop_svg",
     "scene_svg",
+    "share_card_svg",
+    "thumbnail_svg",
     "txt",
 ]
