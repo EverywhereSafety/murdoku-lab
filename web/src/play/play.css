@@ -311,6 +311,125 @@ h3 {
   opacity: 0.86;
 }
 
+/* ----------------------------------------------------------------------- daily */
+.pl-card.is-today {
+  border-top-width: 7px;
+}
+.pl-today-cta {
+  margin-top: 6px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.pl-countdown {
+  font: 500 12px var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--ink-muted);
+}
+.pl-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+.pl-stats b {
+  font: 700 18px var(--mono);
+  color: var(--ink);
+}
+.pl-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fde9cf;
+  color: #a2402e;
+  font-weight: 700;
+}
+.pl-flame {
+  fill: #e0703a;
+}
+.pl-training {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 18px;
+  border: 1px dashed var(--accent);
+  border-radius: 16px;
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+}
+.pl-training > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.pl-training span span {
+  color: var(--ink-muted);
+}
+.pl-archive {
+  margin-top: 30px;
+}
+.pl-archive h2 {
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+.pl-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 720px;
+}
+.pl-calendar-head {
+  text-align: center;
+  font: 600 12px var(--mono);
+  color: var(--ink-muted);
+}
+.pl-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  min-height: 72px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  background: var(--card);
+  cursor: pointer;
+}
+.pl-day:disabled {
+  cursor: default;
+  opacity: 0.45;
+  border-top-color: var(--line);
+}
+.pl-day-n {
+  font: 500 11px var(--mono);
+  color: var(--ink-muted);
+}
+.pl-day-date {
+  font: 600 20px var(--serif);
+}
+.pl-day-size {
+  font: 500 11px var(--mono);
+  color: var(--ink-muted);
+}
+.pl-day.is-today {
+  box-shadow: 0 0 0 3px #d8a93f;
+}
+.pl-day.is-missed .pl-day-date {
+  color: var(--ink-muted);
+}
+.pl-daily-score {
+  margin-top: 10px;
+}
+
 /* ------------------------------------------------------------------------ case */
 .pl-case {
   padding-top: 18px;

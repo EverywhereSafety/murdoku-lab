@@ -70,6 +70,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     ids = settings.available()
     records = []
+    titles = {setting_id: set() for setting_id in ids}
     for size, band in SLOTS:
         path = out / f"s{size}-{band}.jsonl"
         if args.regenerate or not path.exists():
@@ -87,7 +88,14 @@ def main():
             )
         for i, setting_id in enumerate(ids):
             case = cases[i % len(cases)]
-            theme = settings.dress(case, setting_id)
+            # A setting's cases should not share a title; try a few salts before giving in.
+            for attempt in range(24):
+                theme = settings.dress(
+                    case, setting_id, salt=str(attempt) if attempt else ""
+                )
+                if theme.title not in titles[setting_id]:
+                    break
+            titles[setting_id].add(theme.title)
             records.append(
                 {
                     "visual_case_id": f"{setting_id}-{size}x{size}",

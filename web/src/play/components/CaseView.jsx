@@ -11,7 +11,9 @@ import { createStore } from "../engine/store.js";
 import { t } from "../i18n/index.js";
 import { feedback, reducedMotion } from "../lib/fx.js";
 import { funnel } from "../lib/funnel.js";
+import { shareSquares, streaks } from "../engine/daily.js";
 import { CoachCard, useCoach } from "./Coach.jsx";
+import { Countdown, Flame } from "./Daily.jsx";
 import { Dossier } from "./Dossier.jsx";
 import { Dialog, Face, Mascot, Stars, Toast, formatTime } from "./ui.jsx";
 
@@ -41,6 +43,19 @@ function highlightCells(game, state, ref) {
   const person = game.person.get(ref.id);
   const cells = state.placed[ref.id] ? [state.placed[ref.id]] : state.marks[ref.id] || [];
   return { cells, colour: person?.accent || "#0b7469" };
+}
+
+function dailyShare(game, finished, progress, url) {
+  const d = game.bundle.daily;
+  const verdict = progress.wrong_verdicts ? `⚖️🔁${progress.wrong_verdicts}` : "⚖️✅";
+  const stars = "★".repeat(finished.stars) + "☆".repeat(3 - finished.stars);
+  const hints = progress.hints.length;
+  return [
+    `Murdoku Daily #${d.n} · ${t(`weekday.${d.weekday}`).slice(0, 3)} · ${game.meta.size} ${game.meta.difficulty.label}`,
+    `${shareSquares(game, progress.hints)} ${verdict}`,
+    `${stars} · ${hints ? t("reveal.hints", { n: hints }) : t("reveal.noHints")}`,
+    url,
+  ].join("\n");
 }
 
 function shareText(game, finished, hints, url) {
@@ -227,16 +242,17 @@ function HintCard({ hint, game, onMore, onFix, onClose }) {
   );
 }
 
-function RevealDialog({ open, game, finished, hints, onClose, onNext, onLibrary }) {
+function RevealDialog({ open, game, finished, hints, progress, streak, onClose, onNext, onLibrary }) {
   const [copied, setCopied] = useState(false);
   if (!finished) return null;
   const secret = game.secret();
   const murderer = secret.murderer ? game.person.get(secret.murderer) : null;
   const victim = game.people.find((p) => p.victim);
   const room = game.areas.find((a) => a.id === secret.victim_area)?.name ?? "";
-  const url = window.location.href;
+  const daily = game.bundle.daily;
+  const url = daily && game.bundle.share?.url ? new URL(game.bundle.share.url, window.location.href).href : window.location.href;
   const share = async () => {
-    const text = shareText(game, finished, hints, url);
+    const text = daily ? dailyShare(game, finished, progress, url) : shareText(game, finished, hints, url);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else await navigator.clipboard.writeText(text);
@@ -271,6 +287,16 @@ function RevealDialog({ open, game, finished, hints, onClose, onNext, onLibrary 
         <span>{hints ? t("reveal.hints", { n: hints }) : t("reveal.noHints")}</span>
         <span>{t("reveal.time", { time: formatTime(finished.elapsed_ms) })}</span>
       </div>
+      {daily && (
+        <div className="pl-score pl-daily-score">
+          {streak > 0 && (
+            <span className="pl-streak">
+              <Flame /> {t("daily.streak", { n: streak })}
+            </span>
+          )}
+          <Countdown />
+        </div>
+      )}
       <div className="pl-dialog-buttons">
         <button type="button" className="pl-primary" onClick={share}>
           {copied ? t("reveal.copied") : t("reveal.share")}
@@ -298,7 +324,7 @@ function RevealDialog({ open, game, finished, hints, onClose, onNext, onLibrary 
   );
 }
 
-function Playing({ game, markup, settings, onOpen }) {
+function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
   const store = useMemo(() => createStore(game), [game]);
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const { state, progress } = snapshot;
@@ -434,6 +460,8 @@ function Playing({ game, markup, settings, onOpen }) {
     setVerdictOpen(false);
     const result = store.submit(value);
     if (result.solved) {
+      const after = store.getSnapshot().progress;
+      onSolved?.(game, after.finished, after);
       feedback("solved", settings);
       setTimeout(() => setRevealOpen(true), reducedMotion() ? 0 : 900);
     } else {
@@ -584,6 +612,8 @@ function Playing({ game, markup, settings, onOpen }) {
         game={game}
         finished={finished}
         hints={progress.hints.length}
+        progress={progress}
+        streak={game.bundle.daily ? streaks(profile?.daily || {}, day).current : 0}
         onClose={() => setRevealOpen(false)}
         onNext={next ? () => onOpen(next) : null}
         onLibrary={() => onOpen(null)}
@@ -593,7 +623,7 @@ function Playing({ game, markup, settings, onOpen }) {
   );
 }
 
-export function CaseView({ id, settings, onOpen }) {
+export function CaseView({ id, settings, onOpen, onSolved, profile, day }) {
   const [loaded, setLoaded] = useState(null);
   const [error, setError] = useState(null);
   useEffect(() => {
@@ -627,5 +657,16 @@ export function CaseView({ id, settings, onOpen }) {
         <p>{t("case.loading")}</p>
       </div>
     );
-  return <Playing key={loaded.game.id} game={loaded.game} markup={loaded.markup} settings={settings} onOpen={onOpen} />;
+  return (
+    <Playing
+      key={loaded.game.id}
+      game={loaded.game}
+      markup={loaded.markup}
+      settings={settings}
+      onOpen={onOpen}
+      onSolved={onSolved}
+      profile={profile}
+      day={day}
+    />
+  );
 }

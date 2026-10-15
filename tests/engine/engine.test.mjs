@@ -164,3 +164,26 @@ test("hints escalate: next suspect, misplaced suspect, then the verdict", async 
   const verdict = nextHint(game, done, []);
   assert.equal(verdict.target, "verdict");
 });
+
+test("daily days: local calendar, streaks across DST and catch-up plays", async () => {
+  const daily = await import("../../web/src/play/engine/daily.js");
+  assert.equal(daily.caseNumber("2026-10-12", "2026-10-15"), 4);
+  // across the US and EU daylight-saving changes, day numbers stay consecutive
+  assert.equal(daily.caseNumber("2026-10-12", "2026-11-02"), 22);
+  assert.equal(daily.addDays("2026-10-31", 2), "2026-11-02");
+  assert.equal(daily.addDays("2027-03-27", 2), "2027-03-29");
+  assert.equal(daily.today(new URLSearchParams("date=2026-10-20")), "2026-10-20");
+  assert.equal(daily.today(new URLSearchParams("date=bad"), new Date(2026, 9, 15, 23, 30)), "2026-10-15");
+  const record = {
+    1: { date: "2026-10-12", solved_on: "2026-10-12", stars: 3 },
+    2: { date: "2026-10-13", solved_on: "2026-10-13", stars: 2 },
+    3: { date: "2026-10-14", solved_on: "2026-10-15", stars: 3 },
+    4: { date: "2026-10-15", solved_on: "2026-10-15", stars: 1, hints: 2 },
+  };
+  assert.deepEqual(daily.streaks(record, "2026-10-15"), { current: 1, best: 2 });
+  assert.deepEqual(daily.streaks({ ...record, 3: { ...record[3], solved_on: "2026-10-14" } }, "2026-10-16"), { current: 4, best: 4 });
+  assert.equal(daily.stats(record).perfect, 2);
+  const manifest = { days: [{ date: "2026-10-14" }, { date: "2026-10-15" }, { date: "2026-10-16" }] };
+  assert.equal(daily.openDays(manifest, "2026-10-15").length, 2);
+  assert.equal(daily.openDays(manifest, "2026-10-15", true).length, 3);
+});

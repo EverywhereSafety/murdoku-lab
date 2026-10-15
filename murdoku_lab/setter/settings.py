@@ -241,14 +241,14 @@ def dress(case, setting_id, *, salt=""):
     objects = {k: v for k, v in pack["objects"].items() if k in present}
     visual = dict(pack["visual"])
     visual["setting"] = setting_id
-    for field, key in (("finish", "area_finishes"), ("wallpaper", "area_wallpapers")):
+    for field, slot in (("finish", "area_finishes"), ("wallpaper", "area_wallpapers")):
         chosen_values = {
             str(a): rooms[chosen[a]][field]
             for a in range(case.scene.n_areas)
             if rooms[chosen[a]].get(field)
         }
         if chosen_values:
-            visual[key] = chosen_values
+            visual[slot] = chosen_values
     theme = Theme(
         theme_id=f"{setting_id}-{hashlib.sha256(key.encode()).hexdigest()[:8]}",
         title=pack["titles"][_pick(key + "|title", len(pack["titles"]))],

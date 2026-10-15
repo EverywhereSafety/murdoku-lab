@@ -45,3 +45,6 @@ build/
 
 # Generated player case bundles (python -m murdoku_lab.visual.play_export).
 web/public/cases/
+web/public/daily/
+web/public/og/
+web/public/d/

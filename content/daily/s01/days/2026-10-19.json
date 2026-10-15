@@ -1,0 +1,518 @@
+{
+ "schema": "murdoku.daily_case/1",
+ "date": "2026-10-19",
+ "n": 8,
+ "weekday": "monday",
+ "size": 6,
+ "band": "easy",
+ "special": null,
+ "setting": "train",
+ "murderer": "A",
+ "victim": "Vincent Vane",
+ "murdoku_case": {
+  "schema": "murdoku.case/1",
+  "id": "6b4d2e6dbe6fea08",
+  "variant": "classic",
+  "scene": {
+   "W": 6,
+   "H": 6,
+   "area_of": [
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    2,
+    0,
+    2,
+    2,
+    2,
+    2,
+    2,
+    0,
+    0,
+    2,
+    2,
+    2,
+    2,
+    0,
+    0,
+    2,
+    2,
+    2,
+    2,
+    0,
+    0,
+    2,
+    2,
+    2,
+    2
+   ],
+   "obj_of": [
+    null,
+    null,
+    null,
+    null,
+    "car",
+    null,
+    null,
+    null,
+    "piano",
+    null,
+    "shrub",
+    "bear",
+    null,
+    null,
+    null,
+    null,
+    "shelf",
+    "bed",
+    "boulder",
+    null,
+    null,
+    null,
+    null,
+    "bed",
+    "barrel",
+    null,
+    "carpet",
+    null,
+    null,
+    null,
+    "bed",
+    null,
+    "piano",
+    null,
+    null,
+    null
+   ],
+   "props": [
+    {
+     "pid": "barrel",
+     "standable": false,
+     "cells": [
+      24
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "bear",
+     "standable": false,
+     "cells": [
+      11
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "bed",
+     "standable": true,
+     "cells": [
+      17,
+      23,
+      30
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "boulder",
+     "standable": false,
+     "cells": [
+      18
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "car",
+     "standable": true,
+     "cells": [
+      4
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "carpet",
+     "standable": true,
+     "cells": [
+      26
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "piano",
+     "standable": false,
+     "cells": [
+      8,
+      32
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "shelf",
+     "standable": false,
+     "cells": [
+      16
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "shrub",
+     "standable": false,
+     "cells": [
+      10
+     ],
+     "landmark": false
+    }
+   ],
+   "terrain_of": [
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor"
+   ],
+   "allow_disconnected_areas": false,
+   "doors": [
+    [
+     0,
+     1
+    ],
+    [
+     12,
+     13
+    ]
+   ]
+  },
+  "characters": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "V"
+  ],
+  "victim": "V",
+  "tags": {},
+  "clues": [
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "A",
+      "args": [
+       "bed"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "D",
+      "args": [
+       "car"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "beside",
+      "holder": "B",
+      "args": [
+       "shelf"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_beside",
+      "holder": "E",
+      "args": [
+       "carpet"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "in_area",
+      "holder": "C",
+      "args": [
+       2
+      ]
+     }
+    ]
+   }
+  ],
+  "solution": {
+   "A": 30,
+   "B": 15,
+   "C": 29,
+   "D": 4,
+   "E": 20,
+   "V": 7
+  },
+  "answer": "murderer",
+  "answer_key": "A",
+  "theme_id": null,
+  "seed": 16340255,
+  "target_band": "easy",
+  "certificate": {
+   "solved": true,
+   "depth": 9,
+   "tier_max": 1,
+   "tier_hist": {
+    "1": 9
+   },
+   "advanced": 0,
+   "cost": 9.0,
+   "max_width": 53,
+   "guess_free": true,
+   "place_order": [
+    "D",
+    "B",
+    "E",
+    "A",
+    "C",
+    "V"
+   ],
+   "bottleneck": {
+    "kind": "line",
+    "tier": 1,
+    "text": "V is the only person who can be in row 2, and every row holds someone — so V is there.",
+    "removed": 17
+   },
+   "steps": [
+    {
+     "kind": "setup",
+     "tier": 1,
+     "text": "Mark the cells each clue allows. 7 cell(s) are unusable (a table, shelf, plant or the like stands there); 53 candidate placements remain across 6 people.",
+     "removed": 0
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for D: r1c5. Row 1 and column 5 are now closed to everyone else.",
+     "removed": 13,
+     "placed": [
+      "D",
+      4
+     ]
+    },
+    {
+     "kind": "line",
+     "tier": 1,
+     "text": "V is the only person who can be in row 2, and every row holds someone — so V is there.",
+     "removed": 17
+    },
+    {
+     "kind": "exclusive",
+     "tier": 1,
+     "text": "A was the only person on a bed — every other person is wiped off those 3 square(s) (3 candidate(s) cleared).",
+     "removed": 3
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for B: r3c4. Row 3 and column 4 are now closed to everyone else.",
+     "removed": 9,
+     "placed": [
+      "B",
+      15
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for E: r4c3. Row 4 and column 3 are now closed to everyone else.",
+     "removed": 3,
+     "placed": [
+      "E",
+      20
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for A: r6c1. Row 6 and column 1 are now closed to everyone else.",
+     "removed": 2,
+     "placed": [
+      "A",
+      30
+     ]
+    },
+    {
+     "kind": "verdict",
+     "tier": 1,
+     "text": "C is at r5c6.",
+     "removed": 0,
+     "placed": [
+      "C",
+      29
+     ]
+    },
+    {
+     "kind": "verdict",
+     "tier": 1,
+     "text": "V is at r2c2.",
+     "removed": 0,
+     "placed": [
+      "V",
+      7
+     ]
+    }
+   ]
+  },
+  "meta": {
+   "quality_version": "scene-design-v1",
+   "implied_atoms_removed": 0,
+   "scene_spec": {
+    "schema": "murdoku.scene_spec/1",
+    "anchors_per_area": {},
+    "blocker_rate": 0.2,
+    "furniture_rate": 0.16
+   }
+  }
+ },
+ "murdoku_theme": {
+  "theme_id": "train-4769a91e",
+  "title": "Murder at Midnight",
+  "names": {
+   "A": "Ada Ashworth",
+   "B": "Basil Blackwood",
+   "C": "Cleo Carrow",
+   "D": "Dorian Dale",
+   "E": "Esme Elwood",
+   "V": "Vincent Vane"
+  },
+  "pronouns": {
+   "A": "she",
+   "B": "he",
+   "C": "she",
+   "D": "he",
+   "E": "she",
+   "V": "he"
+  },
+  "areas": [
+   "Guard's Van",
+   "Lounge Car",
+   "Sleeper Car"
+  ],
+  "objects": {
+   "bed": "sleeper berth",
+   "carpet": "corridor runner",
+   "car": "luggage trolley",
+   "shelf": "luggage rack",
+   "shrub": "potted azalea",
+   "bear": "teddy bear",
+   "piano": "lounge piano",
+   "boulder": "coal heap",
+   "barrel": "milk churn"
+  },
+  "tags": {},
+  "victim_note": "was found dead",
+  "blurb": "The train departed on time. Somewhere between two countries, one passenger stopped breathing.",
+  "assets": {},
+  "setting_id": "train",
+  "visual": {
+   "accent": "#2f5c48",
+   "finishes": [
+    "carpet",
+    "planks",
+    "herringbone",
+    "parquet",
+    "checker",
+    "boards",
+    "paving"
+   ],
+   "wallpapers": [
+    "walnut_panels",
+    "night_window",
+    "green_velvet",
+    "panel_wood"
+   ],
+   "variants": {
+    "carpet": [
+     "sage",
+     "rose",
+     "plum"
+    ],
+    "checker": [
+     "noir"
+    ],
+    "planks": [
+     "walnut",
+     "oak"
+    ]
+   },
+   "frame": "train",
+   "skins": {
+    "bed": "berth",
+    "chair": "compartment_seat",
+    "car": "luggage_trolley",
+    "table": "dining_car_table",
+    "tv": "samovar",
+    "shelf": "luggage_rack",
+    "plant": "fern",
+    "crate": "mail_sacks",
+    "box": "hamper",
+    "register": "railway_lantern",
+    "boulder": "coal_heap",
+    "barrel": "milk_churn"
+   },
+   "setting": "train",
+   "area_finishes": {
+    "0": "boards",
+    "1": "herringbone",
+    "2": "carpet"
+   },
+   "area_wallpapers": {
+    "0": "panel_wood",
+    "1": "walnut_panels",
+    "2": "green_velvet"
+   }
+  }
+ }
+}

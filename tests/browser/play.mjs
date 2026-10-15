@@ -143,7 +143,7 @@ try {
   checks.push("right verdict: reveal, epilogue, GUILTY stamp on the board");
 
   await page.goto(base, { waitUntil: "networkidle" });
-  assert.ok((await page.locator(".pl-progress-line").textContent()).startsWith("1 of"), "the library counts the solve");
+  assert.ok((await page.locator(".pl-card.is-solved").count()) >= 1, "the library marks the solved case");
   checks.push("library records the solved case");
 
   await page.goto(`${base}?case=glasshouse`, { waitUntil: "networkidle" });
@@ -173,6 +173,52 @@ try {
     checks.push("the training case coaches every placement in deduction order");
   }
   await desktop.close();
+
+  // -------------------------------------------------------------------- daily
+  const manifestPath = path.join(root, "daily/manifest.json");
+  if (fs.existsSync(manifestPath)) {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    const day = manifest.days[Math.min(3, manifest.days.length - 1)];
+    const later = manifest.days.find((d) => d.date > day.date);
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    const daily = await context.newPage();
+    watch(daily, "daily");
+    await daily.goto(`${base}?date=${day.date}`, { waitUntil: "networkidle" });
+    assert.match(await daily.locator(".pl-today-cta").textContent(), /today/i);
+    checks.push(`daily: the library opens on today's case (#${day.n}) with a countdown and calendar`);
+    if (later) {
+      await daily.goto(`${base}?d=${later.n}&date=${day.date}`, { waitUntil: "networkidle" });
+      await daily.locator(".pl-empty h2").waitFor();
+      await daily.goto(`${base}?d=${later.n}&date=${day.date}&unlock=all`, { waitUntil: "networkidle" });
+      await daily.locator(".pl-overlay").waitFor();
+      checks.push("daily: future cases stay locked unless previewed with unlock=all");
+    }
+    const sealed = JSON.parse(fs.readFileSync(path.join(root, `daily/${day.id}.json`), "utf8"));
+    const answers = unseal(sealed.secret, sealed.id, day.date);
+    await daily.goto(`${base}?d=${day.n}&date=${day.date}`, { waitUntil: "networkidle" });
+    const help = await boardHelpers(daily);
+    for (const [who, cell] of Object.entries(answers.solution)) {
+      await daily.keyboard.press(who.toLowerCase());
+      await daily.mouse.click(...help.point(cell));
+    }
+    const lineup = await daily.evaluate(() =>
+      [...document.querySelectorAll(".pl-suspect")].filter((n) => !n.classList.contains("is-victim")).map((n) => n.querySelector(".pl-badge").textContent),
+    );
+    await daily.locator(".pl-accuse.is-ready").click();
+    await daily.locator(".pl-lineup-card").nth(lineup.indexOf(answers.murderer)).click();
+    await daily.locator(".pl-reveal .pl-primary").click();
+    const shared = await daily.evaluate(() => navigator.clipboard.readText());
+    assert.match(shared, new RegExp(`^Murdoku Daily #${day.n} · `));
+    assert.match(shared, /🟩/);
+    assert.ok(!/\b[a-p](?:1[0-6]|[1-9])\b/.test(shared.split("\n").slice(0, 3).join(" ")), "no coordinates in the share text");
+    for (const p of sealed.public.people) assert.ok(!shared.includes(p.name), "no names in the share text");
+    checks.push("daily: solving copies a spoiler-free share line (#n, tiles, verdict, stars)");
+    await daily.goto(`${base}?date=${day.date}`, { waitUntil: "networkidle" });
+    assert.match(await daily.locator(".pl-streak").first().textContent(), /1-day streak/);
+    checks.push("daily: the streak counts a case solved on its day");
+    await context.close();
+  }
 
   // -------------------------------------------------------------------- phone
   const phone = await browser.newContext({ viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });

@@ -27,6 +27,14 @@ def _artwork(style):
     return renderer_info(style)
 
 
+def daily_published():
+    """Content hashes of locked daily cases (content/daily/published.json)."""
+    from murdoku_lab.paths import PROJECT_ROOT
+
+    path = PROJECT_ROOT / "content" / "daily" / "published.json"
+    return set(json.loads(path.read_text())) if path.exists() else set()
+
+
 def load_records(path):
     if path.suffix == ".jsonl":
         return [
@@ -84,6 +92,8 @@ def write_bundle(
     (destination / "public").mkdir()
     private = {view: [] for view in views}
     results, seen = [], set()
+    # Published daily cases are for players, never training data.
+    published = daily_published()
     for source in records:
         case = Case.from_json(source.get("murdoku_case", source))
         if source.get("murdoku_theme"):
@@ -101,6 +111,15 @@ def write_bundle(
         if identity in seen:
             continue
         seen.add(identity)
+        if identity in published:
+            results.append(
+                {
+                    "case_id": identity,
+                    "accepted": False,
+                    "excluded": "published daily case",
+                }
+            )
+            continue
         report = gate(
             case,
             expect_band=case.target_band,

@@ -124,3 +124,13 @@ def test_epilogue_fills_every_field(demo_cases):
     murderer = next(p for p in case.characters if p != case.victim)
     line = settings.epilogue(theme, case, murderer, 0)
     assert "{" not in line and theme.area(0) in line
+
+
+def test_dressing_varies_with_the_case_and_the_salt(demo_cases):
+    """Titles, blurbs and theme ids come from a hash of the case and salt, not the setting
+    alone: many dressings of one setting must not all read the same."""
+    first, second = demo_cases
+    ids = {settings.dress(c, "train", salt=s).theme_id for c in demo_cases for s in ("", "a", "b", "c")}
+    assert len(ids) == 8
+    titles = {settings.dress(first, "train", salt=str(s)).title for s in range(24)}
+    assert len(titles) > 3

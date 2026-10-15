@@ -3,6 +3,8 @@ import tokens from "../../generated/tokens.json";
 import { assetUrl, loadLibrary } from "../data.js";
 import { caseStatus } from "../engine/persist.js";
 import { t } from "../i18n/index.js";
+import { todaysCase } from "../engine/daily.js";
+import { Archive, Countdown, StatsRow, TodayCard } from "./Daily.jsx";
 import { Mascot, Stars } from "./ui.jsx";
 
 function CaseCard({ entry, onOpen, big = false }) {
@@ -38,7 +40,7 @@ function CaseCard({ entry, onOpen, big = false }) {
   );
 }
 
-export function Library({ onOpen }) {
+export function Library({ onOpen, manifest, day, unlock, profile }) {
   const [index, setIndex] = useState(null);
   const [error, setError] = useState(null);
   useEffect(() => {
@@ -69,6 +71,7 @@ export function Library({ onOpen }) {
   const featured = fresh
     ? training
     : index.cases.find((c) => c.kind === "themed" && !caseStatus(c)?.solved) || index.cases[0];
+  const todays = manifest ? todaysCase(manifest, day) : null;
   return (
     <div className="pl-library">
       <section className="pl-hero">
@@ -76,15 +79,39 @@ export function Library({ onOpen }) {
           <Mascot pose="pointing" size={132} className="pl-hero-mascot" />
           <h1>{t("brand.name")}</h1>
           <p>{t("brand.tagline")}</p>
-          <p className="pl-progress-line">{t("library.progress", { solved, total: index.cases.length })}</p>
+          {manifest ? (
+            <StatsRow record={profile.daily || {}} day={day} />
+          ) : (
+            <p className="pl-progress-line">{t("library.progress", { solved, total: index.cases.length })}</p>
+          )}
         </div>
-        {featured && (
+        {todays ? (
           <div className="pl-hero-feature">
-            <p className="pl-eyebrow">{fresh ? t("library.training") : t("library.featured")}</p>
-            <CaseCard entry={featured} onOpen={onOpen} big />
+            <p className="pl-eyebrow">
+              {t("daily.today")} · <Countdown />
+            </p>
+            <TodayCard entry={todays} onOpen={onOpen} />
           </div>
+        ) : (
+          featured && (
+            <div className="pl-hero-feature">
+              <p className="pl-eyebrow">{fresh ? t("library.training") : t("library.featured")}</p>
+              <CaseCard entry={featured} onOpen={onOpen} big />
+            </div>
+          )
         )}
       </section>
+      {todays && fresh && (
+        <button type="button" className="pl-training" onClick={() => onOpen(training.id)}>
+          <Mascot pose="pointing" size={56} />
+          <span>
+            <strong>{t("library.training")}</strong>
+            <span>{training.title}</span>
+          </span>
+          <span aria-hidden="true">→</span>
+        </button>
+      )}
+      {manifest && <Archive manifest={manifest} day={day} unlock={unlock} onOpen={onOpen} />}
       {groups.map(([key, entries]) => {
         const setting = tokens.settings[key];
         const name = key === "classic" ? t("library.classics") : setting?.name || entries[0].setting.name;

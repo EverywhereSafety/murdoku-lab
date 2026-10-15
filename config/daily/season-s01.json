@@ -1,0 +1,19 @@
+{
+  "schema": "murdoku.daily_season/1",
+  "season": "s01",
+  "epoch": "2026-10-12",
+  "start": "2026-10-12",
+  "weeks": 8,
+  "candidates": 3,
+  "rhythm": {
+    "monday": [6, "easy"],
+    "tuesday": [6, "medium"],
+    "wednesday": [7, "medium"],
+    "thursday": [7, "hard"],
+    "friday": [8, "medium"],
+    "saturday": [8, "medium"],
+    "sunday": [9, "hard"]
+  },
+  "special": {"sunday": "Sunday Special"},
+  "settings": ["manor", "liner", "museum", "theatre", "chalet", "glasshouse", "train", "library"]
+}

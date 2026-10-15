@@ -1,0 +1,682 @@
+{
+ "schema": "murdoku.daily_case/1",
+ "date": "2026-10-15",
+ "n": 4,
+ "weekday": "thursday",
+ "size": 7,
+ "band": "hard",
+ "special": null,
+ "setting": "library",
+ "murderer": "F",
+ "victim": "Valentina Vane",
+ "murdoku_case": {
+  "schema": "murdoku.case/1",
+  "id": "062471be047dcb6a",
+  "variant": "classic",
+  "scene": {
+   "W": 7,
+   "H": 7,
+   "area_of": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    3,
+    1,
+    1,
+    3,
+    3,
+    3,
+    3,
+    3
+   ],
+   "obj_of": [
+    null,
+    null,
+    "barrel",
+    "boulder",
+    "chair",
+    null,
+    null,
+    null,
+    null,
+    "carpet",
+    "carpet",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "barrel",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "tree",
+    null,
+    "boulder",
+    "barrel",
+    null,
+    null,
+    "box",
+    "chair",
+    null,
+    "car",
+    "chair",
+    "chair",
+    null,
+    null,
+    null,
+    null,
+    "table",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "barrel"
+   ],
+   "props": [
+    {
+     "pid": "barrel",
+     "standable": false,
+     "cells": [
+      2,
+      19,
+      29,
+      48
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "boulder",
+     "standable": false,
+     "cells": [
+      3,
+      28
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "box",
+     "standable": false,
+     "cells": [
+      32
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "car",
+     "standable": true,
+     "cells": [
+      35
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "carpet",
+     "standable": true,
+     "cells": [
+      9,
+      10
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "chair",
+     "standable": true,
+     "cells": [
+      4,
+      33,
+      36,
+      37
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "table",
+     "standable": false,
+     "cells": [
+      42
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "tree",
+     "standable": false,
+     "cells": [
+      26
+     ],
+     "landmark": false
+    }
+   ],
+   "terrain_of": [
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor"
+   ],
+   "allow_disconnected_areas": false,
+   "doors": [
+    [
+     1,
+     8
+    ],
+    [
+     17,
+     18
+    ],
+    [
+     34,
+     41
+    ],
+    [
+     37,
+     44
+    ]
+   ]
+  },
+  "characters": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "F",
+   "V"
+  ],
+  "victim": "V",
+  "tags": {},
+  "clues": [
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "B",
+      "args": [
+       "carpet"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "with",
+      "holder": "D",
+      "args": [
+       "C"
+      ]
+     },
+     {
+      "kind": "only_on",
+      "holder": "D",
+      "args": [
+       "chair"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "beside",
+      "holder": "F",
+      "args": [
+       "tree"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "alone",
+      "holder": "A",
+      "args": []
+     },
+     {
+      "kind": "only_beside",
+      "holder": "A",
+      "args": [
+       "barrel"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "col_offset",
+      "holder": "E",
+      "args": [
+       "C",
+       -1
+      ]
+     },
+     {
+      "kind": "in_corner",
+      "holder": "E",
+      "args": []
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "not_in_corner",
+      "holder": "C",
+      "args": []
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "not_beside",
+      "holder": "V",
+      "args": [
+       "tree"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "not_in_area",
+      "holder": "V",
+      "args": [
+       1
+      ]
+     }
+    ]
+   }
+  ],
+  "solution": {
+   "A": 47,
+   "B": 10,
+   "C": 15,
+   "D": 37,
+   "E": 0,
+   "F": 25,
+   "V": 34
+  },
+  "answer": "murderer",
+  "answer_key": "F",
+  "theme_id": null,
+  "seed": 19148852,
+  "target_band": "hard",
+  "certificate": {
+   "solved": true,
+   "depth": 19,
+   "tier_max": 3,
+   "tier_hist": {
+    "1": 11,
+    "2": 5,
+    "3": 3
+   },
+   "advanced": 3,
+   "cost": 36.0,
+   "max_width": 79,
+   "guess_free": true,
+   "place_order": [
+    "B",
+    "D",
+    "A",
+    "C",
+    "E",
+    "V",
+    "F"
+   ],
+   "bottleneck": {
+    "kind": "xblock",
+    "tier": 3,
+    "text": "A cannot be at r4c2: that would leave F with no square at all.",
+    "removed": 1
+   },
+   "steps": [
+    {
+     "kind": "setup",
+     "tier": 1,
+     "text": "Mark the cells each clue allows. 9 cell(s) are unusable (a table, shelf, plant or the like stands there); 79 candidate placements remain across 7 people.",
+     "removed": 0
+    },
+    {
+     "kind": "exclusive",
+     "tier": 1,
+     "text": "B was the only person on a carpet — every other person is wiped off those 2 square(s) (5 candidate(s) cleared).",
+     "removed": 5
+    },
+    {
+     "kind": "exclusive",
+     "tier": 1,
+     "text": "D was the only person on a chair — every other person is wiped off those 4 square(s) (7 candidate(s) cleared).",
+     "removed": 7
+    },
+    {
+     "kind": "exclusive",
+     "tier": 1,
+     "text": "A was the only person beside a barrel — every other person is wiped off those 9 square(s) (14 candidate(s) cleared).",
+     "removed": 14
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for B: r2c4. Row 2 and column 4 are now closed to everyone else.",
+     "removed": 15,
+     "placed": [
+      "B",
+      10
+     ]
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking D and C (with) removes 1 candidate(s).",
+     "removed": 1
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking E and C (col_offset) removes 7 candidate(s).",
+     "removed": 7
+    },
+    {
+     "kind": "alone",
+     "tier": 2,
+     "text": "Someone else is pinned to an area A would have had to itself — 3 candidate(s) cleared.",
+     "removed": 3
+    },
+    {
+     "kind": "xblock",
+     "tier": 3,
+     "text": "A cannot be at r4c2: that would leave F with no square at all.",
+     "removed": 1
+    },
+    {
+     "kind": "xblock",
+     "tier": 3,
+     "text": "C cannot be at r4c3: that would leave F with no square at all.",
+     "removed": 1
+    },
+    {
+     "kind": "xblock",
+     "tier": 3,
+     "text": "E cannot be at r4c5: that would leave F with no square at all.",
+     "removed": 1
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking E and C (col_offset) removes 2 candidate(s).",
+     "removed": 2
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking D and C (with) removes 2 candidate(s).",
+     "removed": 2
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for D: r6c3. Row 6 and column 3 are now closed to everyone else.",
+     "removed": 6,
+     "placed": [
+      "D",
+      37
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for A: r7c6. Row 7 and column 6 are now closed to everyone else.",
+     "removed": 3,
+     "placed": [
+      "A",
+      47
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for C: r3c2. Row 3 and column 2 are now closed to everyone else.",
+     "removed": 1,
+     "placed": [
+      "C",
+      15
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for E: r1c1. Row 1 and column 1 are now closed to everyone else.",
+     "removed": 2,
+     "placed": [
+      "E",
+      0
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for V: r5c7. Row 5 and column 7 are now closed to everyone else.",
+     "removed": 1,
+     "placed": [
+      "V",
+      34
+     ]
+    },
+    {
+     "kind": "verdict",
+     "tier": 1,
+     "text": "F is at r4c5.",
+     "removed": 0,
+     "placed": [
+      "F",
+      25
+     ]
+    }
+   ]
+  },
+  "meta": {
+   "quality_version": "scene-design-v1",
+   "implied_atoms_removed": 0,
+   "scene_spec": {
+    "schema": "murdoku.scene_spec/1",
+    "anchors_per_area": {},
+    "blocker_rate": 0.2,
+    "furniture_rate": 0.16
+   }
+  }
+ },
+ "murdoku_theme": {
+  "theme_id": "library-7dbb121d",
+  "title": "Death Between the Lines",
+  "names": {
+   "A": "Ada Ashworth",
+   "B": "Basil Blackwood",
+   "C": "Cleo Carrow",
+   "D": "Dorian Dale",
+   "E": "Esme Elwood",
+   "F": "Felix Fairweather",
+   "V": "Valentina Vane"
+  },
+  "pronouns": {
+   "A": "she",
+   "B": "he",
+   "C": "she",
+   "D": "he",
+   "E": "she",
+   "F": "he",
+   "V": "she"
+  },
+  "areas": [
+   "Dean's Study",
+   "Reading Room",
+   "Cloister",
+   "Porter's Lodge"
+  ],
+  "objects": {
+   "chair": "leather armchair",
+   "carpet": "faded rug",
+   "car": "book trolley",
+   "table": "reading table",
+   "tree": "old yew",
+   "box": "stack of books",
+   "boulder": "telescope",
+   "barrel": "umbrella stand"
+  },
+  "tags": {},
+  "victim_note": "was found dead",
+  "blurb": "The bell has rung for dinner. One scholar is still among the books, and will be for ever.",
+  "assets": {},
+  "setting_id": "library",
+  "visual": {
+   "accent": "#7d2a2e",
+   "finishes": [
+    "parquet",
+    "herringbone",
+    "planks",
+    "carpet",
+    "flagstone",
+    "boards",
+    "paving",
+    "lawn"
+   ],
+   "wallpapers": [
+    "book_wall",
+    "oak_panel",
+    "gothic_window",
+    "crimson"
+   ],
+   "variants": {
+    "carpet": [
+     "plum",
+     "rose",
+     "sage"
+    ],
+    "planks": [
+     "walnut",
+     "oak"
+    ]
+   },
+   "frame": "library",
+   "skins": {
+    "bed": "chesterfield",
+    "chair": "leather_armchair",
+    "car": "book_trolley",
+    "table": "reading_table",
+    "tv": "grandfather_clock",
+    "crate": "card_catalogue",
+    "box": "book_stack",
+    "register": "circulation_desk",
+    "bear": "owl",
+    "statue": "globe",
+    "boulder": "telescope",
+    "barrel": "umbrella_stand"
+   },
+   "setting": "library",
+   "area_finishes": {
+    "0": "carpet",
+    "1": "parquet",
+    "2": "paving",
+    "3": "flagstone"
+   },
+   "area_wallpapers": {
+    "0": "crimson",
+    "1": "book_wall",
+    "2": "gothic_window",
+    "3": "oak_panel"
+   }
+  }
+ }
+}
