@@ -57,6 +57,9 @@ export default function PlayApp() {
       if (!game.bundle.daily) return;
       const { n, date } = game.bundle.daily;
       setProfile((current) => {
+        // The first solve counts: solving a case again later must not move its streak day.
+        const before = current.daily?.[n];
+        if (before?.solved_on && before.solved_on <= where.day) return current;
         const next = {
           ...current,
           daily: {

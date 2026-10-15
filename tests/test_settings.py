@@ -130,7 +130,32 @@ def test_dressing_varies_with_the_case_and_the_salt(demo_cases):
     """Titles, blurbs and theme ids come from a hash of the case and salt, not the setting
     alone: many dressings of one setting must not all read the same."""
     first, second = demo_cases
-    ids = {settings.dress(c, "train", salt=s).theme_id for c in demo_cases for s in ("", "a", "b", "c")}
+    ids = {
+        settings.dress(c, "train", salt=s).theme_id
+        for c in demo_cases
+        for s in ("", "a", "b", "c")
+    }
     assert len(ids) == 8
     titles = {settings.dress(first, "train", salt=str(s)).title for s in range(24)}
     assert len(titles) > 3
+
+
+def test_clues_say_an_before_a_vowel(demo_cases):
+    """Packs name props such as "umbrella stand" or "owl"; the clues must say "an"."""
+    import dataclasses
+
+    from murdoku_lab.core.atoms import SPECS
+    from murdoku_lab.core.render import render_clue
+
+    case, clue, kind = next(
+        (case, clue, atom["obj"])
+        for case in demo_cases
+        for clue in case.clues
+        for atom in clue.atoms
+        if "obj" in SPECS[atom.kind].params and atom["obj"] != "flowers"
+    )
+    theme = settings.dress(case, "library")
+    for noun, article in (("umbrella stand", "an"), ("unicorn", "a"), ("globe", "a")):
+        renamed = dataclasses.replace(theme, objects={**theme.objects, kind: noun})
+        text = render_clue(clue, case, renamed)
+        assert f"{article} {noun}" in text, text

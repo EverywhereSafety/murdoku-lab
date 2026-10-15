@@ -62,7 +62,6 @@ export function loadProfile() {
   const profile = read("profile", {});
   return {
     settings: { ...DEFAULT_SETTINGS, ...(profile.settings || {}) },
-    solved: profile.solved || {},
     daily: profile.daily || {},
   };
 }

@@ -74,7 +74,7 @@ export function TodayCard({ entry, onOpen }) {
           <span>{entry.size}</span>
           <span>{entry.setting.name}</span>
         </span>
-        <span className="pl-today-cta">{status?.solved ? t("daily.solvedToday") : t("daily.play")} →</span>
+        <span className="pl-today-cta">{status?.solved ? t("daily.solvedToday") : t("daily.play")}{"\u00a0→"}</span>
       </span>
     </button>
   );

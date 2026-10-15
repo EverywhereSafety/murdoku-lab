@@ -324,6 +324,7 @@ h3 {
   font: 500 12px var(--mono);
   letter-spacing: 0.04em;
   text-transform: none;
+  white-space: nowrap;
   color: var(--ink-muted);
 }
 .pl-stats {
@@ -1483,6 +1484,75 @@ h3 {
   }
   .pl-dialog-body {
     padding: 22px 18px 20px;
+  }
+}
+
+/* Phones: today's case belongs on the first screen, so the welcome shrinks to one row. */
+@media (max-width: 599px) {
+  .pl-library {
+    padding-top: 14px;
+  }
+  .pl-hero {
+    padding: 16px;
+    gap: 14px;
+    border-radius: 22px;
+  }
+  .pl-hero-copy {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+  }
+  .pl-hero-mascot {
+    width: 60px;
+    height: 60px;
+  }
+  .pl-hero h1 {
+    font-size: 32px;
+    margin: 0;
+  }
+  .pl-hero-copy > :not(.pl-hero-mascot):not(h1) {
+    grid-column: 1 / -1;
+  }
+  .pl-hero-copy > p {
+    font-size: 15px;
+    margin: 10px 0 4px;
+  }
+  .pl-stats {
+    font-size: 13px;
+    gap: 6px 12px;
+  }
+  .pl-stats b {
+    font-size: 15px;
+  }
+  .pl-hero-feature .pl-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+  .pl-card.is-big {
+    flex-direction: row;
+  }
+  .pl-card.is-big .pl-card-thumb {
+    width: 40%;
+    align-self: stretch;
+  }
+  .pl-card.is-big .pl-card-thumb img {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  .pl-card.is-big .pl-card-body {
+    padding: 12px 14px;
+    gap: 4px;
+  }
+  .pl-card.is-big strong {
+    font-size: 20px;
+  }
+  .pl-card.is-big .pl-card-blurb {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 14px;
   }
 }
 

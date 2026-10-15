@@ -9,6 +9,7 @@ content/tutorial/tutorial.json (`murdoku_case` + `murdoku_theme`, dressed in the
 play_export ships as the `tutorial` case.
 """
 
+import dataclasses
 import json
 import subprocess
 import sys
@@ -95,7 +96,10 @@ def main():
     if best is None:
         raise SystemExit("no candidate starts with a single-square deduction")
     case = best[1]
-    theme = settings.dress(case, "manor", salt="tutorial")
+    # A title of its own, so the training case never shares one with a daily case.
+    theme = dataclasses.replace(
+        settings.dress(case, "manor", salt="tutorial"), title="Elementary"
+    )
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
         json.dumps(

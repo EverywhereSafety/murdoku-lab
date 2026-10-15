@@ -5,7 +5,7 @@
 
 Cases come from the constraint-first farm with the player rhythm policy and the cozy scene spec
 (denser rooms). Case i of every size is dressed in setting i, so each setting gets one case per
-size. The result, `cases.jsonl`, holds `murdoku_case` + `murdoku_theme` records that the Lab and
+size. A setting's cases get different titles, and none of the titles the locked daily cases use. The result, `cases.jsonl`, holds `murdoku_case` + `murdoku_theme` records that the Lab and
 the gallery read:
 
     python -m murdoku_lab.visual.server --records outputs/showcase/cases.jsonl
@@ -60,6 +60,15 @@ def generate(path, size, band, n, workers):
         )
 
 
+def daily_titles():
+    """Titles of the locked daily cases, per setting: the showcase leaves them to the daily."""
+    used = {}
+    for path in sorted((ROOT / "content" / "daily").glob("*/days/*.json")):
+        record = json.loads(path.read_text())
+        used.setdefault(record["setting"], set()).add(record["murdoku_theme"]["title"])
+    return used
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default=str(ROOT / "outputs" / "showcase"))
@@ -70,7 +79,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     ids = settings.available()
     records = []
-    titles = {setting_id: set() for setting_id in ids}
+    daily = daily_titles()
+    titles = {setting_id: set(daily.get(setting_id, ())) for setting_id in ids}
     for size, band in SLOTS:
         path = out / f"s{size}-{band}.jsonl"
         if args.regenerate or not path.exists():
@@ -89,7 +99,7 @@ def main():
         for i, setting_id in enumerate(ids):
             case = cases[i % len(cases)]
             # A setting's cases should not share a title; try a few salts before giving in.
-            for attempt in range(24):
+            for attempt in range(40):
                 theme = settings.dress(
                     case, setting_id, salt=str(attempt) if attempt else ""
                 )

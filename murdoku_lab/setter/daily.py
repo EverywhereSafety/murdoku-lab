@@ -12,9 +12,10 @@ A season (config/daily/season-<id>.json) fixes the weekly rhythm of board sizes 
 epoch that numbers cases (#1 is the epoch's day), and the setting rotation: no setting repeats
 within a week. Each day gets a few candidates from the constraint-first farm with seeds derived
 from sha256("murdoku/daily/v1/<date>/<j>"), so a day can always be regenerated. Locking picks a
-candidate (the reviewer's pick, or the first that keeps the variety rules: a new layout, not
-yesterday's murderer letter, no victim repeated within a week), dresses it in the day's setting
-and records seeds, git revision and solver version. Locked cases are listed in
+candidate (the reviewer's pick, or the first that keeps the variety rules: a new room layout and
+not yesterday's murderer letter, farming a few more candidates when none does), dresses it in the
+day's setting (preferring a title the setting has not used yet and a victim not seen in the last
+five days) and records the candidate, seed, git revision and solver version. Locked cases are listed in
 content/daily/published.json so dataset exports can leave them out.
 """
 
@@ -387,7 +388,7 @@ def build(spec, out=None, site_url=""):
         }
         data["share"] = {"url": f"{site_url}d/{n}/", "og_image": f"og/{n}.png"}
         data["scene"] = {"day": f"{case_id}.day.svg", "night": f"{case_id}.night.svg"}
-        data["thumb"] = f"{case_id}.thumb.png"
+        data["thumb"] = f"{case_id}.thumb.svg"
         (daily_dir / f"{case_id}.json").write_text(
             json.dumps(data, ensure_ascii=False, separators=(",", ":"))
         )
@@ -402,11 +403,7 @@ def build(spec, out=None, site_url=""):
                     backdrop=False,
                 )
             )
-        (daily_dir / f"{case_id}.thumb.png").write_bytes(
-            png_from_svg(
-                thumbnail_svg(obs, px=320), profile=bundled_profile(fit_width=320)
-            )
-        )
+        (daily_dir / f"{case_id}.thumb.svg").write_text(thumbnail_svg(obs, px=320))
         weekday = record["weekday"].title()
         date = dt.date.fromisoformat(record["date"])
         label = f"{weekday[:3]} {date.day} {date.strftime('%b')}"

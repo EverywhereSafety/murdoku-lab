@@ -33,7 +33,8 @@ Read the motivation: **[How we solved the Treasure Hunt in 20 minutes](https://e
 | -------------------- | ----------------------------------------------------------------------------------------------- |
 | Setter               | Generate boards up to 24×24 with scene roles, semantic themes and verified solutions                       |
 | Solver               | Verify accepted cases with CP-SAT and independent DFS; inspect deduction and difficulty signals |
-| Playable frontend    | Place characters with row/column exclusions, personal notes, clue focus and board navigation                                   |
+| Player app           | A daily case, graded hints, a coached training case and eight illustrated settings, as a static web app |
+| Research Lab         | Place characters with row/column exclusions, personal notes, clue focus, exports and solver views       |
 | Text + vision export | Produce paired inputs for the same verified case: text or board PNG + clues                     |
 | Semantic diversity   | Vary settings, cast and scene labels through optional LLM theming                               |
 | Agent environment    | Execute stateful tools and check placement and murderer answers                                 |
@@ -113,12 +114,18 @@ contain answers; keep those separate from model-facing inputs.
 
 ```bash
 npm ci
+npm run release:local
+```
+
+Open **http://127.0.0.1:4173/** for the player (today's case, the training case and the
+illustrated cases) and **/lab/** for the research Lab. To play your own cases in the Lab:
+
+```bash
 npm run build
 python -m murdoku_lab.visual.server --port 8765 --records data/cases/demo.jsonl
 ```
 
-Open **http://localhost:8765/**. The server also includes built-in demo cases.
-See [frontend setup](docs/guides/play.md) for visual assets and hosting.
+See [playing and hosting](docs/guides/play.md) and [the daily case](docs/guides/daily.md).
 
 ## Export text and vision queries
 

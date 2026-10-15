@@ -5,8 +5,9 @@
 
 Writes web/public/cases/: `index.json` (the case library), and per case `<id>.json` (the
 bundle), `<id>.day.svg` / `<id>.night.svg` (the static casebook scene: floors, walls, furniture,
-plaques, frame) and `<id>.thumb.png`. The player draws people, notes and coordinates on top of
-the scene and never loads Python.
+plaques, frame) and `<id>.thumb.svg` (the same scene at library-card size: about 7 KB once a
+host gzips it, a tenth of a PNG). The player draws people, notes and coordinates on top of the
+scene and never loads Python.
 
 A bundle holds the public observation and a sealed secret (solution, verdict, epilogue, hints;
 see seal.py). Nothing in the public part is derived from the solution.
@@ -142,7 +143,7 @@ def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt=""):
         "meta": meta,
         "public": public,
         "scene": {"day": f"{case_id}.day.svg", "night": f"{case_id}.night.svg"},
-        "thumb": f"{case_id}.thumb.png",
+        "thumb": f"{case_id}.thumb.svg",
         "share": None,
         "ai_results": None,
         "secret": seal(secret, case_id, salt),
@@ -222,13 +223,7 @@ def export(out=OUT, records=None, *, thumbs=True):
                 )
             )
         if thumbs:
-            from murdoku_lab.visual.raster import bundled_profile, png_from_svg
-
-            (out / f"{case_id}.thumb.png").write_bytes(
-                png_from_svg(
-                    thumbnail_svg(obs, px=320), profile=bundled_profile(fit_width=320)
-                )
-            )
+            (out / f"{case_id}.thumb.svg").write_text(thumbnail_svg(obs, px=320))
         library.append(
             {
                 "id": case_id,

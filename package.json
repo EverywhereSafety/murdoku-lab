@@ -11,7 +11,8 @@
     "render": "node scripts/render_visual.mjs",
     "test:engine": "node --test 'tests/engine/*.test.mjs'",
     "export:cases": ".venv/bin/python -m murdoku_lab.visual.play_export --records outputs/showcase/cases.jsonl",
-    "test:play": "node tests/browser/play.mjs"
+    "test:play": "node tests/browser/play.mjs",
+    "release:local": ".venv/bin/python scripts/release_local.py"
   },
   "dependencies": {
     "@fontsource/dm-mono": "^5.3.0",
