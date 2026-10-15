@@ -1,0 +1,46 @@
+[
+ {
+  "id": "glasshouse",
+  "salt": "",
+  "value": {
+   "murderer": "A",
+   "solution": {
+    "A": "b1",
+    "V": "c3"
+   }
+  },
+  "sealed": {
+   "alg": "murdoku.seal/1",
+   "data": "d+AqfyvQQrywVuPA88WfwADNHIEX8rxyHLpqpzgGU0JFz41I7jyw5CLKnxnPRkA="
+  }
+ },
+ {
+  "id": "n-142-ab12cd",
+  "salt": "2026-10-15",
+  "value": {
+   "epilogue": "Café au lait — “quoted”",
+   "hints": [
+    1,
+    2
+   ]
+  },
+  "sealed": {
+   "alg": "murdoku.seal/1",
+   "data": "TsdgUgsZlZ4sDer52lP32+3/lJsQtqhYrs+2ynyljyssZtRcwp0HnklSwg3gUqllbIs+62KYobpzQkk="
+  }
+ },
+ {
+  "id": "liner-7x7",
+  "salt": "",
+  "value": {
+   "empty": {},
+   "list": [],
+   "flag": true,
+   "none": null
+  },
+  "sealed": {
+   "alg": "murdoku.seal/1",
+   "data": "JizWkIR5kGAIALNHYdYyMC62Xh3WfgA6jAE89ZhQdkwzGyB+gbOUXwiy3DIoZQ=="
+  }
+ }
+]

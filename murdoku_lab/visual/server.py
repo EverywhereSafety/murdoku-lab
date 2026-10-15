@@ -170,7 +170,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond({"error": "Unknown API route."}, 404)
         # A source directory / private answer key is never a static-file root.
         dist = (ROOT / "dist").resolve()
-        file = (dist / ("index.html" if path == "/" else path.lstrip("/"))).resolve()
+        # Directory URLs (/, /lab/) serve their index.html, like any static host.
+        relative = path.lstrip("/") + ("index.html" if path.endswith("/") else "")
+        file = (dist / relative).resolve()
         if not file.is_relative_to(dist) or not file.is_file():
             return self.respond(
                 {"error": "File not found. Build the UI with npm run build."}, 404

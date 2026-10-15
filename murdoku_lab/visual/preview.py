@@ -72,7 +72,7 @@ def main():
             f"""<details class="case" data-size="{info['size']}" {'open' if info['index']==1 else ''}>
         <summary><span class="number">{info['index']:02d}</span> {info['size']}×{info['size']} · {escape(info['band'])} · {info['areas']} areas</summary>
         <div class="case-layout"><div><a href="{image}" target="_blank" rel="noreferrer"><img src="{image}" alt="Case {info['index']} board and visual legend" loading="lazy"></a><p class="muted">Open the full-resolution board and legends.</p></div>
-        <div><h3>{escape(info['title'])}</h3><p><a class="play" href="../?case={case_id}">Play →</a></p><pre class="clues">{escape(clues)}</pre>
+        <div><h3>{escape(info['title'])}</h3><p><a class="play" href="../lab/?case={case_id}">Play →</a></p><pre class="clues">{escape(clues)}</pre>
         <details><summary>Visual query text</summary><pre>{escape(vision_text)}</pre></details></div></div>
         <details class="text-query"><summary>Text query</summary><pre>{escape(text_row['messages'][1]['content'])}</pre></details></details>"""
         )

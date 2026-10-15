@@ -8,7 +8,9 @@
     "build": "vite build",
     "test:browser": "node tests/browser/visual.mjs",
     "test:proxy": "node tests/browser/proxy.mjs",
-    "render": "node scripts/render_visual.mjs"
+    "render": "node scripts/render_visual.mjs",
+    "test:engine": "node --test 'tests/engine/*.test.mjs'",
+    "export:cases": ".venv/bin/python -m murdoku_lab.visual.play_export --records outputs/showcase/cases.jsonl"
   },
   "dependencies": {
     "@fontsource/dm-mono": "^5.3.0",

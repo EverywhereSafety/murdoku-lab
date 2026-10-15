@@ -46,7 +46,7 @@ async function action(args, note) {
   return result;
 }
 try {
-  await page.goto(base, { waitUntil: "networkidle" });
+  await page.goto(base + "/lab/", { waitUntil: "networkidle" });
   await page.locator('[data-cell="b1"]').waitFor();
   assert.equal(await page.locator("[data-cell]").count(), 36);
   await page.screenshot({ path: "artifacts/desktop.png", fullPage: true });
@@ -325,7 +325,7 @@ try {
   phone.setDefaultNavigationTimeout(120000);
   phone.setDefaultTimeout(120000);
   phone.on("pageerror", (e) => errors.push(e.message));
-  await phone.goto(base, { waitUntil: "networkidle" });
+  await phone.goto(base + "/lab/", { waitUntil: "networkidle" });
   await phone.locator('[data-cell="b1"]').waitFor();
   assert(
     await phone.evaluate(
