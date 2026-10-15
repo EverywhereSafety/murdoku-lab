@@ -2,6 +2,8 @@
 
 from murdoku_lab.core.board import TERRAINS
 from murdoku_lab.core.render import cell_label, render_atom
+from murdoku_lab.visual.art.palette import person_accent
+from murdoku_lab.visual.art.portraits import assign_looks
 
 ROOM_COLORS = (
     "#ead4bc",
@@ -135,6 +137,26 @@ def public_observation(
         "Offsets compare only the named coordinate. Area numbers start at 1; zero people is an even count.",
         "Terrain is the ground layer, separate from named props that may share its label.",
     ]
+    people = [
+        {
+            "id": p,
+            "name": th.name(p),
+            "victim": p == case.victim,
+            "portrait": i,
+            "color": PERSON_COLORS[i % len(PERSON_COLORS)],
+            "tags": [th.tag(t) for t in sorted(case.tags.get(p, ()), key=str)],
+        }
+        for i, p in enumerate(case.characters)
+    ]
+    # Casebook look and accent come from public names and tags only (never the seed).
+    raw_tags = {p: [str(t) for t in case.tags.get(p, ())] for p in case.characters}
+    looks = assign_looks(
+        [{"id": p["id"], "name": p["name"], "tags": raw_tags[p["id"]]} for p in people],
+        pronouns=th.pronouns,
+    )
+    for i, person in enumerate(people):
+        person["look"] = looks[person["id"]]
+        person["accent"] = person_accent(i)
     if case.vdef.murderer_rule == "classic":
         rules.append(
             "The murderer was alone with the victim: exactly two people in that area."
@@ -188,18 +210,9 @@ def public_observation(
                 [cell_label(case, k) for k in sorted(d)]
                 for d in sorted(scene.doors, key=lambda pair: sorted(pair))
             ],
+            **({"visual": th.visual} if th.visual else {}),
         },
-        "people": [
-            {
-                "id": p,
-                "name": th.name(p),
-                "victim": p == case.victim,
-                "portrait": i,
-                "color": PERSON_COLORS[i % len(PERSON_COLORS)],
-                "tags": [th.tag(t) for t in sorted(case.tags.get(p, ()), key=str)],
-            }
-            for i, p in enumerate(case.characters)
-        ],
+        "people": people,
         "clues": clues,
         "placements": {p: cell_label(case, k) for p, k in sorted(pad.placed.items())},
         "marks": {

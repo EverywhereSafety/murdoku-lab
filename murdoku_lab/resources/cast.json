@@ -1,0 +1,23 @@
+{
+  "schema": "murdoku.cast/1",
+  "note": "The recurring cast of the daily cases. Initials are tool IDs. Bios never mention a place.",
+  "suspects": {
+    "A": {"name": "Ada Ashworth", "pronoun": "she", "bio": "Retired codebreaker. Still does the crossword in ink.", "catchphrase": "Every pattern has a seam."},
+    "B": {"name": "Basil Blackwood", "pronoun": "he", "bio": "Collector of antique clocks, always five minutes early.", "catchphrase": "Punctuality is a kind of alibi."},
+    "C": {"name": "Cleo Carrow", "pronoun": "she", "bio": "Botanist with a pocketful of seeds and a sharp eye.", "catchphrase": "Roots tell you where things have been."},
+    "D": {"name": "Dorian Dale", "pronoun": "he", "bio": "Stage magician who insists he has retired.", "catchphrase": "Watch the other hand."},
+    "E": {"name": "Esme Elwood", "pronoun": "she", "bio": "Society columnist who hears everything first.", "catchphrase": "Darling, I only report."},
+    "F": {"name": "Felix Fairweather", "pronoun": "he", "bio": "Ship's doctor with steady hands and a loud laugh.", "catchphrase": "Breathe in. Now tell me again."},
+    "G": {"name": "Greta Gale", "pronoun": "she", "bio": "Mountaineer who never sits still for long.", "catchphrase": "Always check the rope twice."},
+    "H": {"name": "Hugo Hargreaves", "pronoun": "he", "bio": "Librarian who can find any book, and any secret.", "catchphrase": "Shelved, but not forgotten."}
+  },
+  "victims": [
+    {"name": "Victor Vane", "pronoun": "he", "bio": "Heir to the Vane fortune, and to its bad luck."},
+    {"name": "Vera Vane", "pronoun": "she", "bio": "Philanthropist with too many grateful friends."},
+    {"name": "Violet Vane", "pronoun": "she", "bio": "Opera singer who never missed a curtain call, until now."},
+    {"name": "Vincent Vane", "pronoun": "he", "bio": "Inventor whose patents everyone wanted."},
+    {"name": "Valentina Vane", "pronoun": "she", "bio": "Art dealer with a ledger of enemies."},
+    {"name": "Vaughn Vane", "pronoun": "he", "bio": "Yachtsman, gambler, and the family's black sheep."}
+  ],
+  "running_gag": "The Vanes are the unluckiest family in fiction. Every case, another one."
+}

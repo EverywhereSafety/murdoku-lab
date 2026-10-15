@@ -1,0 +1,106 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "manor",
+  "name": "Alderwick Manor",
+  "eyebrow": "An evening at Alderwick",
+  "titles": [
+    "The Quiet Inheritance",
+    "Tea, Toast and Treachery",
+    "A Will Read at Midnight",
+    "The Last Toast at Alderwick",
+    "Dust on the Keys",
+    "Secrets in the Silver Drawer",
+    "The Long Weekend",
+    "Supper for Eight, Seven Remaining"
+  ],
+  "blurbs": [
+    "A country house, a reading of the will, and one guest who never came down to supper.",
+    "Rain against the windows, a fire in every grate, and a family that cannot agree on anything.",
+    "Everyone came for the anniversary. Someone came for something else.",
+    "The clocks were wound, the silver polished, and by morning the house had a new heir."
+  ],
+  "rooms": [
+    {"name": "Library", "suits": ["shelf", "chair", "register", "carpet"], "finish": "parquet"},
+    {"name": "Study", "suits": ["register", "shelf", "chair", "bear"], "finish": "herringbone"},
+    {"name": "Drawing Room", "suits": ["chair", "piano", "carpet", "flowers"], "finish": "carpet"},
+    {"name": "Dining Room", "suits": ["table", "chair", "flowers"], "finish": "planks"},
+    {"name": "Kitchen", "suits": ["table", "crate", "barrel", "box"], "finish": "checker"},
+    {"name": "Conservatory", "suits": ["plant", "palm", "flowers", "tree", "shrub"], "finish": "flagstone"},
+    {"name": "Music Room", "suits": ["piano", "chair", "statue"], "finish": "parquet"},
+    {"name": "Morning Room", "suits": ["chair", "flowers", "table", "bed"], "finish": "marble"},
+    {"name": "Gallery", "suits": ["statue", "carpet", "boulder"], "finish": "marble"},
+    {"name": "Billiard Room", "suits": ["table", "tv", "chair"], "finish": "carpet"},
+    {"name": "Cellar", "suits": ["barrel", "crate", "box", "boulder"], "finish": "flagstone"},
+    {"name": "Guest Bedroom", "suits": ["bed", "carpet", "box"], "finish": "carpet"},
+    {"name": "Orangery", "suits": ["palm", "tree", "plant", "shrub"], "finish": "flagstone"},
+    {"name": "Coach House", "suits": ["car", "crate", "box", "boulder"], "finish": "boards"},
+    {"name": "Trophy Room", "suits": ["bear", "statue", "shelf"], "finish": "planks"},
+    {"name": "Sitting Room", "suits": ["chair", "tv", "carpet", "plant"], "finish": "boards"}
+  ],
+  "objects": {
+    "bed": "chaise longue",
+    "chair": "wingback chair",
+    "carpet": "Persian rug",
+    "car": "motor car",
+    "table": "oak table",
+    "tv": "cabinet radio",
+    "shelf": "bookcase",
+    "plant": "fern",
+    "tree": "potted bay tree",
+    "flowers": "vase of lilies",
+    "shrub": "box hedge",
+    "crate": "packing crate",
+    "box": "hat box",
+    "register": "writing desk",
+    "palm": "parlour palm",
+    "bear": "bearskin rug",
+    "statue": "marble bust",
+    "piano": "grand piano",
+    "boulder": "millstone",
+    "barrel": "wine cask"
+  },
+  "visual": {
+    "tints": [
+      "#f1d8b4",
+      "#d3e4c3",
+      "#efe0a6",
+      "#c6dfe2",
+      "#f1cdc4",
+      "#d9cfeb",
+      "#cde8da",
+      "#e9d2a0",
+      "#c9d7f1",
+      "#ecc8db",
+      "#dde2c0",
+      "#bfe1d9"
+    ],
+    "finishes": ["parquet", "planks", "herringbone", "carpet", "marble", "flagstone", "checker", "boards"],
+    "frame": "manor",
+    "skins": {
+      "chair": "wingback",
+      "bed": "chaise",
+      "register": "writing_desk",
+      "tv": "cabinet_radio",
+      "plant": "fern",
+      "tree": "potted_bay",
+      "flowers": "lilies",
+      "shrub": "box_hedge",
+      "box": "hatbox",
+      "bear": "bearskin",
+      "boulder": "millstone",
+      "barrel": "wine_cask"
+    }
+  },
+  "motives": [
+    "the will had been rewritten that very morning",
+    "an old debt of honour had finally come due",
+    "a letter had turned up in the wrong drawer",
+    "the family silver was not quite as silver as it looked",
+    "a forty-year-old wager was about to be settled"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were alone in the {area}. Nobody else saw a thing, which was rather the point: {motive}.",
+    "Only {murderer} was in the {area} with {victim}. The rest of the house was busy being innocent, and {murderer} knew it: {motive}.",
+    "The {area} held two people that evening, and one of them walked out. {murderer} had a reason: {motive}."
+  ]
+}
