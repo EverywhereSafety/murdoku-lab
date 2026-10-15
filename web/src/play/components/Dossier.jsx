@@ -54,11 +54,11 @@ export function ClueText({ text, refs, onRef }) {
   return parts;
 }
 
-function SuspectCard({ game, person, index, state, selected, clashing, clues, refs, onSelect, onRef, onReview }) {
+function SuspectCard({ game, person, index, state, selected, clashing, clues, refs, onSelect, onRef, onReview, hinted, coached }) {
   const where = state.placed[person.id];
   return (
     <article
-      className={`pl-suspect${selected ? " is-selected" : ""}${person.victim ? " is-victim" : ""}${clashing ? " is-clash" : ""}${where ? " is-placed" : ""}`}
+      className={`pl-suspect${selected ? " is-selected" : ""}${person.victim ? " is-victim" : ""}${clashing ? " is-clash" : ""}${where ? " is-placed" : ""}${coached === person.id && !selected ? " is-coached" : ""}`}
       style={{ "--accent": person.accent, "--deal": index }}
       draggable
       onDragStart={(event) => {
@@ -79,7 +79,11 @@ function SuspectCard({ game, person, index, state, selected, clashing, clues, re
           <span className="pl-where">{where ? t("case.placedAt", { cell: where.toUpperCase() }) : t("case.notPlaced")}</span>
         </header>
         {clues.map((clue) => (
-          <p key={clue.id} className={`pl-statement${state.reviewed.includes(clue.id) ? " is-reviewed" : ""}`}>
+          <p
+            key={clue.id}
+            className={`pl-statement${state.reviewed.includes(clue.id) ? " is-reviewed" : ""}${hinted === clue.id ? " is-hinted" : ""}`}
+          >
+            <span className="pl-clue-no">{clue.number}</span>
             <span className="pl-quote">
               <ClueText text={clue.text} refs={refs} onRef={onRef} />
             </span>
@@ -99,7 +103,7 @@ function SuspectCard({ game, person, index, state, selected, clashing, clues, re
   );
 }
 
-export function Dossier({ game, state, selected, clashes, onSelect, onRef, onReview, compact = false }) {
+export function Dossier({ game, state, selected, clashes, onSelect, onRef, onReview, hinted, coached, compact = false }) {
   const refs = useReferences(game);
   const byHolder = useMemo(() => {
     const map = new Map();
@@ -141,6 +145,8 @@ export function Dossier({ game, state, selected, clashes, onSelect, onRef, onRev
             onSelect={onSelect}
             onRef={onRef}
             onReview={onReview}
+            hinted={hinted}
+            coached={coached}
           />
         ))}
       </section>
@@ -148,7 +154,11 @@ export function Dossier({ game, state, selected, clashes, onSelect, onRef, onRev
         <section className="pl-facts" aria-label={t("case.facts")}>
           <h2>{t("case.facts")}</h2>
           {facts.map((clue) => (
-            <p key={clue.id} className={`pl-statement${state.reviewed.includes(clue.id) ? " is-reviewed" : ""}`}>
+            <p
+              key={clue.id}
+              className={`pl-statement${state.reviewed.includes(clue.id) ? " is-reviewed" : ""}${hinted === clue.id ? " is-hinted" : ""}`}
+            >
+              <span className="pl-clue-no">{clue.number}</span>
               <span className="pl-quote">
                 <ClueText text={clue.text} refs={refs} onRef={onRef} />
               </span>

@@ -27,6 +27,39 @@ from murdoku_lab.visual.art import STATIC_LAYERS, casebook, portraits, thumbnail
 from murdoku_lab.visual.projection import public_observation
 from murdoku_lab.visual.seal import seal
 
+
+def hint_data(case):
+    """What the player's hints need, all derived from the clues: the order in which pure
+    deduction places people (the first person in it that the player has not placed is always
+    deducible from the clues and everyone before them), each person's squares allowed by their
+    own statements, and, per person and square, the statement that rules the square out.
+    """
+    from murdoku_lab.core.atoms import SPECS, unary_mask
+    from murdoku_lab.solver.exact import candidate_masks
+    from murdoku_lab.solver.logic import certify
+
+    scene = case.scene
+    order = list(certify(case).place_order)
+    order += [p for p in case.characters if p not in order]
+    candidates = {
+        p: [cell_label(case, k) for k in sorted(cells)]
+        for p, cells in candidate_masks(case).items()
+    }
+    forbid = {p: {} for p in case.characters}
+    for number, clue in enumerate(case.clues, start=1):
+        for atom in clue.atoms:
+            spec = SPECS[atom.kind]
+            if spec.arity == "unary" or (
+                spec.arity == "global" and spec.mask is not None
+            ):
+                allowed = unary_mask(atom, scene)
+                if allowed is None:
+                    continue
+                for k in sorted(set(scene.open_cells) - set(allowed)):
+                    forbid[atom.holder].setdefault(cell_label(case, k), number)
+    return {"order": order, "candidates": candidates, "forbid": forbid}
+
+
 SCHEMA = "murdoku.play_case/1"
 LIBRARY = "murdoku.play_library/1"
 ROOT = Path(__file__).resolve().parents[2]
@@ -77,7 +110,7 @@ def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt=""):
         "victim_area": victim_area,
         "murderer": case.murderer if case.vdef.answer == "murderer" else None,
         "epilogue": None,
-        "hints": [],
+        "hints": hint_data(case),
     }
     if theme.setting_id and secret["murderer"]:
         from murdoku_lab.setter import settings
@@ -116,8 +149,22 @@ def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt=""):
     }
 
 
+TUTORIAL = ROOT / "content" / "tutorial" / "tutorial.json"
+
+
 def entries(records=None):
-    """(case_id, kind, case, theme, setting name, eyebrow) for the classics and any records."""
+    """(case_id, kind, case, theme, setting name, eyebrow): the training case
+    (scripts/build_tutorial.py), the classics and any dressed records."""
+    if TUTORIAL.exists():
+        row = json.loads(TUTORIAL.read_text())
+        yield (
+            "tutorial",
+            "tutorial",
+            Case.from_json(row["murdoku_case"]),
+            Theme.from_json(row["murdoku_theme"]),
+            "Training case",
+            "Your first case",
+        )
     for entry in demos.catalogue().values():
         yield entry.slug, "classic", entry.case, entry.theme, entry.setting, entry.eyebrow
     if not records:

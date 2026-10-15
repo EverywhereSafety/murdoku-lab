@@ -70,10 +70,7 @@ export function createStore(game, { persist = true } = {}) {
     submit(answer) {
       const result = judge(game, state.placed, answer);
       if (result.solved) {
-        const earned = stars({
-          wrongVerdicts: progress.wrong_verdicts,
-          hintLevels: progress.hints.map((h) => h.level),
-        });
+        const earned = stars({ wrongVerdicts: progress.wrong_verdicts, hints: progress.hints });
         progress = {
           ...progress,
           finished: { at: Date.now(), stars: earned, answer, elapsed_ms: progress.elapsed_ms },
@@ -85,6 +82,14 @@ export function createStore(game, { persist = true } = {}) {
       save();
       emit();
       return result;
+    },
+    // Record a hint shown to the player; stars count them.
+    hint(given) {
+      if (progress.finished) return;
+      const { target, level, reveal } = given;
+      progress = { ...progress, hints: [...progress.hints, { target, level, reveal }] };
+      save();
+      emit();
     },
     tick(ms) {
       if (progress.finished || ms <= 0) return;

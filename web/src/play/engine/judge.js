@@ -47,10 +47,11 @@ export function judge(game, placed, answer) {
   };
 }
 
-// Stars depend on help and mistakes, never on speed.
-export function stars({ wrongVerdicts = 0, hintLevels = [] } = {}) {
-  const revealed = hintLevels.some((level) => level >= 3);
-  if (wrongVerdicts === 0 && hintLevels.length === 0) return 3;
+// Stars depend on help and mistakes, never on speed: three for a clean solve, two after
+// nudges or one wrong verdict, one after a hint that gave an answer away.
+export function stars({ wrongVerdicts = 0, hints = [] } = {}) {
+  const revealed = hints.some((h) => h.reveal);
+  if (wrongVerdicts === 0 && hints.length === 0) return 3;
   if (!revealed && wrongVerdicts <= 1) return 2;
   return 1;
 }

@@ -145,6 +145,33 @@ try {
   await page.goto(base, { waitUntil: "networkidle" });
   assert.ok((await page.locator(".pl-progress-line").textContent()).startsWith("1 of"), "the library counts the solve");
   checks.push("library records the solved case");
+
+  await page.goto(`${base}?case=glasshouse`, { waitUntil: "networkidle" });
+  await page.locator(".pl-tool", { hasText: "Hint" }).click();
+  const nudge = await page.locator(".pl-hint p").textContent();
+  await page.locator(".pl-hint .pl-secondary").click();
+  await page.locator(".pl-hint .pl-secondary").click();
+  await page.locator(".pl-hint .pl-primary").click();
+  assert.equal(await page.locator(".pl-token").count(), 1, "the answer-level hint places the person");
+  assert.match(nudge, /^Try \w+ next/, "the first hint is a nudge, not the answer");
+  checks.push("hints escalate from a nudge to a one-tap answer");
+
+  if (fs.existsSync(path.join(root, "cases/tutorial.json"))) {
+    await page.goto(`${base}?case=tutorial`, { waitUntil: "networkidle" });
+    await page.locator(".pl-coach .pl-primary").click();
+    const tutorial = JSON.parse(fs.readFileSync(path.join(root, "cases/tutorial.json"), "utf8"));
+    const order = unseal(tutorial.secret, tutorial.id).hints.order;
+    const solve = unseal(tutorial.secret, tutorial.id).solution;
+    const help = await boardHelpers(page);
+    for (const who of order) {
+      const coached = page.locator(".pl-suspect.is-coached .pl-face");
+      if (await coached.count()) await coached.first().click();
+      assert.match(await page.locator(".pl-coach p").textContent(), new RegExp(tutorial.public.people.find((p) => p.id === who).name.split(" ")[0]));
+      await page.mouse.click(...help.point(solve[who]));
+    }
+    assert.match(await page.locator(".pl-coach p").textContent(), /Name the murderer|Close the case/);
+    checks.push("the training case coaches every placement in deduction order");
+  }
   await desktop.close();
 
   // -------------------------------------------------------------------- phone

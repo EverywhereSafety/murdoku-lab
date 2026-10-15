@@ -58,3 +58,15 @@ def test_static_scenes_hold_no_people_or_hit_targets(library):
     svg = (out / f"{index['cases'][0]['id']}.day.svg").read_text()
     assert 'class="cell-hit"' not in svg and "placement-notes" not in svg
     assert 'data-style="casebook"' in svg
+
+
+def test_hint_data_is_sound(library):
+    out, index = library
+    for entry in index["cases"]:
+        bundle = json.loads((out / entry["url"]).read_text())
+        secret = unseal(bundle["secret"], bundle["id"])
+        hints, solution = secret["hints"], secret["solution"]
+        assert sorted(hints["order"]) == sorted(solution)
+        for person, cell in solution.items():
+            assert cell in hints["candidates"][person]
+            assert cell not in hints["forbid"][person], (entry["id"], person, cell)

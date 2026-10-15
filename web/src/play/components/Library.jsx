@@ -48,6 +48,7 @@ export function Library({ onOpen }) {
     if (!index) return [];
     const bySetting = new Map();
     for (const entry of index.cases) {
+      if (entry.kind === "tutorial") continue;
       const key = entry.kind === "classic" ? "classic" : entry.setting.id;
       if (!bySetting.has(key)) bySetting.set(key, []);
       bySetting.get(key).push(entry);
@@ -63,7 +64,11 @@ export function Library({ onOpen }) {
     );
   if (!index) return <div className="pl-empty" aria-busy="true" />;
   const solved = index.cases.filter((c) => caseStatus(c)?.solved).length;
-  const featured = index.cases.find((c) => c.kind !== "classic" && !caseStatus(c)?.solved) || index.cases[0];
+  const training = index.cases.find((c) => c.kind === "tutorial");
+  const fresh = training && !caseStatus(training)?.solved;
+  const featured = fresh
+    ? training
+    : index.cases.find((c) => c.kind === "themed" && !caseStatus(c)?.solved) || index.cases[0];
   return (
     <div className="pl-library">
       <section className="pl-hero">
@@ -75,7 +80,7 @@ export function Library({ onOpen }) {
         </div>
         {featured && (
           <div className="pl-hero-feature">
-            <p className="pl-eyebrow">{t("library.featured")}</p>
+            <p className="pl-eyebrow">{fresh ? t("library.training") : t("library.featured")}</p>
             <CaseCard entry={featured} onOpen={onOpen} big />
           </div>
         )}

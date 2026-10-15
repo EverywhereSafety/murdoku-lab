@@ -708,6 +708,11 @@ h3 {
     0 0 0 3px #d8a93f,
     var(--shadow);
 }
+.pl-suspect.is-coached,
+.pl-chip.is-coached {
+  box-shadow: 0 0 0 3px #d8a93f;
+  animation: pl-glow-box 1.4s ease-in-out infinite;
+}
 .pl-suspect.is-clash {
   background: color-mix(in srgb, var(--warn) 8%, var(--card));
 }
@@ -757,6 +762,80 @@ h3 {
 }
 .pl-quote {
   flex: 1;
+}
+.pl-clue-no {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  border-radius: 6px;
+  background: var(--bg-2);
+  color: var(--ink-soft);
+  font: 600 12px var(--mono);
+  margin-top: 1px;
+}
+.pl-statement.is-hinted {
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px #d8a93f;
+  background: color-mix(in srgb, #f2c13a 14%, transparent);
+  animation: pl-glow-box 1.6s ease-in-out 2;
+}
+@keyframes pl-glow-box {
+  50% {
+    box-shadow: 0 0 0 6px #d8a93f66;
+  }
+}
+.pl-hint {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: min(92%, 640px);
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--card);
+  border: 2px solid #d8a93f;
+  box-shadow: var(--shadow);
+  animation: pl-hint-in 240ms ease;
+}
+@keyframes pl-hint-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+.pl-hint.is-top {
+  bottom: auto;
+  top: 56px;
+}
+/* The card's words let taps through to the board; only its buttons catch them. */
+.pl-hint {
+  pointer-events: none;
+}
+.pl-hint button {
+  pointer-events: auto;
+}
+.pl-hint p {
+  margin: 0 0 8px;
+  font: 600 18px/1.35 var(--serif);
+}
+.pl-hint-body {
+  flex: 1;
+}
+.pl-hint-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pl-hint-buttons button {
+  min-height: 40px;
+  padding: 8px 14px;
 }
 .pl-statement.is-reviewed .pl-quote {
   color: var(--ink-muted);
@@ -1266,6 +1345,19 @@ h3 {
   }
   .pl-toast-region {
     bottom: 96px;
+  }
+  .pl-hint,
+  .pl-hint.is-top {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    width: auto;
+    transform: none;
+  }
+  .pl-hint p {
+    font-size: 16px;
   }
   .pl-dialog {
     max-width: calc(100vw - 16px);

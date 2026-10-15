@@ -58,7 +58,14 @@ export default function PlayApp() {
         onChange={changeSettings}
         onClose={() => setDialog(null)}
       />
-      <HowToDialog open={dialog === "howto"} onClose={() => setDialog(null)} />
+      <HowToDialog
+        open={dialog === "howto"}
+        onClose={() => setDialog(null)}
+        onTraining={() => {
+          setDialog(null);
+          open("tutorial");
+        }}
+      />
     </div>
   );
 }

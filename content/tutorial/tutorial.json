@@ -1,0 +1,523 @@
+{
+ "visual_case_id": "tutorial",
+ "murdoku_case": {
+  "schema": "murdoku.case/1",
+  "id": "bdc00b96d4d72fbc",
+  "variant": "classic",
+  "scene": {
+   "W": 6,
+   "H": 6,
+   "area_of": [
+    0,
+    0,
+    0,
+    0,
+    3,
+    3,
+    0,
+    0,
+    0,
+    3,
+    3,
+    3,
+    0,
+    0,
+    0,
+    3,
+    3,
+    3,
+    0,
+    4,
+    4,
+    4,
+    4,
+    3,
+    1,
+    1,
+    2,
+    4,
+    4,
+    4,
+    1,
+    1,
+    2,
+    4,
+    4,
+    4
+   ],
+   "obj_of": [
+    null,
+    "carpet",
+    "carpet",
+    "shelf",
+    null,
+    null,
+    "register",
+    null,
+    null,
+    "barrel",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "car",
+    "car",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "bed",
+    null,
+    "piano",
+    null,
+    "box",
+    null,
+    "plant",
+    "shrub"
+   ],
+   "props": [
+    {
+     "pid": "barrel",
+     "standable": false,
+     "cells": [
+      9
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "bed",
+     "standable": true,
+     "cells": [
+      28
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "box",
+     "standable": false,
+     "cells": [
+      32
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "car",
+     "standable": true,
+     "cells": [
+      15,
+      16
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "carpet",
+     "standable": true,
+     "cells": [
+      1,
+      2
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "piano",
+     "standable": false,
+     "cells": [
+      30
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "plant",
+     "standable": false,
+     "cells": [
+      34
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "register",
+     "standable": false,
+     "cells": [
+      6
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "shelf",
+     "standable": false,
+     "cells": [
+      3
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "shrub",
+     "standable": false,
+     "cells": [
+      35
+     ],
+     "landmark": false
+    }
+   ],
+   "terrain_of": [
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor"
+   ],
+   "allow_disconnected_areas": false,
+   "doors": [
+    [
+     14,
+     15
+    ],
+    [
+     18,
+     24
+    ],
+    [
+     19,
+     25
+    ],
+    [
+     25,
+     26
+    ]
+   ]
+  },
+  "characters": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "V"
+  ],
+  "victim": "V",
+  "tags": {},
+  "clues": [
+   {
+    "atoms": [
+     {
+      "kind": "not_in_corner",
+      "holder": "D",
+      "args": []
+     },
+     {
+      "kind": "with",
+      "holder": "D",
+      "args": [
+       "C"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "on",
+      "holder": "B",
+      "args": [
+       "carpet"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "A",
+      "args": [
+       "bed"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "C",
+      "args": [
+       "car"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "beside",
+      "holder": "E",
+      "args": [
+       "piano"
+      ]
+     }
+    ]
+   }
+  ],
+  "solution": {
+   "A": 28,
+   "B": 2,
+   "C": 15,
+   "D": 11,
+   "E": 31,
+   "V": 18
+  },
+  "answer": "murderer",
+  "answer_key": "B",
+  "theme_id": null,
+  "seed": 21139272,
+  "target_band": "easy",
+  "certificate": {
+   "solved": true,
+   "depth": 7,
+   "tier_max": 1,
+   "tier_hist": {
+    "1": 7
+   },
+   "advanced": 0,
+   "cost": 7.0,
+   "max_width": 50,
+   "guess_free": true,
+   "place_order": [
+    "A",
+    "C",
+    "E",
+    "B",
+    "D",
+    "V"
+   ],
+   "bottleneck": {
+    "kind": "single",
+    "tier": 1,
+    "text": "Only one square is still possible for A: r5c5. Row 5 and column 5 are now closed to everyone else.",
+    "removed": 16,
+    "placed": [
+     "A",
+     28
+    ]
+   },
+   "steps": [
+    {
+     "kind": "setup",
+     "tier": 1,
+     "text": "Mark the cells each clue allows. 7 cell(s) are unusable (a table, shelf, plant or the like stands there); 50 candidate placements remain across 6 people.",
+     "removed": 0
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for A: r5c5. Row 5 and column 5 are now closed to everyone else.",
+     "removed": 16,
+     "placed": [
+      "A",
+      28
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for C: r3c4. Row 3 and column 4 are now closed to everyone else.",
+     "removed": 11,
+     "placed": [
+      "C",
+      15
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for E: r6c2. Row 6 and column 2 are now closed to everyone else.",
+     "removed": 7,
+     "placed": [
+      "E",
+      31
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for B: r1c3. Row 1 and column 3 are now closed to everyone else.",
+     "removed": 8,
+     "placed": [
+      "B",
+      2
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for D: r2c6. Row 2 and column 6 are now closed to everyone else.",
+     "removed": 2,
+     "placed": [
+      "D",
+      11
+     ]
+    },
+    {
+     "kind": "verdict",
+     "tier": 1,
+     "text": "V is at r4c1.",
+     "removed": 0,
+     "placed": [
+      "V",
+      18
+     ]
+    }
+   ]
+  },
+  "meta": {
+   "quality_version": "scene-design-v1",
+   "implied_atoms_removed": 0,
+   "scene_spec": {
+    "schema": "murdoku.scene_spec/1",
+    "anchors_per_area": {},
+    "blocker_rate": 0.2,
+    "furniture_rate": 0.16
+   }
+  }
+ },
+ "murdoku_theme": {
+  "theme_id": "manor-292f5c32",
+  "title": "A Will Read at Midnight",
+  "names": {
+   "A": "Ada Ashworth",
+   "B": "Basil Blackwood",
+   "C": "Cleo Carrow",
+   "D": "Dorian Dale",
+   "E": "Esme Elwood",
+   "V": "Vera Vane"
+  },
+  "pronouns": {
+   "A": "she",
+   "B": "he",
+   "C": "she",
+   "D": "he",
+   "E": "she",
+   "V": "she"
+  },
+  "areas": [
+   "Library",
+   "Drawing Room",
+   "Kitchen",
+   "Coach House",
+   "Conservatory"
+  ],
+  "objects": {
+   "bed": "chaise longue",
+   "carpet": "Persian rug",
+   "car": "motor car",
+   "shelf": "bookcase",
+   "plant": "fern",
+   "shrub": "box hedge",
+   "box": "hat box",
+   "register": "writing desk",
+   "piano": "grand piano",
+   "barrel": "wine cask"
+  },
+  "tags": {},
+  "victim_note": "was found dead",
+  "blurb": "Everyone came for the anniversary. Someone came for something else.",
+  "assets": {},
+  "setting_id": "manor",
+  "visual": {
+   "accent": "#3d6a5b",
+   "tints": [
+    "#f1d8b4",
+    "#d3e4c3",
+    "#efe0a6",
+    "#c6dfe2",
+    "#f1cdc4",
+    "#d9cfeb",
+    "#cde8da",
+    "#e9d2a0",
+    "#c9d7f1",
+    "#ecc8db",
+    "#dde2c0",
+    "#bfe1d9"
+   ],
+   "finishes": [
+    "parquet",
+    "planks",
+    "herringbone",
+    "carpet",
+    "marble",
+    "flagstone",
+    "checker",
+    "boards"
+   ],
+   "frame": "manor",
+   "skins": {
+    "chair": "wingback",
+    "bed": "chaise",
+    "register": "writing_desk",
+    "tv": "cabinet_radio",
+    "plant": "fern",
+    "tree": "potted_bay",
+    "flowers": "lilies",
+    "shrub": "box_hedge",
+    "box": "hatbox",
+    "bear": "bearskin",
+    "boulder": "millstone",
+    "barrel": "wine_cask"
+   },
+   "setting": "manor",
+   "area_finishes": {
+    "0": "parquet",
+    "1": "carpet",
+    "2": "checker",
+    "3": "boards",
+    "4": "flagstone"
+   },
+   "area_wallpapers": {
+    "0": "panel_wood",
+    "1": "damask_rose",
+    "2": "tile_cream",
+    "3": "brick",
+    "4": "glass_pane"
+   }
+  }
+ }
+}

@@ -79,7 +79,7 @@ export function SettingsDialog({ open, settings, onChange, onClose }) {
   );
 }
 
-export function HowToDialog({ open, onClose }) {
+export function HowToDialog({ open, onClose, onTraining }) {
   return (
     <Dialog open={open} onClose={onClose} labelledBy="pl-howto-title" className="pl-howto">
       <Mascot pose="pointing" size={96} className="pl-dialog-mascot" />
@@ -90,7 +90,10 @@ export function HowToDialog({ open, onClose }) {
         ))}
       </ol>
       <div className="pl-dialog-buttons">
-        <button type="button" className="pl-primary" onClick={onClose}>
+        <button type="button" className="pl-primary" onClick={onTraining}>
+          {t("howto.training")}
+        </button>
+        <button type="button" className="pl-secondary" onClick={onClose}>
           {t("settings.close")}
         </button>
       </div>

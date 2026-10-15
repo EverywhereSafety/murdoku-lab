@@ -96,8 +96,8 @@ test("base rules flag rows, columns, stacked and blocked squares", () => {
 test("stars count help and mistakes, never time", () => {
   assert.equal(stars({}), 3);
   assert.equal(stars({ wrongVerdicts: 1 }), 2);
-  assert.equal(stars({ hintLevels: [1, 2] }), 2);
-  assert.equal(stars({ hintLevels: [3] }), 1);
+  assert.equal(stars({ hints: [{ reveal: false }, { reveal: false }] }), 2);
+  assert.equal(stars({ hints: [{ reveal: true }] }), 1);
   assert.equal(stars({ wrongVerdicts: 2 }), 1);
 });
 
@@ -136,4 +136,31 @@ test("gestures: select, place, pick up, refuse, note cycle and swap", async () =
   run(dropPerson(game, state, a, open[3].cell));
   assert.equal(state.placed[a], open[3].cell);
   assert.equal(state.placed[b], open[2].cell);
+});
+
+test("hints escalate: next suspect, misplaced suspect, then the verdict", async () => {
+  const { nextHint } = await import("../../web/src/play/engine/hints.js");
+  const fixture = cases[0];
+  const order = [...fixture.people.map((p) => p.id)];
+  const solution = fixture.verdicts.solution;
+  const game = gameFrom({ ...fixture });
+  // gameFrom seals no hint data; add a minimal table like play_export's.
+  const secret = game.secret();
+  secret.hints = { order, candidates: Object.fromEntries(order.map((p) => [p, [solution[p]]])), forbid: {} };
+  secret.victim_area = game.areaOf.get(solution[game.victim]);
+  const state = initialState();
+  const used = [];
+  for (const level of [1, 2, 3]) {
+    const hint = nextHint(game, state, used);
+    assert.equal(hint.target, `next:${order[0]}`);
+    assert.equal(hint.level, level);
+    used.push(hint);
+  }
+  assert.ok(used[2].reveal && used[2].fix.cell === solution[order[0]]);
+  const wrongCell = fixture.cells.find((c) => c.standable && c.cell !== solution[order[1]]).cell;
+  const wrong = { ...state, placed: { [order[1]]: wrongCell } };
+  assert.equal(nextHint(game, wrong, []).key, "hint.misplaced.1");
+  const done = { ...state, placed: { ...solution } };
+  const verdict = nextHint(game, done, []);
+  assert.equal(verdict.target, "verdict");
 });

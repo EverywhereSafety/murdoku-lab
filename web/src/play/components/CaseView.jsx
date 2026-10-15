@@ -4,12 +4,14 @@ import { useBoardNavigation } from "../../lib/use-board-view.js";
 import { Board } from "../board/Board.jsx";
 import { loadCase, loadLibrary, loadScene } from "../data.js";
 import { ActionError } from "../engine/reducer.js";
+import { nextHint } from "../engine/hints.js";
 import { dropPerson, noteTap, placeTap } from "../engine/intents.js";
 import { colOf, conflicts, crossedFor, rowOf } from "../engine/rules.js";
 import { createStore } from "../engine/store.js";
 import { t } from "../i18n/index.js";
 import { feedback, reducedMotion } from "../lib/fx.js";
 import { funnel } from "../lib/funnel.js";
+import { CoachCard, useCoach } from "./Coach.jsx";
 import { Dossier } from "./Dossier.jsx";
 import { Dialog, Face, Mascot, Stars, Toast, formatTime } from "./ui.jsx";
 
@@ -41,18 +43,19 @@ function highlightCells(game, state, ref) {
   return { cells, colour: person?.accent || "#0b7469" };
 }
 
-function shareText(game, finished, url) {
+function shareText(game, finished, hints, url) {
   const stars = "★".repeat(finished.stars) + "☆".repeat(3 - finished.stars);
+  const help = hints ? t("reveal.hints", { n: hints }) : t("reveal.noHints");
   const lines = [
     `Murdoku Lab · ${game.meta.title}`,
     `${game.meta.setting.name} · ${game.meta.size} · ${game.meta.difficulty.label}`,
-    `${stars} · ${formatTime(finished.elapsed_ms)}`,
+    `${stars} · ${help} · ${formatTime(finished.elapsed_ms)}`,
     url,
   ];
   return lines.join("\n");
 }
 
-function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, accuse, onAccuse, onClues, narrow, finished, onSummary }) {
+function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, onHint, accuse, onAccuse, onClues, narrow, finished, onSummary }) {
   return (
     <div className="pl-actions" role="toolbar" aria-label="Board actions">
       <button type="button" className="pl-tool" onClick={onUndo} disabled={!snapshot.state.undo.length || finished}>
@@ -79,6 +82,10 @@ function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, accuse, onAccuse,
           <span>{t("action.clues")}</span>
         </button>
       )}
+      <button type="button" className="pl-tool" onClick={onHint} disabled={finished}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z" /></svg>
+        <span>{t("action.hint")}</span>
+      </button>
       <span className="pl-actions-spacer" />
       {finished ? (
         <button type="button" className="pl-accuse is-ready" onClick={onSummary}>
@@ -98,7 +105,7 @@ function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, accuse, onAccuse,
   );
 }
 
-function SuspectTray({ game, state, selected, clashes, onSelect }) {
+function SuspectTray({ game, state, selected, clashes, onSelect, coached }) {
   const person = selected ? game.person.get(selected) : null;
   const statement = selected ? game.clues.filter((c) => c.person === selected) : [];
   return (
@@ -115,7 +122,7 @@ function SuspectTray({ game, state, selected, clashes, onSelect }) {
             type="button"
             role="option"
             aria-selected={p.id === selected}
-            className={`pl-chip${p.id === selected ? " is-selected" : ""}${state.placed[p.id] ? " is-placed" : ""}${clashes.people.has(p.id) ? " is-clash" : ""}`}
+            className={`pl-chip${p.id === selected ? " is-selected" : ""}${state.placed[p.id] ? " is-placed" : ""}${clashes.people.has(p.id) ? " is-clash" : ""}${coached === p.id && p.id !== selected ? " is-coached" : ""}`}
             style={{ "--accent": p.accent }}
             onClick={() => onSelect(p.id)}
           >
@@ -186,7 +193,41 @@ function OutcomeDialog({ result, game, onClose }) {
   );
 }
 
-function RevealDialog({ open, game, finished, onClose, onNext, onLibrary }) {
+// Cards float over the board; they dock away from the squares they point at.
+export function dockFor(game, cells) {
+  const low = (cells || []).some((cell) => Number(cell.slice(1)) > game.height * 0.55);
+  return low ? " is-top" : "";
+}
+
+function HintCard({ hint, game, onMore, onFix, onClose }) {
+  if (!hint) return null;
+  const canMore = !hint.reveal;
+  return (
+    <div className={`pl-hint${dockFor(game, hint.focus?.cells)}`} role="status" aria-live="polite">
+      <Mascot pose={hint.reveal ? "pointing" : "thinking"} size={64} />
+      <div className="pl-hint-body">
+        <p>{t(hint.key, hint.vars)}</p>
+        <div className="pl-hint-buttons">
+          {hint.fix && (
+            <button type="button" className="pl-primary" onClick={onFix}>
+              {t("hint.place", { name: game.person.get(hint.fix.person).name.split(" ")[0] })}
+            </button>
+          )}
+          {canMore && (
+            <button type="button" className="pl-secondary" onClick={onMore}>
+              {t("hint.more")}
+            </button>
+          )}
+          <button type="button" className="pl-link" onClick={onClose}>
+            {t("hint.close")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RevealDialog({ open, game, finished, hints, onClose, onNext, onLibrary }) {
   const [copied, setCopied] = useState(false);
   if (!finished) return null;
   const secret = game.secret();
@@ -195,7 +236,7 @@ function RevealDialog({ open, game, finished, onClose, onNext, onLibrary }) {
   const room = game.areas.find((a) => a.id === secret.victim_area)?.name ?? "";
   const url = window.location.href;
   const share = async () => {
-    const text = shareText(game, finished, url);
+    const text = shareText(game, finished, hints, url);
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) await navigator.share({ text });
       else await navigator.clipboard.writeText(text);
@@ -227,6 +268,7 @@ function RevealDialog({ open, game, finished, onClose, onNext, onLibrary }) {
       {secret.epilogue && <p className="pl-epilogue">{secret.epilogue}</p>}
       <div className="pl-score">
         <Stars count={finished.stars} size={28} />
+        <span>{hints ? t("reveal.hints", { n: hints }) : t("reveal.noHints")}</span>
         <span>{t("reveal.time", { time: formatTime(finished.elapsed_ms) })}</span>
       </div>
       <div className="pl-dialog-buttons">
@@ -273,6 +315,8 @@ function Playing({ game, markup, settings, onOpen }) {
   const [outcome, setOutcome] = useState(null);
   const [revealOpen, setRevealOpen] = useState(false);
   const [sheet, setSheet] = useState(false);
+  const [hint, setHint] = useState(null);
+  const coach = useCoach(game, state, selected, finished);
   const [next, setNext] = useState(null);
   const [zoom, setZoom] = useState(100);
   const { scrollRef, changeZoom, fitBoard } = useBoardNavigation({ zoom, setZoom, sessionId: game.id });
@@ -398,6 +442,21 @@ function Playing({ game, markup, settings, onOpen }) {
     }
   };
 
+  const showHint = () => {
+    if (finished) return;
+    const given = nextHint(game, state, progress.hints);
+    store.hint(given);
+    setHint(given);
+    if (given.focus.person) setSelected(given.focus.person);
+    feedback("note", settings);
+  };
+
+  const fixHint = () => {
+    if (!hint?.fix) return;
+    run(dropPerson(game, state, hint.fix.person, hint.fix.cell));
+    setHint(null);
+  };
+
   const review = (clueId, reviewed) => {
     try {
       store.dispatch([{ action: "review_clue", clue_id: clueId, reviewed }]);
@@ -432,6 +491,8 @@ function Playing({ game, markup, settings, onOpen }) {
       }}
       onRef={onRef}
       onReview={review}
+      hinted={hint?.focus?.clue}
+      coached={coach?.focus?.person}
       compact={compact}
     />
   );
@@ -454,7 +515,13 @@ function Playing({ game, markup, settings, onOpen }) {
               state={state}
               selected={finished ? null : selected}
               notes={notes}
-              highlight={highlightCells(game, state, pinned || ref)}
+              highlight={
+                coach?.focus?.cells
+                  ? { cells: coach.focus.cells, colour: "#d8a93f" }
+                  : hint?.focus?.cells
+                  ? { cells: hint.focus.cells, colour: hint.reveal ? "#d7654f" : "#d8a93f" }
+                  : highlightCells(game, state, pinned || ref)
+              }
               clashes={clashes}
               crossed={crossed}
               ripple={ripple}
@@ -478,13 +545,14 @@ function Playing({ game, markup, settings, onOpen }) {
               </button>
             </div>
           )}
-          {narrow && <SuspectTray game={game} state={state} selected={selected} clashes={clashes} onSelect={setSelected} />}
+          {narrow && <SuspectTray game={game} state={state} selected={selected} clashes={clashes} onSelect={setSelected} coached={coach?.focus?.person} />}
           <ActionBar
             snapshot={snapshot}
             notes={notes}
             onNotes={() => setNotes((v) => !v)}
             onUndo={() => history("undo")}
             onRedo={() => history("redo")}
+            onHint={showHint}
             accuse={accuse}
             onAccuse={() => setVerdictOpen(true)}
             onClues={() => setSheet(true)}
@@ -492,6 +560,11 @@ function Playing({ game, markup, settings, onOpen }) {
             finished={Boolean(finished)}
             onSummary={() => setRevealOpen(true)}
           />
+          {coach ? (
+            <CoachCard coach={coach} dock={dockFor(game, coach.focus?.cells)} onLibrary={() => onOpen(null)} />
+          ) : (
+            <HintCard hint={finished ? null : hint} game={game} onMore={showHint} onFix={fixHint} onClose={() => setHint(null)} />
+          )}
           {settings.timer && !finished && <p className="pl-timer">{formatTime(progress.elapsed_ms)}</p>}
         </section>
         {!narrow && <aside className="pl-side">{dossier(false)}</aside>}
@@ -510,6 +583,7 @@ function Playing({ game, markup, settings, onOpen }) {
         open={revealOpen}
         game={game}
         finished={finished}
+        hints={progress.hints.length}
         onClose={() => setRevealOpen(false)}
         onNext={next ? () => onOpen(next) : null}
         onLibrary={() => onOpen(null)}
