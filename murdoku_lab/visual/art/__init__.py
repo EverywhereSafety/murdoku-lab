@@ -101,6 +101,7 @@ def thumbnail_svg(observation, *, px=320, theme="day"):
         theme=check_theme(theme),
         layers=STATIC_LAYERS,
         cell_labels="none",
+        backdrop=False,
     )
     width, height = dimensions(observation)
     size = f'width="{px}" height="{round(px * height / width)}"'

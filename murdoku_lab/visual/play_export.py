@@ -167,7 +167,11 @@ def export(out=OUT, records=None, *, thumbs=True):
         for mode in ("day", "night"):
             (out / f"{case_id}.{mode}.svg").write_text(
                 casebook.scene_svg(
-                    obs, theme=mode, layers=STATIC_LAYERS, cell_labels="none"
+                    obs,
+                    theme=mode,
+                    layers=STATIC_LAYERS,
+                    cell_labels="none",
+                    backdrop=False,
                 )
             )
         if thumbs:

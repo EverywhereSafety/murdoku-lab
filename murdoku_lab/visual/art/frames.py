@@ -265,15 +265,21 @@ def _ornaments(name, observation):
     return ""
 
 
-def plinth(observation, colours, name=None):
-    """The paper, the frame's drop shadow, the frame band and the board's dark inset."""
+def plinth(observation, colours, name=None, *, backdrop=True):
+    """The paper, the frame's drop shadow, the frame band and the board's dark inset.
+    `backdrop=False` leaves the corners transparent for pages with their own background.
+    """
     spec = get(name)
     key = name if name in FRAMES else DEFAULT
     width, height = dimensions(observation)
     m = MARGIN
     x, y, w, h = m, m, width - 2 * m, height - 2 * m
     out = [
-        f'<rect width="{width}" height="{height}" fill="{colours["paper"]}"/>',
+        (
+            f'<rect width="{width}" height="{height}" fill="{colours["paper"]}"/>'
+            if backdrop
+            else ""
+        ),
         f'<rect x="{x + 4}" y="{y + 8}" width="{w}" height="{h}" rx="16" fill="#1b130e" fill-opacity=".22" filter="url(#mk-soft)"/>',
         f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="url(#mk-g-{spec["fill"]})" stroke="{spec["edge"]}" stroke-width="2.4"/>',
         f'<rect x="{x + 5}" y="{y + 5}" width="{w - 10}" height="{h - 10}" rx="12" fill="none" stroke="{spec["rim"]}" stroke-width="1.6" stroke-opacity=".8"/>',

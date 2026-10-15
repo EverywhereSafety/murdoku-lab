@@ -129,6 +129,7 @@ def scene_svg(
     cell_labels="tabs",
     reveal=None,
     export=False,
+    backdrop=True,
 ):
     check_theme(theme)
     show = ALL_LAYERS if layers is None else frozenset(layers)
@@ -174,7 +175,9 @@ def scene_svg(
         "</style>",
     ]
     if "paper" in show:
-        root.append(frames.plinth(observation, colours, visual.get("frame")))
+        root.append(
+            frames.plinth(observation, colours, visual.get("frame"), backdrop=backdrop)
+        )
     root.append('<g class="board-decoration">')
     if "floor" in show:
         root.append(_floors(cells, styles))
