@@ -217,4 +217,4 @@ def person_accent(index):
 
 def night_tint(color):
     """A room tint for the night casebook: the same hue, deep and quiet."""
-    return mix(color, "#0f1d1a", 0.72)
+    return mix(color, "#13231f", 0.58)

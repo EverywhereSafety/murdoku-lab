@@ -25,6 +25,23 @@ class Entry:
     description: str = "Read the statements. Reconstruct the evening."
 
 
+# The Alderwick demos wear the manor look. Skins are chosen to agree with the demo's own nouns
+# ("rose bush" stays a flowering shrub, not the manor's clipped box hedge).
+ALDERWICK_VISUAL = {
+    "setting": "manor",
+    "finishes": ["herringbone", "flagstone", "checker", "carpet", "paving"],
+    "area_finishes": {
+        "0": "herringbone",
+        "1": "flagstone",
+        "2": "checker",
+        "3": "carpet",
+        "4": "paving",
+    },
+    "frame": "manor",
+    "skins": {"chair": "wingback", "plant": "fern", "flowers": "lilies"},
+}
+
+
 def glasshouse(*, open_case=False):
     # An irregular room partition and a four-square rug exercise real footprints.
     rows = [
@@ -110,9 +127,12 @@ def glasshouse(*, open_case=False):
             "E": "Esme",
             "V": "Victor",
         },
+        pronouns={"A": "she", "B": "he", "C": "she", "D": "he", "E": "she", "V": "he"},
         areas=("Study", "Conservatory", "Hall", "Drawing room", "Terrace"),
         objects={"shelf": "bookshelf", "carpet": "rug", "shrub": "rose bush"},
         blurb="Six guests. A quiet house. One story that doesn't quite add up.",
+        setting_id="manor",
+        visual=ALDERWICK_VISUAL,
     )
     case.self_check()
     theme.validate(case)
@@ -218,6 +238,16 @@ def lily_pond():
             "F": "Felix",
             "G": "Grace",
             "V": "Victor",
+        },
+        pronouns={
+            "A": "she",
+            "B": "he",
+            "C": "she",
+            "D": "he",
+            "E": "she",
+            "F": "he",
+            "G": "she",
+            "V": "he",
         },
         areas=("Orchard", "Lily pond", "Sand garden", "Tea lawn"),
         objects={"chair": "garden chair", "flag": "garden flag"},
