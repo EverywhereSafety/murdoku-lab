@@ -10,6 +10,11 @@ characters, check placements and submit the arrangement and murderer. Solver
 certificates and [reasoning profiles](../reference/reasoning-profiles.md) support
 analysis of generated cases.
 
+The built-in casebook includes **The Museum After Hours**, a 24 × 24 case with
+24 people and fifteen rooms. Connect statements about the exhibits, staff roles
+and distances between people. Zoom in to read the room labels and use pencil
+marks to keep track of possible placements.
+
 ![Playable casebook](../assets/play-preview.png)
 
 ## Board controls

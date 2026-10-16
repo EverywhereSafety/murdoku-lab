@@ -314,6 +314,55 @@ def test_large_scene_retains_native_resolution_and_all_256_targets():
     assert "Victor" in " ".join(full.itertext())
 
 
+def test_museum_case_loads_without_research_code_and_supports_complete_play():
+    from murdoku_lab.visual.browser import BrowserGame
+    from murdoku_lab.solver.exact import count_solutions
+    from murdoku_lab.solver.logic import certify
+
+    game = BrowserGame()
+    entry = game.cases["museum"]
+    case = entry.case
+    exact = count_solutions(case, cap=2, time_limit_s=10)
+    deduction = certify(case, include_probe=False)
+    assert exact.unique and exact.solutions == [case.solution]
+    assert deduction.solved and deduction.placed == case.solution
+
+    state = game.request("/api/sessions", {"case_id": "museum"})["result"]
+    assert state["scene"]["width"] == state["scene"]["height"] == 24
+    assert len(state["people"]) == len(state["clues"]) == 24
+    assert len(state["scene"]["areas"]) == 15
+    assert not keys(state) & {
+        "solution",
+        "answer_key",
+        "certificate",
+        "seed",
+        "meta",
+        "atoms",
+    }
+    assert state["placements"] == state["marks"] == {}
+    assert state["notebook"] == "" and state["last_event"] is None
+    assert "at least 6 rows above Nora" in state["clues"][0]["text"]
+    assert "at least 6 columns to the left of Kieran" in state["clues"][5]["text"]
+    assert any(rule.startswith("Specialist galleries are ") for rule in state["rules"])
+    root = ET.fromstring(scene_svg(state, style="classic"))
+    hits = [node for node in root.iter() if "data-cell" in node.attrib]
+    assert len(hits) == 576 and any(node.attrib["data-cell"] == "x24" for node in hits)
+
+    result = game.request(
+        f"/api/sessions/{state['session_id']}/actions",
+        {
+            "action": {
+                "action": "submit",
+                "placements": {
+                    p: cell_label(case, cell) for p, cell in case.solution.items()
+                },
+                "murderer": case.murderer,
+            }
+        },
+    )["result"]
+    assert result["result"]["reward"] == 1 and result["observation"]["done"]
+
+
 def test_personal_exclusions_undo_restore_and_svg():
     from murdoku_lab.visual.browser import BrowserGame
 

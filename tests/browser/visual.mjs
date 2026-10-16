@@ -584,6 +584,78 @@ try {
   checks.push(
     "hover row-column guides / coordinate labels / anchored wheel zoom / drag pan",
   );
+
+  const museumCase = JSON.parse(
+    await fs.readFile(
+      new URL("../../murdoku_lab/visual/cases/museum.json", import.meta.url),
+      "utf8",
+    ),
+  ).murdoku_case;
+  const museumPlacements = Object.fromEntries(
+    Object.entries(museumCase.solution).map(([person, cell]) => [
+      person,
+      String.fromCharCode(97 + (cell % 24)) + (Math.floor(cell / 24) + 1),
+    ]),
+  );
+  const museumUrl = new URL(base);
+  museumUrl.searchParams.set("case", "museum");
+  await page.goto(museumUrl.href, { waitUntil: "networkidle" });
+  await page.locator('[data-cell="x24"]').waitFor();
+  assert.equal(await page.locator("[data-cell]").count(), 576);
+  assert.equal((await state()).case_id, "museum");
+  assert.equal((await state()).people.length, 24);
+  assert.equal(await page.locator(".scene-svg").getAttribute("data-style"), "classic");
+  await page.screenshot({ path: "artifacts/museum-desktop.png", fullPage: true });
+  const museumCell = museumPlacements.A;
+  await page.locator(`[data-cell="${museumCell}"]`).click();
+  await revision(1);
+  assert.deepEqual((await state()).marks.A, [museumCell]);
+  await page.getByRole("button", { name: "Undo (Ctrl+Z)", exact: true }).click();
+  await revision(2);
+  assert.deepEqual((await state()).marks.A || [], []);
+  await page.locator(`[data-cell="${museumCell}"]`).click();
+  await revision(3);
+  const savedMuseum = await state();
+  await page.reload({ waitUntil: "networkidle" });
+  await revision(3);
+  assert.equal((await state()).session_id, savedMuseum.session_id);
+  assert.deepEqual((await state()).marks.A, [museumCell]);
+  checks.push("24x24 museum deep link / Classic board / pencil / undo / refresh recovery");
+  const victimArea = museumCase.scene.area_of[museumCase.solution[museumCase.victim]];
+  const museumMurderer = Object.keys(museumCase.solution).find(
+    (person) => person !== museumCase.victim &&
+      museumCase.scene.area_of[museumCase.solution[person]] === victimArea,
+  );
+  await action({ action: "submit", placements: museumPlacements, murderer: museumMurderer });
+  assert.equal((await state()).terminal.reward, 1);
+  checks.push("24x24 museum / complete arrangement and correct answer");
+
+  const museumMobile = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  trackExternalRequests(museumMobile);
+  const museumPhone = await museumMobile.newPage();
+  museumPhone.setDefaultTimeout(120000);
+  museumPhone.on("pageerror", (e) => errors.push(e.message));
+  await museumPhone.goto(museumUrl.href, { waitUntil: "networkidle" });
+  await museumPhone.locator('[data-cell="x24"]').waitFor();
+  assert.equal(await museumPhone.locator("[data-cell]").count(), 576);
+  assert(await museumPhone.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  const farCell = Object.values(museumPlacements).find((cell) => cell.startsWith("x"));
+  await museumPhone.locator(`[data-cell="${farCell}"]`).tap();
+  await museumPhone.waitForFunction(() =>
+    document.querySelector(".scene-svg")?.dataset.revision === "1",
+  );
+  assert.deepEqual(
+    (await museumPhone.evaluate(() => window.murdokuAgent.observe())).marks.A,
+    [farCell],
+  );
+  await museumPhone.screenshot({ path: "artifacts/museum-mobile.png", fullPage: true });
+  await museumMobile.close();
+  checks.push("24x24 museum / mobile scrolling and touch / no page overflow");
+
   assert.deepEqual(errors, []);
   assert.deepEqual(externalRequests, []);
   checks.push("all gameplay resources hosted on the same origin");

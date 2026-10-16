@@ -130,12 +130,14 @@ export default function App() {
       const params = new URLSearchParams(location.search);
       const wanted = params.get("case");
       const old = savedSession();
-      if (!wanted && old) {
+      if (old) {
         try {
           const data = await api(`/api/sessions/${old}`);
-          applyState(data);
-          setSelected(data.people[0].id);
-          return;
+          if (!wanted || data.case_id === wanted) {
+            applyState(data);
+            setSelected(data.people[0].id);
+            return;
+          }
         } catch {}
       }
       await newSession(
