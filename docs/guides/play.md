@@ -8,7 +8,7 @@
 The web build has two pages:
 
 - **The player** at `/`: today's daily case, a coached training case, illustrated cases in
-  eight settings and the four classics. It is a static JavaScript app that never loads
+  eight settings and the built-in classics. It is a static JavaScript app that never loads
   Python, so it opens in about a second and works from any static host.
 - **The Lab** at `/lab/`: the research casebook. It runs the Python sessions, either through
   the session server or in the browser through Pyodide, and adds the journal, exports,
@@ -90,6 +90,13 @@ npm run build
 `murdoku_case` and `murdoku_theme`) can be passed with `--records`.
 
 ## The Lab
+
+The built-in casebook includes **The Museum After Hours**, a 24 × 24 case with
+24 people and fifteen rooms. Connect statements about the exhibits, staff roles
+and distances between people. Zoom in to read the room labels and use pencil
+marks to keep track of possible placements.
+
+![Playable casebook](../assets/play-preview.png)
 
 ### Board controls
 

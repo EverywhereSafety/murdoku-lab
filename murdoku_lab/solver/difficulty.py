@@ -126,11 +126,13 @@ def respects_caps(case: Case, band: str) -> bool:
 # catalogue, a perfectly good carved set of `area_no_gt` / `diagonal` / `on_grid_edge` atoms scored
 # ZERO anchors and `style_floor` rejected 280 of 349 attempts. A rule that silently stops applying to
 # new predicates is worse than no rule.
-# The name heuristic below is right for 8 of 9 candidates and wrong for one, so the exception is
-# listed rather than left to bite: `no_empty_area` READS as a denial and IS a positive claim about the
-# whole board — every area holds somebody. Counting it as a negation would skew `min_positive_frac`
-# against a clue that helps a solver.
+# The name heuristic needs explicit exceptions: `no_empty_area` READS as a denial and IS a positive
+# claim about the whole board — every area holds somebody. Counting it as a negation would skew
+# `min_positive_frac` against a clue that helps a solver.
 _NOT_REALLY_NEGATIVE = frozenset({"no_empty_area"})
+# These denials have no `no_` or `not_` prefix. They must count against the negative-clue budget,
+# rather than satisfying positive-clue and anchor floors merely because they name an object.
+_ALSO_NEGATIVE = frozenset({"col_free_of", "row_free_of"})
 
 # Positive locators the structural rule below misses. `only_beside` is a global non-pinning atom and
 # so falls outside it, yet "X was the only person beside a carpet" is one of the strongest anchors
@@ -143,7 +145,7 @@ def _negative_kinds() -> frozenset[str]:
     return frozenset(
         k
         for k in SPECS
-        if (k.startswith("not_") or k.startswith("no_"))
+        if (k.startswith("not_") or k.startswith("no_") or k in _ALSO_NEGATIVE)
         and k not in _NOT_REALLY_NEGATIVE
     )
 

@@ -1,7 +1,6 @@
-"""Small authored cases for the viewer. Private solutions never enter the public projection.
+"""Built-in cases for the viewer. Private solutions never enter the public projection.
 
-These are UI fixtures, not calibrated benchmark samples or official Murdoku cases.
-Authored fixtures used by the playable interface and solver tests.
+These original cases support play and interface tests; they are not official Murdoku cases.
 """
 
 from dataclasses import dataclass
@@ -266,7 +265,13 @@ def lily_pond():
 
 
 def catalogue(record_path: str | None = None):
-    entries = [glasshouse(), lily_pond(), glasshouse(open_case=True), estate()]
+    entries = [
+        glasshouse(),
+        lily_pond(),
+        glasshouse(open_case=True),
+        estate(),
+        museum(),
+    ]
     if record_path:
         path = Path(record_path)
         records = (
@@ -392,4 +397,21 @@ def estate():
         "Case 04 · Alibis across Alderwick",
         "Alderwick House & Grounds",
         "Eleven connected spaces, a courtyard fountain, a pond and overlapping alibis.",
+    )
+
+
+def museum():
+    """24x24 museum with role, room-group and minimum-distance clues."""
+    record = json.loads((Path(__file__).parent / "cases/museum.json").read_text())
+    case = Case.from_json(record["murdoku_case"])
+    theme = Theme.from_json(record["murdoku_theme"])
+    case.self_check()
+    theme.validate(case)
+    return Entry(
+        "museum",
+        case,
+        theme,
+        "Case 05 · After closing time",
+        "The Antiquities Museum",
+        theme.blurb,
     )

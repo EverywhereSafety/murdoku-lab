@@ -93,16 +93,46 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
         return f"{who}'s column was {n} column{'s' if n != 1 else ''} to the {word} of {other}'s column."
     if a.kind == "compass":
         return f"{who} was {COMPASS_WORDS[(a['dr'], a['dc'])]} of {other}."
+    if a.kind == "offset_witness":
+        # Same trap as row_offset: naming a row distance reads as implying a shared column.
+        n = abs(a["d"])
+        return (
+            f"Someone standing exactly {n} row{'s' if n != 1 else ''} "
+            f"{'south' if a['d'] > 0 else 'north'} of {who} was beside "
+            f"{_a(th.obj(a['obj']))}. (Only the rows are compared; the columns may differ.)"
+        )
+    if a.kind == "no_tag_near":
+        word = "row" if a["axis"] == "row" else "column"
+        return (
+            f"Nobody who is {_a(th.tag(a['tag']))} stood in the {word} immediately "
+            f"before or after {who}'s {word}."
+        )
+    if a.kind == "offset_min":
+        n, word = abs(a["d"]), ("row" if a["axis"] == "row" else "column")
+        if a["axis"] == "row":
+            side = "below" if a["d"] > 0 else "above"
+        else:
+            side = "to the right of" if a["d"] > 0 else "to the left of"
+        return (
+            f"{who}'s {word} was at least {n} {word}{'s' if n != 1 else ''} {side} "
+            f"{other}'s {word}."
+        )
     if a.kind == "in_areas":
+        group = th.area_group_label(a["areas"])
+        if group:
+            return f"{who} was in one of the {group}."
         names = " or ".join(_area_phrase(th.area(x)) for x in a["areas"])
         return f"{who} was in {names}."
     if a.kind == "tag_in_area":
         # Was "Someone who woman was in A's room" — the tag is a noun, not a relative clause.
-        return f"Someone who is {_a(th.tag(a['tag']))} was in {who}'s area."
+        return f"Someone else who is {_a(th.tag(a['tag']))} was in {who}'s area."
     if a.kind == "on_in_areas":
-        names = " or ".join(_area_phrase(th.area(x)) for x in a["areas"])
         obj = th.obj(a["obj"])
         obj = {"sand": "sand patch", "water": "water feature"}.get(obj, obj)
+        group = th.area_group_label(a["areas"])
+        if group:
+            return f"{who} was on {_a(obj)} in one of the {group}."
+        names = " or ".join(_area_phrase(th.area(x)) for x in a["areas"])
         return f"{who} was on {_a(obj)} in {names}."
     if a.kind == "area_no_offset":
         d = a["d"]
@@ -411,6 +441,11 @@ def render_case(
         (f"\n{th.blurb}\n" if th.blurb else ""),
         rules.format(n=n, W=case.scene.W, H=case.scene.H, victim=th.name(case.victim)),
         TERMS,
+        (
+            ("AREA GROUPS\n  " + "\n  ".join(th.area_group_rules()) + "\n")
+            if th.area_groups
+            else ""
+        ),
         goal.format(victim=th.name(case.victim), note=th.victim_note),
         f"PEOPLE ({n})\n  {cast}\n",
         attributes,

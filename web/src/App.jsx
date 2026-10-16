@@ -46,7 +46,7 @@ export default function App() {
   const [selected, setSelected] = useState("A");
   const [mode, setMode] = useState("mark");
   const [focusMode, setFocusMode] = useState(false);
-  const [style, setStyle] = useState("casebook");
+  const [style, setStyle] = useState("classic");
   const [zoom, setZoom] = useState(100);
   const [svg, setSvg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -130,12 +130,14 @@ export default function App() {
       const params = new URLSearchParams(location.search);
       const wanted = params.get("case");
       const old = savedSession();
-      if (!wanted && old) {
+      if (old) {
         try {
           const data = await api(`/api/sessions/${old}`);
-          applyState(data);
-          setSelected(data.people[0].id);
-          return;
+          if (!wanted || data.case_id === wanted) {
+            applyState(data);
+            setSelected(data.people[0].id);
+            return;
+          }
         } catch {}
       }
       await newSession(
@@ -657,6 +659,7 @@ export default function App() {
               setHighlightedClues={setHighlightedClues}
               setSelected={setSelected}
               state={state}
+              style={style}
               uiAct={uiAct}
               viewOnly={viewOnly}
             />

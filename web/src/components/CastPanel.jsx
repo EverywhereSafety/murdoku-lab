@@ -10,6 +10,7 @@ export function CastPanel({
   setHighlightedClues,
   setSelected,
   state,
+  style,
   uiAct,
   viewOnly,
 }) {
@@ -81,6 +82,14 @@ export function CastPanel({
                   "SUSPECT"
                 )}
               </span>
+              {style === "classic" && (
+                <span className="person-statement">
+                  {state.clues
+                    .filter((clue) => clue.person === p.id)
+                    .map((clue) => clue.text)
+                    .join(" ")}
+                </span>
+              )}
               {!!p.tags.length && (
                 <span className="person-tags">{p.tags.join(", ")}</span>
               )}

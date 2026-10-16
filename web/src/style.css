@@ -2648,42 +2648,102 @@ button:not(:disabled):active {
   }
 }
 
-/* Classic uses the same board and controls with a bold, colourful print style. */
+/* Classic shares the same actions with a printed casebook presentation. */
 .app-shell[data-skin="classic"] {
-  --ink: #25232b;
-  --muted: #68616e;
-  --line: #cdc8d5;
-  --paper: #f8f6fc;
-  --green: #43335e;
+  --ink: #282832;
+  --muted: #777381;
+  --line: #d6d2df;
+  --paper: #efedf7;
+  --green: #4f4668;
   color: var(--ink);
   background: var(--paper);
 }
+[data-skin="classic"] .cast-grid {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 14px;
+}
+[data-skin="classic"] .person-container {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
 [data-skin="classic"] .person-card {
-  border: 2px solid #302c36;
-  border-radius: 5px;
-  box-shadow: 3px 3px 0 #302c3620;
-  background: #fff;
+  min-height: 232px;
+  padding: 10px 7px;
+  border: 1.5px solid #383541;
+  border-radius: 2px;
+  box-shadow: 3px 4px 0 #57515e35;
+  background: #fffefa;
 }
 [data-skin="classic"] .person-container.selected .person-card {
-  outline: 3px solid #a763cf;
+  outline: 3px solid #8b71a4;
   outline-offset: 3px;
 }
 [data-skin="classic"] .portrait-wrap {
-  border-radius: 2px;
-  background: #e6d6f5;
+  width: 92px;
+  height: 92px;
+  border: 1px solid #383541;
+  padding: 3px;
+  border-radius: 0;
+  background: #e1edeb;
 }
-[data-skin="classic"] .person-container:nth-child(3n + 2) .portrait-wrap {
-  background: #c9e6d4;
+[data-skin="classic"] .portrait-wrap img {
+  width: 84px;
+  height: 84px;
+  border-radius: 0;
+  background: #e1edeb;
 }
-[data-skin="classic"] .person-container:nth-child(3n) .portrait-wrap {
-  background: #f4d6b1;
-}
-[data-skin="classic"] .scene-panel {
-  border: 2px solid #302c36;
-  border-radius: 6px;
+[data-skin="classic"] .person-card > strong {
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #302c36;
+  margin-top: 8px;
 }
 [data-skin="classic"] .person-caption {
+  font-size: 8px;
   font-weight: 700;
+  color: #716779;
+}
+[data-skin="classic"] .victim .person-card {
+  background: #f6e4e8;
+}
+[data-skin="classic"] .person-statement {
+  font: 13px/1.35 Georgia, serif;
+  color: #302c36;
+  margin-top: 9px;
+}
+[data-skin="classic"] .map-legend i {
+  display: none;
+}
+[data-skin="classic"] .scene-panel {
+  border: 1px solid #cbc6d5;
+  border-radius: 3px;
+  background: #faf9fc;
+  box-shadow: 3px 4px 0 #57515e15;
+}
+[data-skin="classic"] .clue-card {
+  margin-bottom: 9px;
+  background: #fffefa;
+  border: 1px solid #d2ccd9;
+  border-radius: 15px 15px 15px 3px;
+  box-shadow: 2px 3px 0 #57515e16;
+}
+[data-skin="classic"] .clue-text {
+  font-family: Georgia, serif;
+  color: #302c36;
+  font-size: 14px;
+  line-height: 1.45;
+}
+[data-skin="classic"] .clue-card.focused {
+  border-color: #8b71a4;
+  background: #f7f1fc;
+}
+@media (max-width: 480px) {
+  [data-skin="classic"] .cast-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .board-assist-toggle {

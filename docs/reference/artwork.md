@@ -7,11 +7,13 @@ Murdoku Lab draws every board itself, as SVG, from the public observation. Nothi
 
 | Style | Use | Status |
 |---|---|---|
-| `casebook` | Lab, player app, previews, opt-in RL exports | Default (`DEFAULT_STYLE`) |
-| `art`, `diagram`, `fluent`, `classic` | Published RL datasets | Frozen byte for byte in `art/legacy.py` |
+| `casebook` | Player app, previews, opt-in RL exports; selectable in the Lab | Default for Python callers (`DEFAULT_STYLE`) |
+| `classic` | The Lab's default style; published RL datasets | Legacy renderer, `art/legacy.py` |
+| `art`, `diagram`, `fluent` | Published RL datasets | Legacy renderer, `art/legacy.py` |
 
-`tests/test_legacy_art.py` guards the legacy styles with 291 SVG digests. Regenerate the digests
-only for a deliberate change: `python tests/test_legacy_art.py --write`.
+`tests/test_legacy_art.py` guards the legacy styles with 351 SVG digests, so casebook work can
+never change them by accident. When the legacy renderer changes on purpose, as the Classic
+presentation update did, regenerate the digests: `python tests/test_legacy_art.py --write`.
 
 RL exports choose their style explicitly and keep it. `export_queries` and `farm` take
 `--artwork-style` (default `art` and `classic`, unchanged until casebook exports are evaluated

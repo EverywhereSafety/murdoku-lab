@@ -37,6 +37,18 @@ The deduction engine applies sound domain reductions through a ranked technique
 ladder. See `tests/test_encoding_agreement.py` and the solver tests for agreement
 and deduction checks.
 
+Five predicate families extend the vocabulary for large boards. `col_free_of`
+and `row_free_of` deny an object to a whole line. `offset_witness` places an unnamed
+witness at an exact row
+offset from the holder, beside an object. `no_tag_near` forbids tag-bearers from the
+lines immediately beside the holder's. `offset_min` bounds a row or column distance
+instead of fixing it. `area_side` places the holder on an extreme row or column of
+their own area. `offset_witness` and `no_tag_near` have dedicated `witness` and
+`exclusion` deduction rules; `offset_min` propagates through the existing
+relational step.
+`tests/test_contest_predicates.py` enumerates every legal placement of a small board
+and requires the CP encoding to admit exactly the set the evaluator accepts.
+
 ## Generation and admission
 
 The setter supports placement-first and constraint-first search. Placement-first
@@ -66,6 +78,12 @@ technique schedule determines the scope of the optimum.
 attributes. `Theme.assets` stores selected artwork IDs. The semantic setter runs
 after the solution is established. Text and image rendering use the same theme.
 Theme validation and invariance tests preserve the formal structure and solution.
+
+Optional `Theme.area_groups` names exact sets of zero-based area IDs, such as
+`{"specialist galleries": [0, 2, 4]}`. Matching area-set clues can use that name;
+text and visual observations both include its membership definition. Other area
+sets keep their explicit room names. This changes presentation without adding a
+new formal predicate.
 
 ## Case record
 

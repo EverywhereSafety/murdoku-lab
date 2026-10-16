@@ -884,6 +884,104 @@ class Deducer:
                         )
         return None
 
+    def t_offset_witness(self, st: State) -> Step | None:
+        """`offset_witness` — the holder needs a row somebody else can witness from.
+
+        Sound both ways. A holder cell whose implied witness row is unreachable, by every other
+        character, for a cell beside the object is impossible. And once exactly one character can
+        serve as the witness, that character is confined to the cells that would do it.
+        """
+        for a in self.atoms:
+            if a.kind != "offset_witness":
+                continue
+            obj, d, x = a["obj"], a["d"], a.holder
+            others = [z for z in self.chars if z != x]
+
+            def witness_cells(z: str, row: int) -> set[int]:
+                return {
+                    k
+                    for k in st.cand[z]
+                    if self.scene.row(k) == row and obj in self.scene.info.beside[k]
+                }
+
+            gone = {
+                k
+                for k in st.cand[x]
+                if not any(witness_cells(z, self.scene.row(k) + d) for z in others)
+            }
+            if gone:
+                st.cand[x] -= gone
+                return Step(
+                    "witness",
+                    2,
+                    f"{x} needs someone exactly {abs(d)} row(s) "
+                    f"{'south' if d > 0 else 'north'} of them beside a {obj}, and for "
+                    f"{len(gone)} of their squares nobody could be there.",
+                    removed=len(gone),
+                )
+            rows = {self.scene.row(k) + d for k in st.cand[x]}
+            able = [z for z in others if any(witness_cells(z, r) for r in rows)]
+            if len(able) == 1:
+                z = able[0]
+                keep = set().union(*(witness_cells(z, r) for r in rows))
+                if keep < st.cand[z]:
+                    n = len(st.cand[z]) - len(keep)
+                    st.cand[z] = keep
+                    return Step(
+                        "witness",
+                        2,
+                        f"{z} is the only person who can be {x}'s witness beside a "
+                        f"{obj}, so {z} must stand where that works "
+                        f"({n} candidate(s) cleared).",
+                        removed=n,
+                    )
+        return None
+
+    def t_no_tag_near(self, st: State) -> Step | None:
+        """`no_tag_near` — arc consistency between the holder's line and each tag-bearer's.
+
+        A line is only usable by a tag-bearer if the holder still has a line that is neither the
+        same nor adjacent, and vice versa. The same line is already impossible (one person per
+        row and per column), so only the adjacency has to be checked here. This is the argument
+        the contest board turns on, and it fires long before either person is placed.
+        """
+        for a in self.atoms:
+            if a.kind != "no_tag_near":
+                continue
+            x, tag = a.holder, a["tag"]
+            f = self.scene.row if a["axis"] == "row" else self.scene.col
+            word = "row" if a["axis"] == "row" else "column"
+            for z in self.chars:
+                if z == x or tag not in self.tags.get(z, frozenset()):
+                    continue
+                mine = {f(k) for k in st.cand[x]}
+                gone = {
+                    k for k in st.cand[z] if not any(abs(f(k) - c) > 1 for c in mine)
+                }
+                if gone:
+                    st.cand[z] -= gone
+                    return Step(
+                        "exclusion",
+                        2,
+                        f"No {tag} may stand in a {word} next to {x}'s, which rules out "
+                        f"{len(gone)} square(s) for {z}.",
+                        removed=len(gone),
+                    )
+                theirs = {f(k) for k in st.cand[z]}
+                gone_x = {
+                    k for k in st.cand[x] if not any(abs(f(k) - c) > 1 for c in theirs)
+                }
+                if gone_x:
+                    st.cand[x] -= gone_x
+                    return Step(
+                        "exclusion",
+                        2,
+                        f"{z} is a {tag} and every {word} still open to them sits next to "
+                        f"those {len(gone_x)} square(s) of {x}'s, so {x} cannot use them.",
+                        removed=len(gone_x),
+                    )
+        return None
+
     def _lines_of(self, st: State, axis: str) -> dict[str, set[int]]:
         """Which rows (or columns) each character can still occupy."""
         f = self.scene.row if axis == "row" else self.scene.col
@@ -1231,6 +1329,8 @@ class Deducer:
             ("relational", 2, self.t_pairwise),
             ("alone", 2, self.t_area),
             ("tagshare", 2, self.t_tag),
+            ("witness", 2, self.t_offset_witness),
+            ("exclusion", 2, self.t_no_tag_near),
             ("last", 4, self.t_last),
             ("naked_subset", 3, self.t_naked_subset),
             ("hidden_subset", 3, self.t_hidden_subset),

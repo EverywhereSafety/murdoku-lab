@@ -84,3 +84,25 @@ def test_complete_prop_retry_requires_exact_keys(monkeypatch):
         case, style="workshop", client=client, require_complete_props=True
     )
     assert result.attempts == 2 and result.theme.objects == {"table": "workbench"}
+
+
+@pytest.mark.parametrize("members", [(0,), (0, 0), (0, 2), (0, True), (0, "1")])
+def test_area_group_rejects_invalid_members(members):
+    theme = Theme(
+        "groups",
+        "Example",
+        {},
+        areas=("East", "West"),
+        area_groups={"galleries": members},
+    )
+    with pytest.raises(ValueError, match="area groups"):
+        theme.validate()
+
+
+def test_area_group_roundtrip_preserves_optional_legacy_shape():
+    theme = Theme("groups", "Example", {}, areas=("East", "West"))
+    assert "area_groups" not in theme.to_json()
+    assert Theme.from_json(theme.to_json()).area_groups == {}
+    grouped = replace(theme, area_groups={"galleries": (0, 1)})
+    grouped.validate()
+    assert Theme.from_json(grouped.to_json()) == grouped

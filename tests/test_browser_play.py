@@ -57,7 +57,13 @@ def test_bad_saved_progress_does_not_block_casebook():
             json.dumps({"path": "/api/cases", "restore": {"case_id": "removed-case"}}),
         )
     )
-    assert len(result["result"]["cases"]) == 4
+    assert {case["id"] for case in result["result"]["cases"]} == {
+        "glasshouse",
+        "lily-pond",
+        "last-place",
+        "estate",
+        "museum",
+    }
 
 
 def test_continue_failed_attempt_keeps_edits_without_reopening_original():

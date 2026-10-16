@@ -208,23 +208,58 @@ def implied_atom_refs(case):
         "on_grid_edge": {"in_grid_corner"},
         "in_corner": {"in_grid_corner"},
     }
+
+    def implied_by(weak, strong):
+        if strong.holder != weak.holder or strong is weak:
+            return False
+        if strong.kind in stronger.get(weak.kind, ()):
+            return True
+        if (
+            weak.kind == "beside_through_wall"
+            and strong.kind == "beside"
+            and strong.args == weak.args
+        ):
+            return True
+        # A bound implies every looser bound in the same direction on the same pair and axis:
+        # "at least 6 rows below Y" already says "at least 3 rows below Y".
+        if weak.kind == strong.kind == "offset_min":
+            wy, waxis, wd = weak.args
+            sy, saxis, sd = strong.args
+            if (wy, waxis) == (sy, saxis) and wd * sd > 0:
+                return abs(sd) > abs(wd)
+        return False
+
     out = []
     for i, clue in enumerate(case.clues):
         for j, weak in enumerate(clue.atoms):
-            if any(
-                strong.holder == weak.holder
-                and (
-                    strong.kind in stronger.get(weak.kind, ())
-                    or (
-                        weak.kind == "beside_through_wall"
-                        and strong.kind == "beside"
-                        and strong.args == weak.args
-                    )
-                )
-                for strong in case.atoms
-            ):
+            if any(implied_by(weak, strong) for strong in case.atoms):
                 out.append((i, j))
     return out
+
+
+def drop_vacuous_scopes(case):
+    """Rewrite `on_in_areas` to plain `on` when the area list rules nothing out.
+
+    "She was on a car in one of the rooms with a car" names a scope that, on this board, already
+    holds wherever a car does: the two atoms have the same cell mask, so the longer sentence adds
+    words and no information. A reader who checks the scope and finds it free is being told the
+    clue is subtle when it is not. Scene geometry only — no placement is consulted.
+    """
+    from dataclasses import replace
+    from murdoku_lab.core.atoms import Atom, unary_mask
+    from murdoku_lab.core.instance import Clue
+
+    clues, changed = [], False
+    for clue in case.clues:
+        atoms = []
+        for a in clue.atoms:
+            if a.kind == "on_in_areas":
+                plain = Atom("on", a.holder, (a["obj"],))
+                if unary_mask(a, case.scene) == unary_mask(plain, case.scene):
+                    a, changed = plain, True
+            atoms.append(a)
+        clues.append(Clue(tuple(atoms)))
+    return replace(case, clues=tuple(clues), certificate=None) if changed else case
 
 
 def fold_area_options(case):
@@ -292,7 +327,7 @@ def prune_implied_atoms(case, certificate, *, simplify_options=False):
     if wanted is None:
         return case, certificate, removed
     if simplify_options:
-        trial = fold_area_options(case)
+        trial = drop_vacuous_scopes(fold_area_options(case))
         if trial.clues != case.clues:
             cert = certify(trial)
             late = case.vdef.victim_last_k
