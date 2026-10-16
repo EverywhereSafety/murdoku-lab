@@ -50,6 +50,18 @@ for testers in Chinese (`scripts/preview/`). Opening `index.html` straight from 
 work, because the browser will not let the page load its case files. Nothing is uploaded; hand
 the zip round yourself.
 
+To put the player on a static host next to an existing site, build a folder for its address:
+
+```bash
+.venv/bin/python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+```
+
+This writes `outputs/site/murdoku/exp/`. Share links and preview images point at that address,
+every page carries `noindex`, and `lab/` sends people to the live research Lab at
+`../../play/`. Copy the folder to `murdoku/exp/` of the site; no other page changes. The
+player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
+(`murdoku-visual-session:<path>`), so both can live on one origin.
+
 ## Playing
 
 Every case has one solution. Each suspect, and the victim, stands on exactly one square;
