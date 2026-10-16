@@ -450,6 +450,49 @@ def test_anchor_and_negative_sets_cover_the_whole_catalogue_structurally():
     ), "it reads as a denial but positively claims every area is occupied"
 
 
+@pytest.mark.parametrize("kind", ["col_free_of", "row_free_of"])
+def test_line_absence_clues_do_not_satisfy_positive_style_floors(kind):
+    from murdoku_lab.solver.difficulty import ANCHOR_KINDS, style_ok
+
+    anchors = [Atom("in_area", holder, (0,)) for holder in "AB"]
+    denials = [Atom(kind, holder, ("barrel",)) for holder in "ABCDE"]
+    assert style_ok(anchors, "easy", 6)
+    # There are enough anchors; the added denials must fail the positive fraction.
+    assert not style_ok(anchors + denials, "easy", 6)
+    assert kind not in ANCHOR_KINDS
+
+
+@pytest.mark.parametrize("kind", ["col_free_of", "row_free_of"])
+def test_line_absence_pool_obeys_negative_cap_per_character(kind):
+    from collections import Counter
+    from murdoku_lab.core.board import Prop
+    from murdoku_lab.setter.sampler import bias_pool
+    from murdoku_lab.solver.difficulty import style
+
+    scene = Scene(
+        6,
+        6,
+        (0,) * 36,
+        (None,) * 36,
+        props=tuple(
+            Prop(f"p{i}", True, frozenset({k}))
+            for i, k in enumerate((7, 8, 9, 10, 13, 14))
+        ),
+    )
+    placement = {"A": 0, "B": 35}
+    denials = [
+        Atom(kind, holder, (prop.pid,)) for holder in placement for prop in scene.props
+    ]
+    anchors = [Atom("in_area", holder, (0,)) for holder in placement]
+    assert all(holds_atom(atom, scene, placement) for atom in denials + anchors)
+    kept = bias_pool(denials + anchors, "easy", tuple(placement), random.Random(0))
+    counts = Counter(atom.holder for atom in kept if atom.kind == kind)
+    limit = style()["max_negatives_per_char"]
+    assert len(scene.props) > limit
+    assert counts == {holder: limit for holder in placement}
+    assert all(anchor in kept for anchor in anchors)
+
+
 def test_every_variant_can_reach_its_anchor_floor():
     """The failure mode, asserted at the source: a variant whose predicates yield no anchors can never
     satisfy `min_anchor_atoms`, so every attempt is rejected and the band is silently unreachable.

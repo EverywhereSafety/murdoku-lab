@@ -453,6 +453,35 @@ _spec(
 )
 
 
+def _axis_value(scene: Scene, axis: str):
+    """`axis` is "row" or "column", the same vocabulary `not_on_extreme_axis` uses."""
+    return scene.row if axis == "row" else scene.col
+
+
+def _offset_min_holds(a: Atom, s: Scene, pl: Placement) -> bool:
+    gap = _axis_value(s, a["axis"])(pl[a.holder]) - _axis_value(s, a["axis"])(
+        pl[a["other"]]
+    )
+    return gap >= a["d"] if a["d"] > 0 else gap <= a["d"]
+
+
+# The 24x24 contest board states a *bound*, not an offset: "She was at least six rows north of
+# Linus." That constrains a whole half-plane rather than one line, so it survives far longer in
+# the solve than `row_offset` does, which is exactly why the reference uses it on a large board.
+# `d` is signed, like `row_offset`: positive means at least `d` below (or right of) the other.
+_spec(
+    kind="offset_min",
+    params=("other", "axis", "d"),
+    arity="pair",
+    tier=2,
+    relational=True,
+    positional=True,
+    template="{holder} was at least {d} from {other} along the {axis}.",
+    holds=_offset_min_holds,
+    mask=None,
+)
+
+
 def _sgn(x: int) -> int:
     return (x > 0) - (x < 0)
 
@@ -518,7 +547,7 @@ _spec(
     arity="global",
     tier=2,
     needs_tags=True,
-    template="Someone who is a {tag} was in {holder}'s area.",
+    template="Someone else who is a {tag} was in {holder}'s area.",
     holds=lambda a, s, pl: (_ for _ in ()).throw(
         NotImplementedError("tag_in_area requires tags; call holds_atom(..., tags=...)")
     ),
@@ -678,6 +707,68 @@ def _extreme_axis(s: Scene, k: int, axis: str) -> bool:
 
 
 # =============================================================================================
+# LINE ABSENCE — "There was no sack anywhere in his column." States what a whole line does NOT
+# contain, so one short sentence rules out every column holding that object. On a 24-wide board
+# that is a far larger cut than naming what the holder stands beside, which is why the contest
+# board opens with one.
+# =============================================================================================
+def _line_free_mask(axis: str):
+    def mask(a: Atom, s: Scene) -> frozenset[int]:
+        value = _axis_value(s, axis)
+        blocked = {value(k) for k in s.cells_with_object(a["obj"])}
+        return frozenset(k for k in s.open_cells if value(k) not in blocked)
+
+    return mask
+
+
+for _axis, _word in (("col", "column"), ("row", "row")):
+    _spec(
+        kind=f"{_axis}_free_of",
+        params=("obj",),
+        arity="unary",
+        tier=2,
+        template="There was no {obj} anywhere in {holder}'s " + _word + ".",
+        holds=lambda a, s, pl, m=_line_free_mask(_axis): pl[a.holder] in m(a, s),
+        mask=_line_free_mask(_axis),
+    )
+del _axis, _word
+
+
+# =============================================================================================
+# AREA SIDE — "She was in the top row of her area." Relative to the holder's own room, so it
+# localises without naming a coordinate, the way `in_corner` does but along a whole edge.
+# =============================================================================================
+_AREA_EDGES = {
+    "top row": ("row", min),
+    "bottom row": ("row", max),
+    "westernmost column": ("col", min),
+    "easternmost column": ("col", max),
+}
+
+
+def _area_side_mask(a: Atom, s: Scene) -> frozenset[int]:
+    axis, pick = _AREA_EDGES[a["edge"]]
+    value = _axis_value(s, axis)
+    out: set[int] = set()
+    for area in range(s.n_areas):
+        cells = s.cells_of_area(area)
+        want = pick(value(k) for k in cells)
+        out |= {k for k in cells if value(k) == want}
+    return frozenset(out & s.open_cells)
+
+
+_spec(
+    kind="area_side",
+    params=("edge",),
+    arity="unary",
+    tier=2,
+    template="{holder} was in the {edge} of their area.",
+    holds=lambda a, s, pl: pl[a.holder] in _area_side_mask(a, s),
+    mask=_area_side_mask,
+)
+
+
+# =============================================================================================
 # OBJECT x AREA — "the golf tee on either Hole 6, 7 or 8", "the flag for Hole 3, 4 or 5". On a
 # large board the same object kind recurs in every area, so naming the kind alone says little;
 # qualifying it by a set of areas is what makes it a usable clue.
@@ -783,6 +874,62 @@ _spec(
 )
 
 
+def _offset_witness_holds(a: Atom, s: Scene, pl: Placement) -> bool:
+    want = s.row(pl[a.holder]) + a["d"]
+    return any(
+        y != a.holder and s.row(k) == want and a["obj"] in s.info.beside[k]
+        for y, k in pl.items()
+    )
+
+
+# "Someone exactly eight rows north of him was beside the tombstone." The contest board's most
+# productive clue shape: it names neither the witness nor the holder's column, so it ties a whole
+# row to an object and leaves the reader to find who can stand there. Area-scoped existentials
+# (`other_beside`, `tag_in_area_on`) cannot express it — the scope here is a row offset.
+_spec(
+    kind="offset_witness",
+    params=("obj", "d"),
+    arity="global",
+    tier=3,
+    positional=True,
+    template="Someone exactly {d} row(s) from {holder} was beside a {obj}.",
+    holds=_offset_witness_holds,
+    mask=None,
+)
+
+
+def _no_tag_near_holds(
+    a: Atom, s: Scene, pl: Placement, tags: Mapping[str, frozenset[int]]
+) -> bool:
+    """Nobody carrying `tag` stands in a line immediately beside the holder's."""
+    value = _axis_value(s, a["axis"])
+    mine = value(pl[a.holder])
+    return not any(
+        y != a.holder
+        and a["tag"] in tags.get(y, frozenset())
+        and abs(value(k) - mine) == 1
+        for y, k in pl.items()
+    )
+
+
+# "No one in an adjacent column wore a hat." An exclusion over a neighbouring line rather than an
+# area, and the one clue on the contest board that prunes before anybody is placed: two people
+# whose remaining lines are all adjacent cannot both exist, so candidates die in pairs.
+_spec(
+    kind="no_tag_near",
+    params=("tag", "axis"),
+    arity="global",
+    tier=3,
+    needs_tags=True,
+    exclusive=True,
+    template="No {tag} stood in the {axis} next to {holder}'s.",
+    holds=lambda a, s, pl: (_ for _ in ()).throw(
+        NotImplementedError("no_tag_near needs tags; call holds_atom(..., tags=...)")
+    ),
+    mask=None,
+)
+
+
 # =============================================================================================
 # GENERAL CLUES — true of the whole board, about nobody in particular. The reference game shows
 # these in their own panel above the suspects ("Even-numbered holes have an even number of
@@ -833,6 +980,7 @@ _TAG_EVALUATORS: dict[str, Callable] = {
     "tag_in_area": lambda a, s, pl, t: _tag_in_area_holds(a, s, pl, t),
     "only_tag_on": _only_tag_on_holds,
     "tag_in_area_on": _tag_in_area_on_holds,
+    "no_tag_near": _no_tag_near_holds,
 }
 
 

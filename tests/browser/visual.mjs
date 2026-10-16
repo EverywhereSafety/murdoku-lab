@@ -232,10 +232,17 @@ try {
   await page
     .getByRole("button", { name: "Open object and terrain key", exact: true })
     .click();
-  await page.waitForFunction(() =>
-    [...document.querySelectorAll(".object-key img")].every(
-      (img) => img.complete && img.naturalWidth > 0,
+  await page.waitForFunction(
+    () => [...document.querySelectorAll(".object-key img")].every((img) => img.complete),
+    null,
+    { timeout: 15000 },
+  );
+  assert.deepEqual(
+    await page.locator(".object-key img").evaluateAll((images) =>
+      images.filter((img) => !img.naturalWidth).map((img) => img.src),
     ),
+    [],
+    "Object key images must load",
   );
   assert.equal(
     await page.locator(".object-key img").count(),

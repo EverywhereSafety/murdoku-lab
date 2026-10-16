@@ -35,9 +35,30 @@ class Theme:
     victim_note: str = "was found dead"
     blurb: str = ""
     assets: dict[str, str] = field(default_factory=dict)
+    area_groups: dict[str, tuple[int, ...]] = field(default_factory=dict)
 
     # ------------------------------------------------------------------------------ validation
     def validate(self, case: Case | None = None) -> None:
+        labels, memberships = set(), set()
+        for label, members in self.area_groups.items():
+            if (
+                not isinstance(label, str)
+                or not label.strip()
+                or label.strip().casefold() in labels
+                or label != label.strip()
+                or not isinstance(members, (tuple, list))
+                or len(members) < 2
+                or any(
+                    type(i) is not int or not 0 <= i < len(self.areas) for i in members
+                )
+                or len(set(members)) != len(members)
+                or frozenset(members) in memberships
+            ):
+                raise ValueError(
+                    "area groups need distinct labels and valid unique members"
+                )
+            labels.add(label.strip().casefold())
+            memberships.add(frozenset(members))
         if self.assets and case is not None:
             from murdoku_lab.visual.asset_catalog import validate_selection
 
@@ -86,6 +107,22 @@ class Theme:
         """
         return self.tags.get(str(t), str(t))
 
+    def area_group_label(self, members) -> str | None:
+        return next(
+            (
+                label
+                for label, group in self.area_groups.items()
+                if set(group) == set(members)
+            ),
+            None,
+        )
+
+    def area_group_rules(self) -> list[str]:
+        return [
+            f"{label[0].upper() + label[1:]} are {', '.join(self.area(i) for i in members)}."
+            for label, members in self.area_groups.items()
+        ]
+
     # ------------------------------------------------------------------------------------ JSON
     def to_json(self) -> dict:
         return {
@@ -99,6 +136,16 @@ class Theme:
             "victim_note": self.victim_note,
             "blurb": self.blurb,
             "assets": self.assets,
+            **(
+                {
+                    "area_groups": {
+                        label: list(members)
+                        for label, members in self.area_groups.items()
+                    }
+                }
+                if self.area_groups
+                else {}
+            ),
         }
 
     @staticmethod
@@ -114,6 +161,10 @@ class Theme:
             victim_note=d.get("victim_note", "was found dead"),
             blurb=d.get("blurb", ""),
             assets=dict(d.get("assets", {})),
+            area_groups={
+                label: tuple(members)
+                for label, members in d.get("area_groups", {}).items()
+            },
         )
 
     @staticmethod

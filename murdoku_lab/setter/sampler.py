@@ -301,6 +301,12 @@ def assign_victim(
 # =============================================================================================
 # 3. Derive the pool of atoms that are TRUE of the hidden solution.
 # =============================================================================================
+# Row/column distances the contest-style predicates are sampled at. Small distances say almost
+# nothing on a large board ("at least 1 row above" excludes one row) and would burn a clue slot,
+# so the pool starts at 3; the carve still drops any that turn out not to pay their way.
+_CONTEST_OFFSETS = (-8, -6, -5, -4, -3, 3, 4, 5, 6, 8)
+
+
 def derive_pool(
     scene: Scene,
     chars: Sequence[str],
@@ -372,6 +378,24 @@ def derive_pool(
         # "someone else in my area was beside a ..." — the reference generator's `otherbeside`
         for o in objs_present:
             add("other_beside", x, (o,))
+        # The 24x24 contest board's own shapes: an absence over a whole line, a witness at a row
+        # offset, and an exclusion over the adjacent line. Offsets are capped well below the board
+        # side, since "at least 1 row above" constrains almost nothing and costs a clue slot.
+        for o in objs_present:
+            add("col_free_of", x, (o,))
+            add("row_free_of", x, (o,))
+            for d in _CONTEST_OFFSETS:
+                add("offset_witness", x, (o, d))
+        for edge in (
+            "top row",
+            "bottom row",
+            "westernmost column",
+            "easternmost column",
+        ):
+            add("area_side", x, (edge,))
+        for tg in sorted({t for ts in tags.values() for t in ts}):
+            for axis in ("row", "column"):
+                add("no_tag_near", x, (tg, axis))
         add("in_corner", x)
         add("not_in_corner", x)
         add("in_grid_corner", x)
@@ -396,6 +420,22 @@ def derive_pool(
             add("diagonal", x, (y,))
             add("row_offset", x, (y, scene.row(pl[x]) - scene.row(pl[y])))
             add("col_offset", x, (y, scene.col(pl[x]) - scene.col(pl[y])))
+            # A bound implies every looser bound, so offering all of them floods the pool with
+            # atoms the carve would only drop again. Two per pair keeps the choice between a
+            # tight and a loose reading. Guarded on `ok` for the same reason as `on_in_areas`:
+            # drawing from `rng` for a forbidden kind would shift every later draw.
+            if "offset_min" in ok:
+                for axis, gap in (
+                    ("row", scene.row(pl[x]) - scene.row(pl[y])),
+                    ("column", scene.col(pl[x]) - scene.col(pl[y])),
+                ):
+                    bounds = [
+                        d
+                        for d in _CONTEST_OFFSETS
+                        if (d > 0 and gap >= d) or (d < 0 and gap <= d)
+                    ]
+                    for d in rng.sample(bounds, min(2, len(bounds))):
+                        add("offset_min", x, (y, axis, d))
             sg = lambda t: (t > 0) - (t < 0)
             add(
                 "compass",

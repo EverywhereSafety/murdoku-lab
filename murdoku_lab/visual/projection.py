@@ -143,6 +143,7 @@ def public_observation(
     else:
         rules.append("This is an open case: there is no alone-with-the-victim rule.")
         goal = f"Place everyone, then identify the square occupied by {th.name(case.victim)}."
+    rules.extend(th.area_group_rules())
     return {
         "schema": "murdoku.observation/1",
         "session_id": session_id,

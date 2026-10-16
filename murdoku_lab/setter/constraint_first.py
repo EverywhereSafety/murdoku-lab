@@ -168,6 +168,17 @@ def candidate_atoms(
                         args.append(rng.choice(["even", "odd"]))
                     elif p == "side":
                         args.append(rng.choice(["north", "south", "east", "west"]))
+                    elif p == "edge":
+                        args.append(
+                            rng.choice(
+                                [
+                                    "top row",
+                                    "bottom row",
+                                    "westernmost column",
+                                    "easternmost column",
+                                ]
+                            )
+                        )
                     elif p == "axis":
                         args.append(rng.choice(["row", "column"]))
                     elif p == "tag":

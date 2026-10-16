@@ -99,3 +99,41 @@ def test_existential_conjunction_preserves_each_atom_subject(base_case):
         assert render_clue(clue, case, theme) == " ".join(
             render_atom(a, case, theme) for a in clue.atoms
         )
+
+
+def test_role_witness_wording_excludes_the_holder(base_case):
+    from murdoku_lab.core.atoms import holds_atom
+
+    holder = base_case.characters[0]
+    atom = Atom("tag_in_area", holder, ("curator",))
+    # The named person cannot be their own witness, even if they have the role.
+    assert not holds_atom(
+        atom, base_case.scene, base_case.solution, {holder: frozenset({"curator"})}
+    )
+    text = render_atom(atom, base_case, canonical_theme(base_case))
+    assert text.startswith("Someone else ")
+
+
+def test_area_group_definition_agrees_across_text_and_visual(base_case):
+    from dataclasses import replace
+    from murdoku_lab.environment.state import Scratchpad
+    from murdoku_lab.visual.projection import public_observation
+
+    case = base_case
+    holder = case.characters[0]
+    area = case.scene.area_of[case.solution[holder]]
+    other = next(i for i in range(case.scene.n_areas) if i != area)
+    members = tuple(sorted((area, other)))
+    atom = Atom("in_areas", holder, (members,))
+    trial = replace(case, clues=case.clues + (Clue((atom,)),))
+    theme = replace(canonical_theme(trial), area_groups={"galleries": members})
+    theme.validate(trial)
+    text = render_case(trial, theme)
+    visual = public_observation(Scratchpad(trial, theme))
+    definition = theme.area_group_rules()[0]
+    assert definition in text and definition in visual["rules"]
+    assert render_atom(atom, trial, theme) == visual["clues"][-1]["text"]
+    assert "one of the galleries" in visual["clues"][-1]["text"]
+    # A different area set must remain explicit, never inherit an incorrect alias.
+    single = Atom("in_areas", holder, ((area,),))
+    assert "one of the galleries" not in render_atom(single, trial, theme)

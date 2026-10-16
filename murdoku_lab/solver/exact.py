@@ -301,6 +301,29 @@ class CpEncoder:
                 )  # nobody carries the tag: unsatisfiable
                 return
             m.AddBoolOr(lits)
+        elif k == "offset_witness":
+            # At least one other character sits on the implied row, beside the object.
+            beside = s.cells_beside(a["obj"])
+            lits = []
+            for z in self._others(a.holder):
+                b = m.NewBoolVar(f"wit_{a.holder}_{z}")
+                m.Add(self.row[z] - self.row[a.holder] == a["d"]).OnlyEnforceIf(b)
+                m.AddImplication(b, self._member(z, beside))
+                lits.append(b)
+            if lits:
+                m.AddBoolOr(lits)
+            else:
+                m.Add(self.cell[a.holder] == -1)  # nobody could witness: unsatisfiable
+        elif k == "no_tag_near":
+            v = self.row if a["axis"] == "row" else self.col
+            for z in self._others(a.holder):
+                if a["tag"] in self.case.tags.get(z, frozenset()):
+                    m.Add(v[z] - v[a.holder] != 1)
+                    m.Add(v[z] - v[a.holder] != -1)
+        elif k == "offset_min":
+            v = self.row if a["axis"] == "row" else self.col
+            gap = v[a.holder] - v[a["other"]]
+            m.Add(gap >= a["d"]) if a["d"] > 0 else m.Add(gap <= a["d"])
         elif k == "area_occupancy_parity":
             want = 0 if a["par"] == "even" else 1
             for ar in range(s.n_areas):

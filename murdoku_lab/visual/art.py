@@ -12,7 +12,7 @@ INK = "#334b42"
 PAPER = "#fafaf3"
 CELL = 100
 PAD = 40
-CLASSIC_PALETTE = ("#ffe095", "#cce8b4", "#f0c5ad", "#c9c0ed", "#b6dedc", "#f5c6db")
+CLASSIC_PALETTE = ("#dfedf0", "#e9f1ec", "#e8e5f2", "#f2ebdc", "#e3eaf3", "#f2e4e8")
 
 
 def esc(value):
@@ -169,7 +169,19 @@ def prop_shape(kind, w, h, name="", *, pack=None, asset=None, distinguish=False)
             return image
     # Geometry is local to a 100x100 drawing, stretched only for rectangular multi-cell props.
     base = f'<g transform="scale({w / 100:.5f} {h / 100:.5f})" stroke="{INK}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">'
-    if kind in ("table", "bed", "carpet", "car", "golf_cart"):
+    casebook = {
+        "carpet": '<rect x="11" y="13" width="78" height="74" rx="1" fill="#dbd7e8" stroke="#9b93b0"/><rect x="17" y="19" width="66" height="62" fill="none" stroke="#b5abc9"/><path d="M38 20v60m24-60v60M18 40h64M18 60h64" stroke="#c5bed6" stroke-width="1"/>',
+        "piano": '<path d="M19 79v10m60-10v10" stroke="#514e61" stroke-width="5"/><rect x="15" y="18" width="70" height="62" rx="3" fill="#8f879f"/><rect x="21" y="24" width="58" height="32" rx="1" fill="#bfb4d0"/><rect x="20" y="59" width="60" height="15" fill="#faf8f0"/><path d="M28 59v15m9-15v15m9-15v15m9-15v15m9-15v15m9-15v15" stroke="#615b70" stroke-width="2"/>',
+        "table": '<path d="M17 72v16h8V72m50 0v16h8V72" fill="#8d829e"/><rect x="10" y="31" width="80" height="46" rx="2" fill="#a99dbb"/><rect x="10" y="24" width="80" height="45" rx="2" fill="#d8cee8"/><path d="M16 64h68" stroke="#b6a9c9" stroke-width="1"/>',
+        "chair": '<path d="M26 66v22m48-22v22" stroke="#7c9fa7" stroke-width="4"/><rect x="25" y="14" width="50" height="45" rx="13" fill="#e9f4f4" stroke="#6f9ca6"/><rect x="21" y="51" width="58" height="27" rx="9" fill="#c3dfe3" stroke="#6f9ca6"/><path d="M16 45v24q0 11 12 11h44q12 0 12-11V45" fill="none" stroke="#6f9ca6" stroke-width="3"/>',
+        "shelf": '<rect x="17" y="12" width="66" height="77" rx="2" fill="#b2c7ce"/><rect x="22" y="18" width="56" height="64" fill="#f3f2ea"/><path d="M22 39h56M22 61h56" stroke="#536b76" stroke-width="4"/><g stroke="#718a95" stroke-width="5"><path d="M29 21v14m9-14v14m10-13 4 13m12-14v14M30 43v14m9-14v14m10-13 4 13m12-14v14M28 65v13m9-13v13m11-13v13m12-13 4 13m8-13v13"/></g>',
+        "tv": '<path d="M42 69v10h16V69" fill="#9ba6ad"/><path d="M18 80h64l5 9H13Z" fill="#c6cad2"/><rect x="13" y="20" width="74" height="53" rx="3" fill="#a9aab7"/><rect x="20" y="26" width="60" height="38" rx="1" fill="#fbfaf5"/><path d="M25 51h12l6-13 8 20 7-13h16" stroke="#647d87" stroke-width="2" fill="none"/>',
+        "bed": '<rect x="18" y="13" width="64" height="75" rx="2" fill="#b0a2bd"/><rect x="22" y="20" width="56" height="62" fill="#d9cfe6"/><rect x="28" y="25" width="44" height="19" rx="4" fill="#faf7f0"/><path d="M22 49h56M21 87v7m58-7v7" stroke="#756b86" stroke-width="3"/>',
+    }
+    if distinguish and kind in casebook:
+        inner = casebook[kind]
+        base = base.replace(INK, "#343541")
+    elif kind in ("table", "bed", "carpet", "car", "golf_cart"):
         if kind == "table":
             inner = '<rect x="13" y="29" width="78" height="53" rx="13" fill="#334b4215" stroke="none"/><rect x="9" y="22" width="78" height="55" rx="13" fill="#bb835b"/><rect x="15" y="28" width="66" height="43" rx="9" fill="#d4a376"/><path d="M20 61h55M33 34h23" stroke="#ac7954"/><ellipse cx="42" cy="45" rx="12" ry="10" fill="#f3ebd0"/><ellipse cx="62" cy="51" rx="7" ry="6" fill="#758b6d"/>'
         elif kind == "carpet":
@@ -311,7 +323,9 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
         elif t == "rug":
             color = "#e3b9b5"
         root.append(f'<rect x="{x}" y="{y}" width="100" height="100" fill="{color}"/>')
-        if style in ("art", "classic"):
+        if style == "art" or (
+            style == "classic" and t in ("tile", "water", "sand", "rug")
+        ):
             pattern = {
                 "floor": "wood",
                 "tile": "tile",
@@ -322,10 +336,10 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
                 "rough": "grass",
             }.get(t, "wood")
             root.append(
-                f'<rect x="{x}" y="{y}" width="100" height="100" fill="url(#{pattern})"/>'
+                f'<rect x="{x}" y="{y}" width="100" height="100" fill="url(#{pattern})" opacity="{0.3 if style == "classic" else 1}"/>'
             )
         root.append(
-            f'<rect x="{x}" y="{y}" width="100" height="100" fill="none" stroke="{"#292929" if style == "classic" else "#51624d"}" stroke-opacity="{".8" if style == "classic" else ".16"}" stroke-width="{3 if style == "classic" else 1}"/>'
+            f'<rect x="{x}" y="{y}" width="100" height="100" fill="none" stroke="{"#657079" if style == "classic" else "#51624d"}" stroke-opacity="{".4" if style == "classic" else ".16"}" stroke-width="{1.2 if style == "classic" else 1}"/>'
         )
     # Merge only filled rectangular connected footprints. Never stretch an illustration over
     # a hole, an unrelated cell, a disconnected instance or an area boundary.
@@ -369,7 +383,7 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             for r, c, h, w in spans:
                 x, y = PAD + c * CELL, PAD + r * CELL
                 root.append(
-                    f'<g data-prop="{esc(prop["id"])}" transform="translate({x+10} {y+15})">{prop_shape(prop["art"], w*CELL-20, h*CELL-22, prop["name"], pack="fluent" if style == "fluent" or prop.get("asset") else None, asset=prop.get("asset"), distinguish=style == "classic")}</g>'
+                    f'<g data-prop="{esc(prop["id"])}" transform="translate({x+10} {y+15})">{prop_shape(prop["art"], w*CELL-20, h*CELL-22, prop["name"], pack="fluent" if style == "fluent" or (prop.get("asset") and style != "classic") else None, asset=prop.get("asset"), distinguish=style == "classic")}</g>'
                 )
                 if prop["art"] == "generic":
                     label = prop["id"][:13]
@@ -397,11 +411,12 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             )
     for x1, y1, x2, y2 in sorted(edges):
         root.append(
-            f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="{"#222222" if style == "classic" else "#526253"}" stroke-width="{7 if style == "classic" else 5.5}" stroke-linecap="round"/>'
+            f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="{"#222222" if style == "classic" else "#526253"}" stroke-width="{9 if style == "classic" else 5.5}" stroke-linecap="round"/>'
         )
-        root.append(
-            f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="#faf6dd" stroke-width="1.2" stroke-opacity=".7"/>'
-        )
+        if style != "classic":
+            root.append(
+                f'<path d="M{x1} {y1}L{x2} {y2}" fill="none" stroke="#faf6dd" stroke-width="1.2" stroke-opacity=".7"/>'
+            )
     for a, b in scene["doors"]:
         ca, cb = by_label[a], by_label[b]
         x = PAD + (ca["col"] + cb["col"] + 1) * CELL / 2
@@ -420,20 +435,25 @@ def scene_svg(observation, *, style="art", selected=None, focus_cells=()):
             continue
         members = [c["cell"] for c in cells if c["area"] == area["id"]]
         for group in connected_components(members, by_label):
-            r = min(c["row"] for c in group)
+            r = (max if style == "classic" else min)(c["row"] for c in group)
             run = sorted(c["col"] for c in group if c["row"] == r)
             c0 = run[0]
             c1 = c0
             while c1 + 1 in run:
                 c1 += 1
             available = (c1 - c0 + 1) * CELL - 18
-            full = f'{area["number"]:02d}  {area["name"].upper()}'
+            full = (
+                area["name"].upper()
+                if style == "classic"
+                else f'{area["number"]:02d}  {area["name"].upper()}'
+            )
             if len(full) * 7.3 + 16 > available:
                 full = f'{area["number"]:02d}'
             tw = min(available, len(full) * 7.3 + 16)
-            x, y = PAD + c0 * CELL + 8, PAD + r * CELL + 6
+            x = PAD + c0 * CELL + 8
+            y = PAD + (r + 1) * CELL - 10 if style == "classic" else PAD + r * CELL + 6
             root.append(
-                f'<rect x="{x}" y="{y}" width="{tw:.1f}" height="19" rx="3" fill="{PAPER}" fill-opacity=".91"/>'
+                f'<rect x="{x}" y="{y}" width="{tw:.1f}" height="19" rx="{9 if style == "classic" else 3}" fill="{PAPER}" fill-opacity=".96" stroke="{"#343541" if style == "classic" else "none"}"/>'
             )
             root.append(
                 txt(x + 8, y + 13.5, full, 10.5, font_weight="700", letter_spacing=".9")
@@ -630,7 +650,7 @@ def board_svg(observation, *, style="art"):
     for i, prop in enumerate(props):
         x, y = 22 + (i % columns) * slot, key_y + (i // columns) * row_height
         out.append(
-            f'<g transform="translate({x} {y})">{prop_shape(prop["art"], 45, 45, pack="fluent" if style == "fluent" or prop.get("asset") else None, asset=prop.get("asset"), distinguish=style == "classic")}</g>'
+            f'<g transform="translate({x} {y})">{prop_shape(prop["art"], 45, 45, pack="fluent" if style == "fluent" or (prop.get("asset") and style != "classic") else None, asset=prop.get("asset"), distinguish=style == "classic")}</g>'
         )
         name = (
             f'{prop["id"]} · {prop["name"]}'
