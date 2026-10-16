@@ -68,6 +68,8 @@ OUT = ROOT / "web" / "public" / "cases"
 BANDS = {"easy": "Easy", "medium": "Medium", "hard": "Hard", "expert": "Expert"}
 # Rough solving time in minutes by board size, refined once players time real cases.
 MINUTES = {5: (2, 4), 6: (3, 7), 7: (5, 10), 8: (8, 15), 9: (12, 25)}
+# Beyond 9×9 (the 16×16 and 24×24 classics) a case is a marathon of many sittings.
+MARATHON = (8 * 60, 48 * 60)
 SESSION_FIELDS = (
     "session_id",
     "revision",
@@ -85,11 +87,14 @@ SESSION_FIELDS = (
 def _difficulty(case):
     band = case.target_band
     size = case.scene.W
-    lo, hi = MINUTES.get(size, (15, 40))
-    if band == "hard":
-        lo, hi = round(lo * 1.4), round(hi * 1.5)
-    elif band == "easy":
-        lo, hi = max(1, round(lo * 0.7)), round(hi * 0.8)
+    if size > max(MINUTES):
+        lo, hi = MARATHON
+    else:
+        lo, hi = MINUTES.get(size, (15, 40))
+        if band == "hard":
+            lo, hi = round(lo * 1.4), round(hi * 1.5)
+        elif band == "easy":
+            lo, hi = max(1, round(lo * 0.7)), round(hi * 0.8)
     return {"band": band, "label": BANDS.get(band, "Classic"), "minutes": [lo, hi]}
 
 

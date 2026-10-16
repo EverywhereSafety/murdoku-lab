@@ -33,7 +33,7 @@ function CaseCard({ entry, onOpen, big = false }) {
         <span className="pl-card-meta">
           <span className={`pl-pill is-${entry.difficulty.band || "classic"}`}>{entry.difficulty.label}</span>
           <span>{entry.size}</span>
-          <span>{t("library.minutes", { lo, hi })}</span>
+          <span>{hi >= 120 ? t("library.hours", { lo: Math.round(lo / 60), hi: Math.round(hi / 60) }) : t("library.minutes", { lo, hi })}</span>
         </span>
       </span>
     </button>

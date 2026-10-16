@@ -37,6 +37,19 @@ To try it on a phone on the same Wi-Fi, run `.venv/bin/python scripts/release_lo
 and open the printed address. `--no-build` serves the last build; `--port` changes the
 port. Nothing is published and the player makes no requests to other sites.
 
+## Share a test build
+
+```bash
+npm run package:preview
+```
+
+This builds the player and writes `outputs/preview/murdoku-preview-<date>.zip`: the static game
+without the Lab, a double-click launcher for macOS and one for Windows that serve it on
+http://127.0.0.1:4173/ with the computer's own Python and open the browser, and a short guide
+for testers in Chinese (`scripts/preview/`). Opening `index.html` straight from disk does not
+work, because the browser will not let the page load its case files. Nothing is uploaded; hand
+the zip round yourself.
+
 ## Playing
 
 Every case has one solution. Each suspect, and the victim, stands on exactly one square;

@@ -9,6 +9,7 @@
   "library.classics": "Classic cases",
   "library.progress": "{solved} of {total} solved",
   "library.minutes": "{lo}–{hi} min",
+  "library.hours": "{lo}–{hi} hr",
   "library.people": "{n} suspects",
   "library.rooms": "{n} rooms",
   "library.solved": "Solved",
