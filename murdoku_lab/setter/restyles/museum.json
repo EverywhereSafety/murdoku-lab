@@ -1,0 +1,78 @@
+{
+ "schema": "murdoku.restyle/1",
+ "case": "museum",
+ "look": "museum",
+ "note": "The Museum After Hours keeps its own words. Each drawing still shows the clue's noun, in a museum's manner: an antique four-poster for 'bed', a gilded throne for 'chair', a specimen cabinet for 'shelf', a meteorite on its stand for 'boulder'.",
+ "skins": {
+  "bed": "four_poster",
+  "chair": "throne",
+  "table": "reading_table",
+  "shelf": "specimen_cabinet",
+  "statue": "classical_statue",
+  "boulder": "meteorite",
+  "plant": "fern",
+  "tree": "potted_bay"
+ },
+ "rooms": {
+  "Antiquities Gallery": [
+   "marble",
+   "stone"
+  ],
+  "Music Gallery": [
+   "herringbone",
+   "portrait_green"
+  ],
+  "Decorative Arts Gallery": [
+   "parquet",
+   "damask_rose"
+  ],
+  "Winter Garden": [
+   "terracotta",
+   "glass_pane"
+  ],
+  "Covered Walk": [
+   "flagstone",
+   "trellis"
+  ],
+  "Grand Gallery": [
+   "marble",
+   "gallery_red"
+  ],
+  "Furniture Gallery": [
+   "parquet",
+   "oak_panel"
+  ],
+  "Exhibit Alcove 1": [
+   "terrazzo",
+   "marble_wall"
+  ],
+  "Restoration Studio": [
+   "boards",
+   "whitewash"
+  ],
+  "Natural History Gallery": [
+   "terrazzo",
+   "panel_wood"
+  ],
+  "Exhibit Alcove 2": [
+   "terrazzo",
+   "marble_wall"
+  ],
+  "Sculpture Gallery": [
+   "marble",
+   "crimson"
+  ],
+  "Reading Room": [
+   "parquet",
+   "book_wall"
+  ],
+  "Collections Store": [
+   "planks",
+   "brick"
+  ],
+  "Reception": [
+   "checker",
+   "gallery_red"
+  ]
+ }
+}

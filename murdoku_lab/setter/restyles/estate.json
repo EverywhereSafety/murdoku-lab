@@ -1,0 +1,59 @@
+{
+ "schema": "murdoku.restyle/1",
+ "case": "estate",
+ "look": "manor",
+ "note": "The Winter Garden Masquerade keeps its own words. The house is drawn as Alderwick: a four-poster in the guest suite, wingback chairs, a wine cask, a classical statue in the grounds. Its rug, bookshelf, rose bush and garden rock already have drawings that match.",
+ "skins": {
+  "bed": "four_poster",
+  "chair": "wingback",
+  "barrel": "wine_cask",
+  "statue": "classical_statue",
+  "plant": "fern"
+ },
+ "rooms": {
+  "Library": [
+   "parquet",
+   "book_wall"
+  ],
+  "Music room": [
+   "herringbone",
+   "panel_blue"
+  ],
+  "Conservatory": [
+   "checker",
+   "glass_pane"
+  ],
+  "Gallery": [
+   "parquet",
+   "damask_rose"
+  ],
+  "Courtyard": [
+   "paving",
+   "brick"
+  ],
+  "Dining room": [
+   "planks",
+   "floral_yellow"
+  ],
+  "Rose garden": [
+   "lawn",
+   "trellis"
+  ],
+  "Terrace": [
+   "flagstone",
+   "stone"
+  ],
+  "Guest suite": [
+   "carpet",
+   "stripe_green"
+  ],
+  "Lily garden": [
+   "lawn",
+   "trellis"
+  ],
+  "Orchard": [
+   "lawn",
+   "brick"
+  ]
+ }
+}

@@ -159,3 +159,48 @@ def test_clues_say_an_before_a_vowel(demo_cases):
         renamed = dataclasses.replace(theme, objects={**theme.objects, kind: noun})
         text = render_clue(clue, case, renamed)
         assert f"{article} {noun}" in text, text
+
+
+@pytest.mark.parametrize("slug", sorted(settings.restyles()))
+def test_restyles_keep_the_written_theme_and_draw_its_nouns(slug):
+    """A restyled case reads exactly as written; only its look comes from the setting pack."""
+    from murdoku_lab.visual import demos
+
+    entry = demos.catalogue()[slug]
+    spec = settings.restyles()[slug]
+    theme = settings.restyle(entry.case, entry.theme, spec)
+    for field in (
+        "title",
+        "names",
+        "pronouns",
+        "areas",
+        "objects",
+        "tags",
+        "area_groups",
+    ):
+        assert getattr(theme, field) == getattr(entry.theme, field), field
+    clues = lambda th: [
+        c["text"] for c in public_observation(Scratchpad(entry.case, th))["clues"]
+    ]
+    assert clues(theme) == clues(entry.theme)
+    pack = settings.load(spec["look"])
+    assert theme.setting_id == spec["look"]
+    assert theme.visual["frame"] == pack["visual"]["frame"]
+    assert theme.visual["skins"] == spec["skins"]
+    assert len(theme.visual["area_wallpapers"]) == entry.case.scene.n_areas
+    svg = art.scene_svg(
+        public_observation(Scratchpad(entry.case, theme)), style="casebook"
+    )
+    ET.fromstring(svg)
+    assert f'url(#mk-g-{frames.get(pack["visual"]["frame"])["fill"]})' in svg
+
+
+def test_a_restyle_must_cover_every_room_and_name_real_drawings():
+    from murdoku_lab.visual import demos
+
+    entry = demos.catalogue()["museum"]
+    spec = copy.deepcopy(settings.restyles()["museum"])
+    spec["rooms"].pop("Reading Room")
+    spec["skins"]["tv"] = "no_such_skin"
+    with pytest.raises(ValueError, match="Reading Room.*|.*no_such_skin"):
+        settings.restyle(entry.case, entry.theme, spec)

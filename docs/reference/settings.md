@@ -74,6 +74,24 @@ Eight packs ship in `murdoku_lab/setter/settings/`:
   salt. The daily lock tries other salts to avoid repeating a title or a recent victim.
 - **Look**: the pack's `visual`, plus each area's finish and wallpaper from its room.
 
+## Restyling a case that has its own theme
+
+Some cases arrive with a theme someone wrote for them, such as the built-in 24 × 24 *The Museum
+After Hours* and 16 × 16 *The Winter Garden Masquerade*. Their clues were written around that
+theme's names, rooms, roles and named area groups, so `dress()` would rewrite the puzzle's
+text. `settings.restyle(case, theme, spec)` instead keeps every word and takes only the look
+from a pack. A spec in `murdoku_lab/setter/restyles/<case>.json` says:
+
+| Field   | Meaning                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------- |
+| `look`  | The pack whose frame, accent and floor colourways the case uses                          |
+| `skins` | Prop kind → drawing. Each drawing must still show the case's noun while suiting the look: a museum's "statue" is a classical statue and its "bed" an antique four-poster, never a sarcophagus |
+| `rooms` | Room name → `[finish, wallpaper]`, one entry for every room on the board                 |
+
+`restyle` refuses a spec that misses a room, names a room that is not on the board, or names
+an unknown drawing, finish or wallpaper. The player app applies the spec to the built-in case
+of the same name; the Lab keeps drawing it as written.
+
 ## Checks a pack must pass
 
 `settings.validate` runs whenever a pack loads:

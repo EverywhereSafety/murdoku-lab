@@ -7,6 +7,7 @@ recurring cast. The content hash ignores themes, so dressing a case can never ch
 solution, certificate or difficulty (tests/test_theme_invariance.py).
 """
 
+import dataclasses
 from functools import lru_cache
 import hashlib
 import json
@@ -262,6 +263,66 @@ def dress(case, setting_id, *, salt=""):
     )
     theme.validate(case)
     return theme
+
+
+RESTYLES_DIR = Path(__file__).resolve().parent / "restyles"
+
+
+@lru_cache(maxsize=None)
+def restyles():
+    """Restyle specs by case slug (`setter/restyles/<slug>.json`)."""
+    return {
+        p.stem: json.loads(p.read_text()) for p in sorted(RESTYLES_DIR.glob("*.json"))
+    }
+
+
+def restyle(case, theme, spec):
+    """Draw a case that has its own written theme in a setting pack's casebook look.
+
+    The theme's words stay as written: title, people, rooms, roles, named area groups and every
+    noun its clues use. The pack supplies the frame, accent and floor colourways; the spec picks,
+    for each prop kind, a drawing that still shows the theme's noun while suiting the setting
+    (a museum's "statue" becomes a classical statue, never a sarcophagus for its "bed"), and a
+    floor finish and wallpaper for every room by name.
+    """
+    from murdoku_lab.visual.art import materials, props
+
+    pack = load(spec["look"])
+    problems = []
+    present = {p.pid for p in case.scene.props}
+    for kind, skin in spec.get("skins", {}).items():
+        if kind not in present:
+            problems.append(f"skin for {kind!r}, which the case does not use")
+        if skin not in props.all_skins() and skin not in props.BASE:
+            problems.append(f"unknown skin {skin!r}")
+    rooms = spec.get("rooms", {})
+    names = [theme.area(a) for a in range(case.scene.n_areas)]
+    for name in names:
+        if name not in rooms:
+            problems.append(f"no finish and wallpaper for room {name!r}")
+    for name, (finish, wallpaper) in rooms.items():
+        if name not in names:
+            problems.append(f"room {name!r} is not on the board")
+        if finish not in materials.FINISHES:
+            problems.append(f"room {name!r} has unknown finish {finish!r}")
+        try:
+            materials.wallpaper_pattern(wallpaper)
+        except ValueError:
+            problems.append(f"room {name!r} has unknown wallpaper {wallpaper!r}")
+    if problems:
+        raise ValueError(f"restyle {spec.get('case')!r}: " + "; ".join(problems))
+    visual = {
+        key: value
+        for key, value in pack["visual"].items()
+        if key in ("accent", "tints", "finishes", "variants", "frame", "wallpapers")
+    }
+    visual["setting"] = spec["look"]
+    visual["skins"] = dict(spec.get("skins", {}))
+    visual["area_finishes"] = {str(a): rooms[n][0] for a, n in enumerate(names)}
+    visual["area_wallpapers"] = {str(a): rooms[n][1] for a, n in enumerate(names)}
+    out = dataclasses.replace(theme, setting_id=spec["look"], visual=visual)
+    out.validate(case)
+    return out
 
 
 def epilogue(theme, case, murderer, area_id, *, salt=""):

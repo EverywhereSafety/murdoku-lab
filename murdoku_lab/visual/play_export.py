@@ -155,7 +155,8 @@ TUTORIAL = ROOT / "content" / "tutorial" / "tutorial.json"
 
 def entries(records=None):
     """(case_id, kind, case, theme, setting name, eyebrow): the training case
-    (scripts/build_tutorial.py), the classics and any dressed records."""
+    (scripts/build_tutorial.py), the classics (restyled where setter/restyles/ says so) and any
+    dressed records."""
     if TUTORIAL.exists():
         row = json.loads(TUTORIAL.read_text())
         yield (
@@ -166,11 +167,17 @@ def entries(records=None):
             "Training case",
             "Your first case",
         )
+    from murdoku_lab.setter import settings
+
+    # A classic with a restyle spec keeps its own words and gets a setting pack's look.
+    styles = settings.restyles()
     for entry in demos.catalogue().values():
-        yield entry.slug, "classic", entry.case, entry.theme, entry.setting, entry.eyebrow
+        theme = entry.theme
+        if entry.slug in styles:
+            theme = settings.restyle(entry.case, theme, styles[entry.slug])
+        yield entry.slug, "classic", entry.case, theme, entry.setting, entry.eyebrow
     if not records:
         return
-    from murdoku_lab.setter import settings
 
     for line in Path(records).read_text().splitlines():
         if not line.strip():

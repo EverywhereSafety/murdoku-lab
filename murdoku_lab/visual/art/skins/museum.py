@@ -1,4 +1,7 @@
-"""The Halloway Museum after hours: sarcophagi, vitrines, a gramophone and a meteorite."""
+"""The Halloway Museum after hours: sarcophagi, vitrines, a gramophone and a meteorite.
+
+Also the antique four-poster bed, for written themes that keep the noun "bed" in a museum or a
+country house (see setter/restyles/)."""
 
 import math
 
@@ -11,7 +14,80 @@ GRADIENTS = {
     "velvet-red": ("#c23a4c", "#8e2132"),
     "meteor": ("#64636d", "#2f2e36"),
     "marble": ("#f6f3ec", "#d4cdbf"),
+    "bedpost": ("#7b4a2b", "#4b2817"),
 }
+
+
+def four_poster(w, h):
+    """An antique four-poster: carved posts, a fringed tester and tied-back velvet curtains."""
+    out = [
+        k.bed(
+            w,
+            h,
+            frame=grad("bedpost"),
+            frame_light="#a8714a",
+            sheet="#fbf6ea",
+            blanket=grad("velvet-red"),
+            band="#e2b54f",
+            leg="#3b1f14",
+        )
+    ]
+
+    def post(x, top, bottom):
+        return (
+            f'<rect x="{f(x - 3)}" y="{f(top)}" width="6" height="{f(bottom - top)}" rx="2" '
+            f'fill="{grad("bedpost")}" {s(1.4)}/>'
+            f'<path d="M{f(x - 3)} {f(top + 8)}h6M{f(x - 3)} {f(bottom - 10)}h6" stroke="#c99a5f" stroke-width="1.4"/>'
+        )
+
+    def finial(x, y):
+        return (
+            f'<circle cx="{f(x)}" cy="{f(y)}" r="4.2" fill="{grad("gold")}" {s(1.2)}/>'
+        )
+
+    def curtain(x, side, top, bottom):
+        # A drape hanging from the tester, gathered by a gold tie a third of the way down.
+        inner = x + side * 11
+        tie = top + (bottom - top) * 0.55
+        return (
+            f'<path d="M{f(x)} {f(top)}H{f(inner)}Q{f(inner - side * 6)} {f(tie)} {f(inner - side * 2)} {f(bottom)}'
+            f'H{f(x)}Z" fill="{grad("velvet-red")}" {s(1.6)}/>'
+            f'<path d="M{f(x + side * 4)} {f(top + 4)}Q{f(x + side * 6)} {f(tie)} {f(x + side * 4)} {f(bottom - 4)}" '
+            f'fill="none" stroke="#6d1726" stroke-width="1.2"/>'
+            f'<rect x="{f(min(x, inner - side * 3) - 1)}" y="{f(tie - 2)}" width="{f(abs(inner - side * 3 - x) + 2)}" '
+            f'height="4" rx="2" fill="{grad("gold")}" {s(1)}/>'
+        )
+
+    def tester(x0, x1, y):
+        scallops = "".join(
+            f"Q{f(x0 + (i + 0.5) * (x1 - x0) / n)} {f(y + 15)} {f(x0 + (i + 1) * (x1 - x0) / n)} {f(y + 9)}"
+            for i, n in (
+                (i, max(3, round((x1 - x0) / 18)))
+                for i in range(max(3, round((x1 - x0) / 18)))
+            )
+        )
+        return (
+            f'<path d="M{f(x0)} {f(y + 9)}{scallops}V{f(y + 6)}H{f(x0)}Z" fill="{grad("velvet-red")}" {s(1.4)}/>'
+            f'<rect x="{f(x0 - 3)}" y="{f(y)}" width="{f(x1 - x0 + 6)}" height="8" rx="2" fill="{grad("bedpost")}" {s(1.6)}/>'
+            f'<path d="M{f(x0)} {f(y + 4)}H{f(x1)}" stroke="#e2b54f" stroke-width="1.4"/>'
+        )
+
+    if w > h * 1.15:
+        # Head to the west, as the bed helper draws it: the tester crowns the headboard.
+        x0, x1 = 8, w - 8
+        out.append(curtain(x0 + 2, 1, -22, 48))
+        out.append(post(x0 + 2, -26, 74) + post(x0 + 22, -26, 60))
+        out.append(tester(x0 - 2, x0 + 26, -32))
+        out.append(post(x1 - 4, 18, 74) + finial(x1 - 4, 16))
+        return "".join(out)
+    # Head to the north: the tester spans the headboard, short posts mark the foot.
+    x0, x1 = 10, w - 10
+    out.append(curtain(x0, 1, -24, 38) + curtain(x1, -1, -24, 38))
+    out.append(post(x0, -28, 30) + post(x1, -28, 30))
+    out.append(tester(x0 - 2, x1 + 2, -34))
+    out.append(post(x0, h - 40, h - 12) + post(x1, h - 40, h - 12))
+    out.append(finial(x0, h - 42) + finial(x1, h - 42))
+    return "".join(out)
 
 
 def sarcophagus(w, h):
@@ -587,6 +663,7 @@ def _marble_wall(pid):
 
 
 SKINS = {
+    "four_poster": four_poster,
     "sarcophagus": sarcophagus,
     "throne": throne,
     "carriage": carriage,
@@ -603,5 +680,5 @@ WALLPAPERS = {
     "portrait_green": _portrait_green,
     "marble_wall": _marble_wall,
 }
-STRETCH = {"sarcophagus", "carriage", "display_case", "specimen_cabinet"}
-TALL = {"throne", "gramophone", "specimen_cabinet", "classical_statue"}
+STRETCH = {"four_poster", "sarcophagus", "carriage", "display_case", "specimen_cabinet"}
+TALL = {"four_poster", "throne", "gramophone", "specimen_cabinet", "classical_statue"}
