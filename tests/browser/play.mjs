@@ -181,6 +181,15 @@ try {
     await page.locator(".pl-verdict .pl-lineup-card").first().waitFor();
     assert.ok(!overlap(await page.locator(".pl-verdict").boundingBox(), board), "the verdict panel leaves the board in view");
     checks.push("the verdict panel leaves the board in view");
+    const suspects = tutorial.public.people.filter((p) => !p.victim).map((p) => p.id);
+    await page.locator(".pl-lineup-card").nth(suspects.indexOf(unseal(tutorial.secret, tutorial.id).murderer)).click();
+    await page.locator(".pl-reveal").waitFor();
+    await page.locator(".pl-reveal button", { hasText: "Play again" }).click();
+    await page.locator(".pl-coach .pl-primary", { hasText: "Let's start" }).waitFor();
+    assert.equal(await page.locator(".pl-token").count(), 0, "playing again clears the board");
+    await page.reload({ waitUntil: "networkidle" });
+    assert.equal(await page.locator(".pl-token").count(), 0, "a fresh start survives a refresh");
+    checks.push("a solved training case can be played again from the start");
   }
   await desktop.close();
 

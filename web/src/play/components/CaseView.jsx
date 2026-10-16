@@ -248,7 +248,7 @@ function HintCard({ hint, game, onMore, onFix, onClose }) {
   );
 }
 
-function RevealDialog({ open, game, finished, hints, progress, streak, onClose, onNext, onLibrary }) {
+function RevealDialog({ open, game, finished, hints, progress, streak, onClose, onNext, onLibrary, onAgain }) {
   const [copied, setCopied] = useState(false);
   if (!finished) return null;
   const secret = game.secret();
@@ -315,6 +315,11 @@ function RevealDialog({ open, game, finished, hints, progress, streak, onClose, 
         <button type="button" className="pl-secondary" onClick={onLibrary}>
           {t("reveal.library")}
         </button>
+        {onAgain && (
+          <button type="button" className="pl-secondary" onClick={onAgain}>
+            {t("reveal.again")}
+          </button>
+        )}
         <button type="button" className="pl-link" onClick={onClose}>
           {t("reveal.board")}
         </button>
@@ -532,8 +537,20 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
     />
   );
 
+  // Practice cases can be played again from scratch; a daily case keeps its first solve.
+  const playAgain = game.bundle.daily
+    ? null
+    : () => {
+        coach?.reset?.();
+        store.restart();
+        setSelected(game.personIds[0]);
+        setHint(null);
+        setOutcome(null);
+        setRevealOpen(false);
+      };
+
   const guide = coach ? (
-    <CoachCard coach={coach} onLibrary={() => onOpen(null)} />
+    <CoachCard coach={coach} onLibrary={() => onOpen(null)} onAgain={playAgain} />
   ) : (
     <HintCard hint={finished ? null : hint} game={game} onMore={showHint} onFix={fixHint} onClose={() => setHint(null)} />
   );
@@ -647,6 +664,7 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
         onClose={() => setRevealOpen(false)}
         onNext={next ? () => onOpen(next) : null}
         onLibrary={() => onOpen(null)}
+        onAgain={playAgain}
       />
       <Toast toast={toast} />
     </div>

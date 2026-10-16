@@ -14,7 +14,7 @@ export function useCoach(game, state, selected, finished) {
   const { order, candidates } = secret.hints;
   const solution = secret.solution;
   const victim = first(game, game.victim);
-  if (finished) return { key: "coach.done", vars: {}, pose: "celebrating", focus: {} };
+  if (finished) return { key: "coach.done", vars: {}, pose: "celebrating", focus: {}, reset: () => setStage("intro") };
   if (stage === "intro")
     return { key: "coach.intro", vars: {}, pose: "pointing", focus: {}, next: () => setStage("play") };
   const wrong = order.find((p) => state.placed[p] && state.placed[p] !== solution[p]);
@@ -45,7 +45,7 @@ export function useCoach(game, state, selected, finished) {
   return { key, vars: { name, statement }, pose: "thinking", focus: { cells: open.length ? open : [solution[next]], person: next } };
 }
 
-export function CoachCard({ coach, onLibrary }) {
+export function CoachCard({ coach, onLibrary, onAgain }) {
   if (!coach) return null;
   return (
     <div className="pl-hint pl-coach" role="status" aria-live="polite">
@@ -62,6 +62,11 @@ export function CoachCard({ coach, onLibrary }) {
             {coach.key === "coach.done" && (
               <button type="button" className="pl-primary" onClick={onLibrary}>
                 {t("coach.cases")}
+              </button>
+            )}
+            {coach.key === "coach.done" && onAgain && (
+              <button type="button" className="pl-secondary" onClick={onAgain}>
+                {t("coach.again")}
               </button>
             )}
           </div>
