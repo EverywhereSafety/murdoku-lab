@@ -283,7 +283,7 @@ def restyle(case, theme, spec):
     noun its clues use. The pack supplies the frame, accent and floor colourways; the spec picks,
     for each prop kind, a drawing that still shows the theme's noun while suiting the setting
     (a museum's "statue" becomes a classical statue, never a sarcophagus for its "bed"), and a
-    floor finish and wallpaper for every room by name.
+    floor finish, wallpaper and optional colourway for every room by name.
     """
     from murdoku_lab.visual.art import materials, props
 
@@ -300,11 +300,17 @@ def restyle(case, theme, spec):
     for name in names:
         if name not in rooms:
             problems.append(f"no finish and wallpaper for room {name!r}")
-    for name, (finish, wallpaper) in rooms.items():
+    for name, (finish, wallpaper, *variant) in rooms.items():
         if name not in names:
             problems.append(f"room {name!r} is not on the board")
         if finish not in materials.FINISHES:
             problems.append(f"room {name!r} has unknown finish {finish!r}")
+        elif variant and variant[0] not in {
+            v[0] for v in materials.FLOOR_VARIANTS[finish]
+        }:
+            problems.append(
+                f"room {name!r} has unknown {finish} colourway {variant[0]!r}"
+            )
         try:
             materials.wallpaper_pattern(wallpaper)
         except ValueError:
@@ -317,9 +323,17 @@ def restyle(case, theme, spec):
         if key in ("accent", "tints", "finishes", "variants", "frame", "wallpapers")
     }
     visual["setting"] = spec["look"]
+    # The spec's finishes come first, so each room gets the floor it names; the pack's own
+    # remain as fallbacks when touching rooms would otherwise look alike.
+    visual["finishes"] = list(
+        dict.fromkeys([room[0] for room in rooms.values()] + visual.get("finishes", []))
+    )
     visual["skins"] = dict(spec.get("skins", {}))
     visual["area_finishes"] = {str(a): rooms[n][0] for a, n in enumerate(names)}
     visual["area_wallpapers"] = {str(a): rooms[n][1] for a, n in enumerate(names)}
+    visual["area_variants"] = {
+        str(a): rooms[n][2] for a, n in enumerate(names) if len(rooms[n]) > 2
+    }
     out = dataclasses.replace(theme, setting_id=spec["look"], visual=visual)
     out.validate(case)
     return out

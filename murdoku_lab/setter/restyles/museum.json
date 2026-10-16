@@ -2,7 +2,7 @@
  "schema": "murdoku.restyle/1",
  "case": "museum",
  "look": "museum",
- "note": "The Museum After Hours keeps its own words. Each drawing still shows the clue's noun, in a museum's manner: an antique four-poster for 'bed', a gilded throne for 'chair', a specimen cabinet for 'shelf', a meteorite on its stand for 'boulder'.",
+ "note": "The Museum After Hours keeps its own words. Each drawing still shows the clue's noun, in a museum's manner: an antique four-poster for 'bed', a gilded throne for 'chair', a specimen cabinet for 'shelf', a meteorite on its stand for 'boulder'. Floors keep touching rooms at least 12 ΔE00 apart, so a few rooms take their second choice.",
  "skins": {
   "bed": "four_poster",
   "chair": "throne",
@@ -16,63 +16,78 @@
  "rooms": {
   "Antiquities Gallery": [
    "marble",
-   "stone"
+   "stone",
+   "white"
   ],
   "Music Gallery": [
    "herringbone",
-   "portrait_green"
+   "portrait_green",
+   "honey"
   ],
   "Decorative Arts Gallery": [
-   "parquet",
-   "damask_rose"
+   "planks",
+   "damask_rose",
+   "ash"
   ],
   "Winter Garden": [
    "terracotta",
-   "glass_pane"
+   "glass_pane",
+   "terra"
   ],
   "Covered Walk": [
    "flagstone",
-   "trellis"
+   "trellis",
+   "sandstone"
   ],
   "Grand Gallery": [
-   "marble",
-   "gallery_red"
+   "carpet",
+   "gallery_red",
+   "teal"
   ],
   "Furniture Gallery": [
    "parquet",
-   "oak_panel"
+   "oak_panel",
+   "amber"
   ],
   "Exhibit Alcove 1": [
    "terrazzo",
-   "marble_wall"
+   "marble_wall",
+   "rose"
   ],
   "Restoration Studio": [
-   "boards",
-   "whitewash"
+   "planks",
+   "whitewash",
+   "ash"
   ],
   "Natural History Gallery": [
-   "terrazzo",
-   "panel_wood"
+   "boards",
+   "panel_wood",
+   "walnut"
   ],
   "Exhibit Alcove 2": [
    "terrazzo",
-   "marble_wall"
+   "marble_wall",
+   "rose"
   ],
   "Sculpture Gallery": [
-   "marble",
-   "crimson"
+   "planks",
+   "crimson",
+   "oak"
   ],
   "Reading Room": [
-   "parquet",
-   "book_wall"
+   "carpet",
+   "book_wall",
+   "navy"
   ],
   "Collections Store": [
    "planks",
-   "brick"
+   "brick",
+   "walnut"
   ],
   "Reception": [
    "checker",
-   "gallery_red"
+   "gallery_red",
+   "noir"
   ]
  }
 }

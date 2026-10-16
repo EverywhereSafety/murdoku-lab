@@ -2,7 +2,7 @@
  "schema": "murdoku.restyle/1",
  "case": "estate",
  "look": "manor",
- "note": "The Winter Garden Masquerade keeps its own words. The house is drawn as Alderwick: a four-poster in the guest suite, wingback chairs, a wine cask, a classical statue in the grounds. Its rug, bookshelf, rose bush and garden rock already have drawings that match.",
+ "note": "The Winter Garden Masquerade keeps its own words. The house is drawn as Alderwick: a four-poster in the guest suite, wingback chairs, a wine cask, a classical statue in the grounds. Its rug, bookshelf, rose bush and garden rock already have drawings that match. Floors keep touching rooms at least 12 ΔE00 apart, so a few rooms take their second choice.",
  "skins": {
   "bed": "four_poster",
   "chair": "wingback",
@@ -12,48 +12,59 @@
  },
  "rooms": {
   "Library": [
-   "parquet",
-   "book_wall"
+   "carpet",
+   "book_wall",
+   "navy"
   ],
   "Music room": [
-   "herringbone",
-   "panel_blue"
+   "carpet",
+   "panel_blue",
+   "rose"
   ],
   "Conservatory": [
-   "checker",
-   "glass_pane"
+   "boards",
+   "glass_pane",
+   "walnut"
   ],
   "Gallery": [
-   "parquet",
-   "damask_rose"
+   "herringbone",
+   "damask_rose",
+   "smoke"
   ],
   "Courtyard": [
-   "paving",
-   "brick"
+   "flagstone",
+   "brick",
+   "grey"
   ],
   "Dining room": [
    "planks",
-   "floral_yellow"
+   "floral_yellow",
+   "walnut"
   ],
   "Rose garden": [
-   "lawn",
-   "trellis"
+   "planks",
+   "trellis",
+   "ash"
   ],
   "Terrace": [
-   "flagstone",
-   "stone"
+   "deck",
+   "stone",
+   "teak"
   ],
   "Guest suite": [
    "carpet",
-   "stripe_green"
+   "stripe_green",
+   "rose"
   ],
   "Lily garden": [
-   "lawn",
-   "trellis"
+   "flagstone",
+   "trellis",
+   "grey"
   ],
   "Orchard": [
-   "lawn",
-   "brick"
+   "flagstone",
+   "brick",
+   "sandstone"
   ]
  }
 }

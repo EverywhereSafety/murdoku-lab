@@ -60,6 +60,10 @@ def room_styles(observation):
         and not (materials.FINISH_CONFLICTS.get(f, set()) & terrains)
     ] or ["planks"]
     explicit = {int(k): v for k, v in (visual.get("area_finishes") or {}).items()}
+    # A restyled case may also name each room's colourway (setter/restyles/).
+    explicit_variant = {
+        int(k): v for k, v in (visual.get("area_variants") or {}).items()
+    }
     wallpapers = [w for w in (visual.get("wallpapers") or materials.WALLPAPERS)]
     room_papers = {int(k): v for k, v in (visual.get("area_wallpapers") or {}).items()}
     # A setting may prefer some colourways of a finish (green velvet aboard a train, red carpet
@@ -87,11 +91,13 @@ def room_styles(observation):
         best = None
         for finish in candidates:
             liked = palette.get(finish)
+            wanted = explicit_variant.get(area) if finish == preferred else None
             for name, base, _, _ in materials.FLOOR_VARIANTS[finish]:
                 gap = min((delta_e(base, u) for u in used), default=100.0)
                 key = (
                     gap >= MIN_FLOOR_GAP,
                     finish == preferred,
+                    wanted is None or name == wanted,
                     not liked or name in liked,
                     gap,
                 )

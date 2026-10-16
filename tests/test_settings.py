@@ -204,3 +204,20 @@ def test_a_restyle_must_cover_every_room_and_name_real_drawings():
     spec["skins"]["tv"] = "no_such_skin"
     with pytest.raises(ValueError, match="Reading Room.*|.*no_such_skin"):
         settings.restyle(entry.case, entry.theme, spec)
+
+
+@pytest.mark.parametrize("slug", sorted(settings.restyles()))
+def test_restyled_rooms_get_the_floors_their_spec_names(slug):
+    """Each room's named floor and colourway survive the touching-rooms contrast rule."""
+    from murdoku_lab.visual import demos
+    from murdoku_lab.visual.art import casebook
+
+    entry = demos.catalogue()[slug]
+    spec = settings.restyles()[slug]
+    theme = settings.restyle(entry.case, entry.theme, spec)
+    styles = casebook.room_styles(public_observation(Scratchpad(entry.case, theme)))
+    for area, style in styles.items():
+        finish, _, *variant = spec["rooms"][theme.area(area)]
+        assert style["finish"] == finish, theme.area(area)
+        if variant:
+            assert style["variant"] == variant[0], theme.area(area)
