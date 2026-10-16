@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 from murdoku_lab.environment.state import Scratchpad
-from murdoku_lab.visual.art import scene_svg, observation_svg
+from murdoku_lab.visual.art import DEFAULT_STYLE, STYLES, scene_svg, observation_svg
 from murdoku_lab.visual.demos import catalogue
 from murdoku_lab.visual.projection import public_observation
 
@@ -15,7 +15,7 @@ def main():
     p.add_argument("--case", default="glasshouse")
     p.add_argument("--records")
     p.add_argument("--scope", choices=("full", "scene"), default="full")
-    p.add_argument("--style", choices=("art", "diagram"), default="art")
+    p.add_argument("--style", choices=STYLES, default=DEFAULT_STYLE)
     p.add_argument("--out", default="artifacts/observation.svg")
     a = p.parse_args()
     e = catalogue(a.records)[a.case]

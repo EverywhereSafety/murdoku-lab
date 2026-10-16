@@ -32,6 +32,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from murdoku_lab.paths import PROJECT_ROOT
+from murdoku_lab.visual.art.styles import STYLES
 
 ROOT = PROJECT_ROOT
 
@@ -173,7 +174,7 @@ def _arguments(argv=None):
     )
     ap.add_argument(
         "--artwork-style",
-        choices=("art", "classic", "fluent", "diagram"),
+        choices=STYLES,
         default="classic",
     )
     ap.add_argument("--variant", default="classic")

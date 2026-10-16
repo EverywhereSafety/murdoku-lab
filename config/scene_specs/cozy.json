@@ -1,0 +1,5 @@
+{
+  "schema": "murdoku.scene_spec/1",
+  "blocker_rate": 0.2,
+  "furniture_rate": 0.16
+}

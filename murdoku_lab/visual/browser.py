@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from murdoku_lab.visual.demos import catalogue
 from murdoku_lab.visual.session import VisualSession
-from murdoku_lab.visual.art import scene_svg, observation_svg
+from murdoku_lab.visual.art import DEFAULT_STYLE, scene_svg, observation_svg
 
 
 class BrowserGame:
@@ -90,7 +90,7 @@ class BrowserGame:
                 render = scene_svg if route == "scene.svg" else observation_svg
                 result = render(
                     state,
-                    style=query.get("style", ["art"])[0],
+                    style=query.get("style", [DEFAULT_STYLE])[0],
                     selected=query.get("selected", [None])[0],
                     focus_cells=query.get("focus", [""])[0].split(","),
                 )

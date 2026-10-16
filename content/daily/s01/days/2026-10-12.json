@@ -1,0 +1,537 @@
+{
+ "schema": "murdoku.daily_case/1",
+ "date": "2026-10-12",
+ "n": 1,
+ "weekday": "monday",
+ "size": 6,
+ "band": "easy",
+ "special": null,
+ "setting": "glasshouse",
+ "murderer": "D",
+ "victim": "Violet Vane",
+ "murdoku_case": {
+  "schema": "murdoku.case/1",
+  "id": "67dd9182adfb7d47",
+  "variant": "classic",
+  "scene": {
+   "W": 6,
+   "H": 6,
+   "area_of": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3
+   ],
+   "obj_of": [
+    null,
+    null,
+    "plant",
+    null,
+    null,
+    "statue",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "box",
+    null,
+    "statue",
+    "chair",
+    null,
+    null,
+    "car",
+    null,
+    null,
+    null,
+    "bed",
+    "bed",
+    null,
+    "chair",
+    null,
+    null,
+    "boulder",
+    "barrel",
+    null,
+    "barrel",
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "props": [
+    {
+     "pid": "barrel",
+     "standable": false,
+     "cells": [
+      28,
+      30
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "bed",
+     "standable": true,
+     "cells": [
+      21,
+      22
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "boulder",
+     "standable": false,
+     "cells": [
+      27
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "box",
+     "standable": false,
+     "cells": [
+      11
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "car",
+     "standable": true,
+     "cells": [
+      17
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "chair",
+     "standable": true,
+     "cells": [
+      14,
+      24
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "plant",
+     "standable": false,
+     "cells": [
+      2
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "statue",
+     "standable": false,
+     "cells": [
+      5,
+      13
+     ],
+     "landmark": true
+    }
+   ],
+   "terrain_of": [
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor"
+   ],
+   "allow_disconnected_areas": false,
+   "doors": [
+    [
+     12,
+     18
+    ],
+    [
+     14,
+     20
+    ],
+    [
+     17,
+     23
+    ],
+    [
+     19,
+     20
+    ]
+   ]
+  },
+  "characters": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "V"
+  ],
+  "victim": "V",
+  "tags": {},
+  "clues": [
+   {
+    "atoms": [
+     {
+      "kind": "on",
+      "holder": "D",
+      "args": [
+       "car"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_beside",
+      "holder": "E",
+      "args": [
+       "boulder"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "beside",
+      "holder": "B",
+      "args": [
+       "statue"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "beside",
+      "holder": "C",
+      "args": [
+       "bed"
+      ]
+     },
+     {
+      "kind": "in_corner",
+      "holder": "C",
+      "args": []
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "A",
+      "args": [
+       "chair"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "in_areas",
+      "holder": "V",
+      "args": [
+       [
+        1,
+        2,
+        3
+       ]
+      ]
+     }
+    ]
+   }
+  ],
+  "solution": {
+   "A": 24,
+   "B": 7,
+   "C": 20,
+   "D": 17,
+   "E": 33,
+   "V": 4
+  },
+  "answer": "murderer",
+  "answer_key": "D",
+  "theme_id": null,
+  "seed": 33902745,
+  "target_band": "easy",
+  "certificate": {
+   "solved": true,
+   "depth": 8,
+   "tier_max": 1,
+   "tier_hist": {
+    "1": 8
+   },
+   "advanced": 0,
+   "cost": 8.0,
+   "max_width": 34,
+   "guess_free": true,
+   "place_order": [
+    "D",
+    "A",
+    "C",
+    "E",
+    "B",
+    "V"
+   ],
+   "bottleneck": {
+    "kind": "single",
+    "tier": 1,
+    "text": "Only one square is still possible for D: r3c6. Row 3 and column 6 are now closed to everyone else.",
+    "removed": 10,
+    "placed": [
+     "D",
+     17
+    ]
+   },
+   "steps": [
+    {
+     "kind": "setup",
+     "tier": 1,
+     "text": "Mark the cells each clue allows. 7 cell(s) are unusable (a table, shelf, plant or the like stands there); 34 candidate placements remain across 6 people.",
+     "removed": 0
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for D: r3c6. Row 3 and column 6 are now closed to everyone else.",
+     "removed": 10,
+     "placed": [
+      "D",
+      17
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for A: r5c1. Row 5 and column 1 are now closed to everyone else.",
+     "removed": 5,
+     "placed": [
+      "A",
+      24
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for C: r4c3. Row 4 and column 3 are now closed to everyone else.",
+     "removed": 6,
+     "placed": [
+      "C",
+      20
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for E: r6c4. Row 6 and column 4 are now closed to everyone else.",
+     "removed": 5,
+     "placed": [
+      "E",
+      33
+     ]
+    },
+    {
+     "kind": "line",
+     "tier": 1,
+     "text": "B is the only person who can be in column 2, and every column holds someone — so B is there.",
+     "removed": 1
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for B: r2c2. Row 2 and column 2 are now closed to everyone else.",
+     "removed": 1,
+     "placed": [
+      "B",
+      7
+     ]
+    },
+    {
+     "kind": "verdict",
+     "tier": 1,
+     "text": "V is at r1c5.",
+     "removed": 0,
+     "placed": [
+      "V",
+      4
+     ]
+    }
+   ]
+  },
+  "meta": {
+   "quality_version": "scene-design-v1",
+   "implied_atoms_removed": 0,
+   "scene_spec": {
+    "schema": "murdoku.scene_spec/1",
+    "anchors_per_area": {},
+    "blocker_rate": 0.2,
+    "furniture_rate": 0.16
+   }
+  }
+ },
+ "murdoku_theme": {
+  "theme_id": "glasshouse-6352b32d",
+  "title": "A Thorn in the Side",
+  "names": {
+   "A": "Ada Ashworth",
+   "B": "Basil Blackwood",
+   "C": "Cleo Carrow",
+   "D": "Dorian Dale",
+   "E": "Esme Elwood",
+   "V": "Violet Vane"
+  },
+  "pronouns": {
+   "A": "she",
+   "B": "he",
+   "C": "she",
+   "D": "he",
+   "E": "she",
+   "V": "she"
+  },
+  "areas": [
+   "Palm House",
+   "Cactus House",
+   "Potting Shed",
+   "Kitchen Garden"
+  ],
+  "objects": {
+   "bed": "raised bed",
+   "chair": "armchair",
+   "car": "delivery van",
+   "plant": "orchid",
+   "box": "watering can",
+   "statue": "fountain",
+   "boulder": "rockery stone",
+   "barrel": "rain barrel"
+  },
+  "tags": {},
+  "victim_note": "was found dead",
+  "blurb": "The rarest bloom in the country is about to open, and someone will not live to see it.",
+  "assets": {},
+  "setting_id": "glasshouse",
+  "visual": {
+   "accent": "#2f7d5f",
+   "finishes": [
+    "terracotta",
+    "flagstone",
+    "paving",
+    "checker",
+    "lawn",
+    "boards",
+    "planks",
+    "marble"
+   ],
+   "wallpapers": [
+    "glass_pane",
+    "trellis",
+    "whitewash",
+    "brick"
+   ],
+   "variants": {
+    "carpet": [
+     "sage"
+    ],
+    "checker": [
+     "sage"
+    ],
+    "flagstone": [
+     "sandstone",
+     "grey"
+    ]
+   },
+   "frame": "glasshouse",
+   "skins": {
+    "bed": "raised_bed",
+    "table": "potting_bench",
+    "tv": "beehive",
+    "plant": "orchid",
+    "tree": "lemon_tree",
+    "crate": "pot_stack",
+    "box": "watering_can",
+    "bear": "gnome",
+    "statue": "fountain",
+    "piano": "wardian_case",
+    "barrel": "rain_barrel"
+   },
+   "setting": "glasshouse",
+   "area_finishes": {
+    "0": "terracotta",
+    "1": "paving",
+    "2": "boards",
+    "3": "lawn"
+   },
+   "area_wallpapers": {
+    "0": "glass_pane",
+    "1": "glass_pane",
+    "2": "whitewash",
+    "3": "trellis"
+   }
+  }
+ }
+}

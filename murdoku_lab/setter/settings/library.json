@@ -1,0 +1,95 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "library",
+  "name": "St Aldhelm's College",
+  "eyebrow": "End of term at St Aldhelm's",
+  "titles": [
+    "Overdue",
+    "Silence, Please",
+    "Death Between the Lines",
+    "A Study in Ink",
+    "The Missing Manuscript",
+    "Final Examination",
+    "Footnotes to a Murder",
+    "Out of Print"
+  ],
+  "blurbs": [
+    "The end of term, a priceless manuscript and a fellow who will not be returning next year.",
+    "The bell has rung for dinner. One scholar is still among the books, and will be for ever.",
+    "Centuries of learning, a college at war with itself and one very final examination.",
+    "Quiet, please. Somebody in this college is about to get away with murder."
+  ],
+  "rooms": [
+    {"name": "Reading Room", "suits": ["table", "chair", "shelf", "carpet"], "finish": "parquet", "wallpaper": "book_wall"},
+    {"name": "Rare Books Room", "suits": ["shelf", "register", "crate", "statue"], "finish": "herringbone", "wallpaper": "book_wall"},
+    {"name": "Map Room", "suits": ["statue", "table", "shelf", "boulder"], "finish": "parquet", "wallpaper": "oak_panel"},
+    {"name": "Archive", "suits": ["crate", "shelf", "box"], "finish": "planks", "wallpaper": "oak_panel"},
+    {"name": "Porter's Lodge", "suits": ["register", "chair", "barrel", "box"], "finish": "flagstone", "wallpaper": "oak_panel"},
+    {"name": "Dean's Study", "suits": ["chair", "register", "tv", "carpet"], "finish": "carpet", "wallpaper": "crimson"},
+    {"name": "Chapel", "suits": ["piano", "chair", "flowers", "statue"], "finish": "flagstone", "wallpaper": "gothic_window"},
+    {"name": "Cloister", "suits": ["tree", "shrub", "statue", "plant"], "finish": "paving", "wallpaper": "gothic_window"},
+    {"name": "Common Room", "suits": ["bed", "chair", "tv", "carpet"], "finish": "carpet", "wallpaper": "crimson"},
+    {"name": "Bindery", "suits": ["table", "crate", "box", "register"], "finish": "boards", "wallpaper": "oak_panel"},
+    {"name": "Stacks", "suits": ["shelf", "car", "box"], "finish": "planks", "wallpaper": "book_wall"},
+    {"name": "Observatory", "suits": ["boulder", "statue", "chair"], "finish": "planks", "wallpaper": "gothic_window"},
+    {"name": "Music School", "suits": ["piano", "chair", "carpet"], "finish": "herringbone", "wallpaper": "oak_panel"},
+    {"name": "Refectory", "suits": ["table", "chair", "flowers"], "finish": "flagstone", "wallpaper": "gothic_window"},
+    {"name": "Quad", "suits": ["tree", "shrub", "bear", "plant"], "finish": "lawn", "wallpaper": "stone"},
+    {"name": "Senior Common Room", "suits": ["chair", "bed", "tv", "flowers"], "finish": "carpet", "wallpaper": "crimson"}
+  ],
+  "objects": {
+    "bed": "chesterfield sofa",
+    "chair": "leather armchair",
+    "carpet": "faded rug",
+    "car": "book trolley",
+    "table": "reading table",
+    "tv": "grandfather clock",
+    "shelf": "bookcase",
+    "plant": "aspidistra",
+    "tree": "old yew",
+    "flowers": "vase of flowers",
+    "shrub": "rose bush",
+    "crate": "card catalogue",
+    "box": "stack of books",
+    "register": "circulation desk",
+    "palm": "potted palm",
+    "bear": "stuffed owl",
+    "statue": "globe",
+    "piano": "practice piano",
+    "boulder": "telescope",
+    "barrel": "umbrella stand"
+  },
+  "visual": {
+    "accent": "#7d2a2e",
+    "finishes": ["parquet", "herringbone", "planks", "carpet", "flagstone", "boards", "paving", "lawn"],
+    "wallpapers": ["book_wall", "oak_panel", "gothic_window", "crimson"],
+    "variants": {"carpet": ["plum", "rose", "sage"], "planks": ["walnut", "oak"]},
+    "frame": "library",
+    "skins": {
+      "bed": "chesterfield",
+      "chair": "leather_armchair",
+      "car": "book_trolley",
+      "table": "reading_table",
+      "tv": "grandfather_clock",
+      "crate": "card_catalogue",
+      "box": "book_stack",
+      "register": "circulation_desk",
+      "bear": "owl",
+      "statue": "globe",
+      "boulder": "telescope",
+      "barrel": "umbrella_stand"
+    }
+  },
+  "motives": [
+    "a thesis had been copied, word for word, thirty years ago",
+    "the college silver had been quietly sold to pay a debt",
+    "the election for the new master was closer than anyone admitted",
+    "a medieval manuscript in the archive was a very modern forgery",
+    "a bequest to the college came with a clause nobody had read"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were the only two in the {area} after the bell for dinner. Only {murderer} came to high table, because {motive}.",
+    "Nobody else had a key to the {area} that evening. {murderer} had made sure of that: {motive}.",
+    "The {area} was silent except for two people: {victim} and {murderer}. The reason had been in the archive all along: {motive}."
+  ]
+}

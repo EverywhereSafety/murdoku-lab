@@ -1,0 +1,93 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "liner",
+  "name": "RMS Aurelia",
+  "eyebrow": "A crossing aboard the Aurelia",
+  "titles": [
+    "Death on the Night Crossing",
+    "Five Days to Southampton",
+    "The Captain's Table",
+    "Calm Seas, Cold Hearts",
+    "One Passenger Short",
+    "The Purser's Ledger",
+    "Fog off the Grand Banks",
+    "Last Dance Before Landfall"
+  ],
+  "blurbs": [
+    "Five days at sea, a famous family aboard, and one passenger who will not reach port.",
+    "Champagne on the upper deck, fog on the water, and a scream that nobody admits to hearing.",
+    "The orchestra kept playing. The stewards kept pouring. Somebody kept a secret all the way across the ocean.",
+    "A maiden voyage, a fortune in the purser's safe and a guest list that did not add up."
+  ],
+  "rooms": [
+    {"name": "Grand Saloon", "suits": ["chair", "piano", "carpet", "flowers", "palm"], "finish": "marble", "wallpaper": "deco_gold"},
+    {"name": "Promenade Deck", "suits": ["chair", "plant", "palm", "bear"], "finish": "deck", "wallpaper": "sea_rail"},
+    {"name": "Captain's Cabin", "suits": ["bed", "register", "shelf", "statue"], "finish": "planks", "wallpaper": "portholes"},
+    {"name": "Bridge", "suits": ["tv", "register", "boulder"], "finish": "boards", "wallpaper": "portholes"},
+    {"name": "Ballroom", "suits": ["piano", "carpet", "flowers", "statue"], "finish": "parquet", "wallpaper": "deco_gold"},
+    {"name": "Dining Saloon", "suits": ["table", "chair", "flowers"], "finish": "herringbone", "wallpaper": "deco_gold"},
+    {"name": "Galley", "suits": ["table", "crate", "barrel", "box"], "finish": "checker", "wallpaper": "bulkhead"},
+    {"name": "Cargo Hold", "suits": ["car", "crate", "box", "boulder", "barrel"], "finish": "boards", "wallpaper": "bulkhead"},
+    {"name": "Smoking Room", "suits": ["chair", "table", "tv", "carpet"], "finish": "carpet", "wallpaper": "deco_gold"},
+    {"name": "Library", "suits": ["shelf", "chair", "carpet", "register"], "finish": "parquet", "wallpaper": "portholes"},
+    {"name": "Boat Deck", "suits": ["car", "bear", "barrel", "boulder"], "finish": "deck", "wallpaper": "sea_rail"},
+    {"name": "Purser's Office", "suits": ["register", "shelf", "crate", "box"], "finish": "planks", "wallpaper": "portholes"},
+    {"name": "Stateroom", "suits": ["bed", "chair", "flowers", "carpet"], "finish": "carpet", "wallpaper": "portholes"},
+    {"name": "Engine Room", "suits": ["tv", "barrel", "boulder", "crate"], "finish": "paving", "wallpaper": "bulkhead"},
+    {"name": "Sun Deck", "suits": ["chair", "palm", "plant", "tree", "shrub"], "finish": "deck", "wallpaper": "sea_rail"},
+    {"name": "Writing Room", "suits": ["register", "chair", "shelf", "statue"], "finish": "herringbone", "wallpaper": "portholes"}
+  ],
+  "objects": {
+    "bed": "bunk",
+    "chair": "deck chair",
+    "carpet": "Turkey rug",
+    "car": "lifeboat",
+    "table": "dining table",
+    "tv": "ship's telegraph",
+    "shelf": "bookcase",
+    "plant": "aspidistra",
+    "tree": "ornamental tree",
+    "flowers": "flower arrangement",
+    "shrub": "potted hydrangea",
+    "crate": "steamer trunk",
+    "box": "parcel",
+    "register": "wireless set",
+    "palm": "potted palm",
+    "bear": "life ring",
+    "statue": "figurehead",
+    "piano": "piano",
+    "boulder": "anchor",
+    "barrel": "coil of rope"
+  },
+  "visual": {
+    "accent": "#1e5a7a",
+    "finishes": ["deck", "planks", "marble", "herringbone", "parquet", "carpet", "checker", "boards", "paving", "terrazzo"],
+    "wallpapers": ["portholes", "deco_gold", "bulkhead", "sea_rail"],
+    "variants": {"carpet": ["navy", "teal"], "checker": ["blue", "noir"], "planks": ["oak", "ash"]},
+    "frame": "liner",
+    "skins": {
+      "bed": "bunk",
+      "chair": "deck_chair",
+      "car": "lifeboat",
+      "tv": "ship_telegraph",
+      "crate": "steamer_trunk",
+      "register": "wireless_set",
+      "bear": "life_ring",
+      "statue": "figurehead",
+      "boulder": "anchor",
+      "barrel": "rope_coil"
+    }
+  },
+  "motives": [
+    "the passenger list had one name too many",
+    "an old wager from a previous crossing was finally called in",
+    "the jewels in the purser's safe were paste, and someone knew why",
+    "a shipboard romance had ended badly, twenty crossings ago",
+    "the cargo was insured for far more than it was worth"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were the only two in the {area} when the band struck up. By the time it stopped, {murderer} had settled an old account: {motive}.",
+    "Nobody else was in the {area}. {murderer} had waited five days at sea for that moment, because {motive}.",
+    "The {area} held two passengers that night, and only {murderer} walked back to the cabins. The reason was simple: {motive}."
+  ]
+}

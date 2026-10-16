@@ -19,6 +19,7 @@ once you have a model and GPU runtime.
 | Connect queries, dynamics, tools and rewards to RL     | [RL integration](guides/rl.md)          |
 | Sample, evaluate and replay model interactions         | [Tools and evaluation](guides/tools.md) |
 | Play locally and inspect query bundles                 | [Frontend](guides/play.md)              |
+| Plan, generate, review and lock daily cases            | [Daily case](guides/daily.md)           |
 | Run the trained solver example                         | [Model](guides/model.md)                |
 
 ## Reference
@@ -27,3 +28,5 @@ once you have a model and GPU runtime.
 - [Formal puzzle model](reference/formal-model.md)
 - [Reasoning and difficulty profiles](reference/reasoning-profiles.md)
 - [Artwork catalog](reference/artwork.md)
+- [Setting packs and skins](reference/settings.md)
+- [Player case format](reference/play-case-format.md)

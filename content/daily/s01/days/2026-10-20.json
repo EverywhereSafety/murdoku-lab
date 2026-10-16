@@ -1,0 +1,552 @@
+{
+ "schema": "murdoku.daily_case/1",
+ "date": "2026-10-20",
+ "n": 9,
+ "weekday": "tuesday",
+ "size": 6,
+ "band": "medium",
+ "special": null,
+ "setting": "library",
+ "murderer": "B",
+ "victim": "Vaughn Vane",
+ "murdoku_case": {
+  "schema": "murdoku.case/1",
+  "id": "45c02be22f5fa6b3",
+  "variant": "classic",
+  "scene": {
+   "W": 6,
+   "H": 6,
+   "area_of": [
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    2,
+    1,
+    2,
+    2,
+    0,
+    0,
+    2,
+    2,
+    2,
+    0,
+    0,
+    0
+   ],
+   "obj_of": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "car",
+    null,
+    null,
+    null,
+    null,
+    "flowers",
+    "car",
+    null,
+    null,
+    null,
+    null,
+    "barrel",
+    "chair",
+    null,
+    null,
+    "chair",
+    null,
+    null,
+    null,
+    null,
+    null,
+    "chair",
+    null,
+    "flowers",
+    null,
+    "shrub",
+    "boulder",
+    "piano",
+    "piano"
+   ],
+   "props": [
+    {
+     "pid": "barrel",
+     "standable": false,
+     "cells": [
+      18
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "boulder",
+     "standable": false,
+     "cells": [
+      33
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "car",
+     "standable": true,
+     "cells": [
+      7,
+      13
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "chair",
+     "standable": true,
+     "cells": [
+      19,
+      22,
+      28
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "flowers",
+     "standable": false,
+     "cells": [
+      12,
+      30
+     ],
+     "landmark": false
+    },
+    {
+     "pid": "piano",
+     "standable": false,
+     "cells": [
+      34,
+      35
+     ],
+     "landmark": true
+    },
+    {
+     "pid": "shrub",
+     "standable": false,
+     "cells": [
+      32
+     ],
+     "landmark": false
+    }
+   ],
+   "terrain_of": [
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor",
+    "floor"
+   ],
+   "allow_disconnected_areas": false,
+   "doors": [
+    [
+     2,
+     3
+    ],
+    [
+     20,
+     26
+    ]
+   ]
+  },
+  "characters": [
+   "A",
+   "B",
+   "C",
+   "D",
+   "E",
+   "V"
+  ],
+  "victim": "V",
+  "tags": {},
+  "clues": [
+   {
+    "atoms": [
+     {
+      "kind": "other_beside",
+      "holder": "V",
+      "args": [
+       "flowers"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "row_offset",
+      "holder": "D",
+      "args": [
+       "V",
+       2
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "beside",
+      "holder": "A",
+      "args": [
+       "chair"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "only_on",
+      "holder": "E",
+      "args": [
+       "chair"
+      ]
+     },
+     {
+      "kind": "not_beside",
+      "holder": "E",
+      "args": [
+       "piano"
+      ]
+     }
+    ]
+   },
+   {
+    "atoms": [
+     {
+      "kind": "in_area",
+      "holder": "C",
+      "args": [
+       2
+      ]
+     }
+    ]
+   }
+  ],
+  "solution": {
+   "A": 29,
+   "B": 6,
+   "C": 31,
+   "D": 15,
+   "E": 22,
+   "V": 2
+  },
+  "answer": "murderer",
+  "answer_key": "B",
+  "theme_id": null,
+  "seed": 27861535,
+  "target_band": "medium",
+  "certificate": {
+   "solved": true,
+   "depth": 16,
+   "tier_max": 3,
+   "tier_hist": {
+    "1": 10,
+    "2": 5,
+    "3": 1
+   },
+   "advanced": 1,
+   "cost": 25.0,
+   "max_width": 102,
+   "guess_free": true,
+   "place_order": [
+    "C",
+    "E",
+    "A",
+    "B",
+    "V",
+    "D"
+   ],
+   "bottleneck": {
+    "kind": "hidden_subset",
+    "tier": 3,
+    "text": "Rows [1, 2] can only be filled by B, V, so those 2 people are confined there: 17 candidate(s) cleared.",
+    "removed": 17
+   },
+   "steps": [
+    {
+     "kind": "setup",
+     "tier": 1,
+     "text": "Mark the cells each clue allows. 7 cell(s) are unusable (a table, shelf, plant or the like stands there); 102 candidate placements remain across 6 people.",
+     "removed": 0
+    },
+    {
+     "kind": "exclusive",
+     "tier": 1,
+     "text": "E was the only person on a chair — every other person is wiped off those 3 square(s) (11 candidate(s) cleared).",
+     "removed": 11
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking D and V (row_offset) removes 18 candidate(s).",
+     "removed": 18
+    },
+    {
+     "kind": "tagshare",
+     "tier": 2,
+     "text": "V shared an area with someone beside a flowers, so areas where that is no longer possible are ruled out (12 candidate(s) cleared).",
+     "removed": 12
+    },
+    {
+     "kind": "hidden_subset",
+     "tier": 3,
+     "text": "Rows [1, 2] can only be filled by B, V, so those 2 people are confined there: 17 candidate(s) cleared.",
+     "removed": 17
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking D and V (row_offset) removes 6 candidate(s).",
+     "removed": 6
+    },
+    {
+     "kind": "line",
+     "tier": 1,
+     "text": "C is the only person who can be in row 6, and every row holds someone — so C is there.",
+     "removed": 3
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for C: r6c2. Row 6 and column 2 are now closed to everyone else.",
+     "removed": 8,
+     "placed": [
+      "C",
+      31
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for E: r4c5. Row 4 and column 5 are now closed to everyone else.",
+     "removed": 10,
+     "placed": [
+      "E",
+      22
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for A: r5c6. Row 5 and column 6 are now closed to everyone else.",
+     "removed": 3,
+     "placed": [
+      "A",
+      29
+     ]
+    },
+    {
+     "kind": "relational",
+     "tier": 2,
+     "text": "Cross-checking the clue linking D and V (row_offset) removes 1 candidate(s).",
+     "removed": 1
+    },
+    {
+     "kind": "line",
+     "tier": 1,
+     "text": "B is the only person who can be in row 2, and every row holds someone — so B is there.",
+     "removed": 3
+    },
+    {
+     "kind": "tagshare",
+     "tier": 2,
+     "text": "V is in area 2 and only B can be the one beside a flowers, so B is confined to it (2 cleared).",
+     "removed": 2
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for B: r2c1. Row 2 and column 1 are now closed to everyone else.",
+     "removed": 1,
+     "placed": [
+      "B",
+      6
+     ]
+    },
+    {
+     "kind": "single",
+     "tier": 1,
+     "text": "Only one square is still possible for V: r1c3. Row 1 and column 3 are now closed to everyone else.",
+     "removed": 1,
+     "placed": [
+      "V",
+      2
+     ]
+    },
+    {
+     "kind": "verdict",
+     "tier": 1,
+     "text": "D is at r3c4.",
+     "removed": 0,
+     "placed": [
+      "D",
+      15
+     ]
+    }
+   ]
+  },
+  "meta": {
+   "quality_version": "scene-design-v1",
+   "implied_atoms_removed": 0,
+   "scene_spec": {
+    "schema": "murdoku.scene_spec/1",
+    "anchors_per_area": {},
+    "blocker_rate": 0.2,
+    "furniture_rate": 0.16
+   }
+  }
+ },
+ "murdoku_theme": {
+  "theme_id": "library-64c3ac55",
+  "title": "Overdue",
+  "names": {
+   "A": "Ada Ashworth",
+   "B": "Basil Blackwood",
+   "C": "Cleo Carrow",
+   "D": "Dorian Dale",
+   "E": "Esme Elwood",
+   "V": "Vaughn Vane"
+  },
+  "pronouns": {
+   "A": "she",
+   "B": "he",
+   "C": "she",
+   "D": "he",
+   "E": "she",
+   "V": "he"
+  },
+  "areas": [
+   "Chapel",
+   "Porter's Lodge",
+   "Cloister"
+  ],
+  "objects": {
+   "chair": "leather armchair",
+   "car": "book trolley",
+   "flowers": "vase of flowers",
+   "shrub": "rose bush",
+   "piano": "practice piano",
+   "boulder": "telescope",
+   "barrel": "umbrella stand"
+  },
+  "tags": {},
+  "victim_note": "was found dead",
+  "blurb": "Quiet, please. Somebody in this college is about to get away with murder.",
+  "assets": {},
+  "setting_id": "library",
+  "visual": {
+   "accent": "#7d2a2e",
+   "finishes": [
+    "parquet",
+    "herringbone",
+    "planks",
+    "carpet",
+    "flagstone",
+    "boards",
+    "paving",
+    "lawn"
+   ],
+   "wallpapers": [
+    "book_wall",
+    "oak_panel",
+    "gothic_window",
+    "crimson"
+   ],
+   "variants": {
+    "carpet": [
+     "plum",
+     "rose",
+     "sage"
+    ],
+    "planks": [
+     "walnut",
+     "oak"
+    ]
+   },
+   "frame": "library",
+   "skins": {
+    "bed": "chesterfield",
+    "chair": "leather_armchair",
+    "car": "book_trolley",
+    "table": "reading_table",
+    "tv": "grandfather_clock",
+    "crate": "card_catalogue",
+    "box": "book_stack",
+    "register": "circulation_desk",
+    "bear": "owl",
+    "statue": "globe",
+    "boulder": "telescope",
+    "barrel": "umbrella_stand"
+   },
+   "setting": "library",
+   "area_finishes": {
+    "0": "flagstone",
+    "1": "flagstone",
+    "2": "paving"
+   },
+   "area_wallpapers": {
+    "0": "gothic_window",
+    "1": "oak_panel",
+    "2": "gothic_window"
+   }
+  }
+ }
+}

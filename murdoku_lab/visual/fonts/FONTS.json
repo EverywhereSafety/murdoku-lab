@@ -1,0 +1,65 @@
+{
+ "files": {
+  "DMMono-400.ttf": {
+   "package": "@fontsource/dm-mono@5.3.0",
+   "sha256": "540051108311d6a7c40b466a7719998a5df0598e28d03fdf9cbc0361add1f726",
+   "source": "dm-mono-latin-400-normal.woff"
+  },
+  "DMMono-500.ttf": {
+   "package": "@fontsource/dm-mono@5.3.0",
+   "sha256": "4b7ee7a071f09ecc4e376ebc54526cf2fd328ae4a944ba8dc1857572b9d32626",
+   "source": "dm-mono-latin-500-normal.woff"
+  },
+  "DMSans-400.ttf": {
+   "package": "@fontsource/dm-sans@5.3.0",
+   "sha256": "e2ba1a90e4a1951eaade988f4e2ac34c6203dbb340a910183302e1f801fcfbdf",
+   "source": "dm-sans-latin-400-normal.woff"
+  },
+  "DMSans-500.ttf": {
+   "package": "@fontsource/dm-sans@5.3.0",
+   "sha256": "47b54babf5e41cd9ba5c329ed969ed9e77ad5b13e32ac406b8395c089b608ccd",
+   "source": "dm-sans-latin-500-normal.woff"
+  },
+  "DMSans-600.ttf": {
+   "package": "@fontsource/dm-sans@5.3.0",
+   "sha256": "cd3aa658e51f41520d1bc0ed63c32504fc6d4e7e7375336c3b0b3aa9380948ba",
+   "source": "dm-sans-latin-600-normal.woff"
+  },
+  "DMSans-700.ttf": {
+   "package": "@fontsource/dm-sans@5.3.0",
+   "sha256": "0e35f827ecc6b3b0c6125d35abc71f95c21d9964b31ee2e9aa0f436afb09d1b5",
+   "source": "dm-sans-latin-700-normal.woff"
+  },
+  "Newsreader-400.ttf": {
+   "package": "@fontsource/newsreader@5.3.0",
+   "sha256": "c6ef7eb2a45b12413524e0846d13bc7d7b7a80aa41748d4497232e37e9e04dc2",
+   "source": "newsreader-latin-400-normal.woff"
+  },
+  "Newsreader-400Italic.ttf": {
+   "package": "@fontsource/newsreader@5.3.0",
+   "sha256": "7eb82aba86834bef9d312a9fd98e419bfc8a4e29184b4aabc5211dfb60719130",
+   "source": "newsreader-latin-400-italic.woff"
+  },
+  "Newsreader-500.ttf": {
+   "package": "@fontsource/newsreader@5.3.0",
+   "sha256": "074ce6fea00caa7473bba59ea91fe82b1a3cacba3b9165a43976ef19d04e22a9",
+   "source": "newsreader-latin-500-normal.woff"
+  },
+  "Newsreader-500Italic.ttf": {
+   "package": "@fontsource/newsreader@5.3.0",
+   "sha256": "3d0ec122d12ffd6f4c2b10213e29167c47f914945881feafa856e667d3424e04",
+   "source": "newsreader-latin-500-italic.woff"
+  },
+  "Newsreader-600.ttf": {
+   "package": "@fontsource/newsreader@5.3.0",
+   "sha256": "e506e1305265f6451d1bdc6b125c30f496355cb0de6b751603174a7a8aa855c4",
+   "source": "newsreader-latin-600-normal.woff"
+  },
+  "Newsreader-600Italic.ttf": {
+   "package": "@fontsource/newsreader@5.3.0",
+   "sha256": "1674037b0936f87c02dd492fe39faa219eb0afb94fbaaf96c182d09b89acb2fd",
+   "source": "newsreader-latin-600-italic.woff"
+  }
+ },
+ "source": "@fontsource packages (Latin subsets)"
+}

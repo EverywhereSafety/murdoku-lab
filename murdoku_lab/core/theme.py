@@ -36,6 +36,10 @@ class Theme:
     blurb: str = ""
     assets: dict[str, str] = field(default_factory=dict)
     area_groups: dict[str, tuple[int, ...]] = field(default_factory=dict)
+    # Presentation only (never read by the solver or the content hash): the setting pack this
+    # theme came from and its look — room tints, floor finishes, walls, frame, prop skins.
+    setting_id: str = ""
+    visual: dict = field(default_factory=dict)
 
     # ------------------------------------------------------------------------------ validation
     def validate(self, case: Case | None = None) -> None:
@@ -65,6 +69,10 @@ class Theme:
             validate_selection(case, self.assets)
         if not self.theme_id or not self.title:
             raise ValueError("theme needs an id and a title")
+        if not isinstance(self.visual, dict) or any(
+            not isinstance(k, str) for k in self.visual
+        ):
+            raise ValueError("theme visual must be an object with string keys")
         # A theme may name any prop the BOARD declares, which is the point of board-local props: the
         # vocabulary is the theme's, not ours. Only a rename of something neither the board nor the
         # catalogue knows is an error, and that is checked against the case when one is supplied.
@@ -146,6 +154,8 @@ class Theme:
                 if self.area_groups
                 else {}
             ),
+            **({"setting_id": self.setting_id} if self.setting_id else {}),
+            **({"visual": self.visual} if self.visual else {}),
         }
 
     @staticmethod
@@ -165,6 +175,8 @@ class Theme:
                 label: tuple(members)
                 for label, members in d.get("area_groups", {}).items()
             },
+            setting_id=d.get("setting_id", ""),
+            visual=dict(d.get("visual", {})),
         )
 
     @staticmethod

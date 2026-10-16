@@ -9,3 +9,6 @@ CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/.
 The dataset carries its license text and separate artwork attribution.
 
 Third-party dependencies retain their respective licenses.
+
+The casebook artwork bundles DM Sans, DM Mono and Newsreader (SIL Open Font License 1.1),
+converted from the @fontsource Latin subsets; see murdoku_lab/visual/fonts/OFL.txt and FONTS.json.

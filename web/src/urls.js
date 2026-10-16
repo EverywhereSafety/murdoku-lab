@@ -1,7 +1,9 @@
 // Resolve against the document's directory so the same build works at /, at
 // /index.html, and below gateways such as /.../proxy/8765/. A leading slash on
 // a route here is an app route, never a request to the gateway's root.
-const applicationBase = new URL(".", window.location.href);
+// A page below the app root (the Lab at lab/) names the root in a meta tag.
+const rootMeta = document.querySelector('meta[name="murdoku-app-root"]');
+const applicationBase = new URL(rootMeta?.content || ".", window.location.href);
 
 export function appUrl(path) {
   if (

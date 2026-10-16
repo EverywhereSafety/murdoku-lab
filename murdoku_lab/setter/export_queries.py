@@ -18,6 +18,21 @@ from murdoku_lab.core.name_library import preset_theme
 from murdoku_lab.environment.queries import make_record, public_record
 from murdoku_lab.setter.pipeline import gate
 from murdoku_lab.solver.difficulty import respects_caps, style_ok
+from murdoku_lab.visual.art.styles import STYLES
+
+
+def _artwork(style):
+    from murdoku_lab.visual.raster import renderer_info
+
+    return renderer_info(style)
+
+
+def daily_published():
+    """Content hashes of locked daily cases (content/daily/published.json)."""
+    from murdoku_lab.paths import PROJECT_ROOT
+
+    path = PROJECT_ROOT / "content" / "daily" / "published.json"
+    return set(json.loads(path.read_text())) if path.exists() else set()
 
 
 def load_records(path):
@@ -40,10 +55,11 @@ def export_case(
         from murdoku_lab.environment.state import Scratchpad
         from murdoku_lab.visual.art import board_svg
         from murdoku_lab.visual.projection import public_observation
-        from murdoku_lab.visual.raster import png_from_svg
+        from murdoku_lab.visual.raster import png_for_style
 
-        data = png_from_svg(
-            board_svg(public_observation(Scratchpad(case, theme)), style=artwork_style)
+        data = png_for_style(
+            board_svg(public_observation(Scratchpad(case, theme)), style=artwork_style),
+            artwork_style,
         )
         suffix = "" if artwork_style == "art" else "-" + artwork_style
         relative = f"images/{case.content_hash()}{suffix}.png"
@@ -76,6 +92,8 @@ def write_bundle(
     (destination / "public").mkdir()
     private = {view: [] for view in views}
     results, seen = [], set()
+    # Published daily cases are for players, never training data.
+    published = daily_published()
     for source in records:
         case = Case.from_json(source.get("murdoku_case", source))
         if source.get("murdoku_theme"):
@@ -93,6 +111,15 @@ def write_bundle(
         if identity in seen:
             continue
         seen.add(identity)
+        if identity in published:
+            results.append(
+                {
+                    "case_id": identity,
+                    "accepted": False,
+                    "excluded": "published daily case",
+                }
+            )
+            continue
         report = gate(
             case,
             expect_band=case.target_band,
@@ -161,6 +188,7 @@ def write_bundle(
         "legacy_text_record_schema_preserved": True,
         "model_calls": 0,
         **({"rhythm_policy": rhythm_policy} if rhythm_policy is not None else {}),
+        **({"artwork": _artwork(artwork_style)} if "vision" in views else {}),
         "private_files": "*.rl.jsonl contain environment cases and answers; send only model_inputs to the model",
     }
     (destination / "manifest.json").write_text(
@@ -176,8 +204,9 @@ def main():
     parser.add_argument("--views", default="text,vision")
     parser.add_argument(
         "--artwork-style",
-        choices=("art", "diagram", "fluent", "classic"),
+        choices=STYLES,
         default="art",
+        help="legacy `art` stays the default until casebook exports are evaluated",
     )
     parser.add_argument("--time-limit", type=float, default=15)
     parser.add_argument("--rhythm-policy", type=Path, default=None)

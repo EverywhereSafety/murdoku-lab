@@ -1,0 +1,93 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "theatre",
+  "name": "The Rosalind Theatre",
+  "eyebrow": "Opening night at the Rosalind",
+  "titles": [
+    "Curtain Call for a Corpse",
+    "Break a Leg",
+    "Opening Night, Closing Act",
+    "The Understudy's Big Chance",
+    "Exit, Pursued",
+    "A Tragedy in Three Acts",
+    "The Show Must Go On",
+    "Last Bow"
+  ],
+  "blurbs": [
+    "The house is full, the critics are in, and one member of the company will not take a bow.",
+    "A new play, an old rivalry and a door that should have stayed locked.",
+    "Everyone in the company knows their lines. Somebody also knew their cue.",
+    "Applause, encores and a final scene that was never in the script."
+  ],
+  "rooms": [
+    {"name": "Stage", "suits": ["chair", "table", "tree", "statue", "boulder"], "finish": "boards", "wallpaper": "curtain_red"},
+    {"name": "Wings", "suits": ["shelf", "tv", "barrel", "crate"], "finish": "boards", "wallpaper": "blackbox"},
+    {"name": "Green Room", "suits": ["chair", "carpet", "flowers", "plant"], "finish": "carpet", "wallpaper": "poster_brick"},
+    {"name": "Dressing Room", "suits": ["table", "shelf", "box", "chair"], "finish": "planks", "wallpaper": "poster_brick"},
+    {"name": "Star's Dressing Room", "suits": ["table", "flowers", "chair", "carpet"], "finish": "carpet", "wallpaper": "curtain_red"},
+    {"name": "Prop Store", "suits": ["crate", "box", "boulder", "statue", "car"], "finish": "planks", "wallpaper": "blackbox"},
+    {"name": "Wardrobe", "suits": ["shelf", "box", "table"], "finish": "herringbone", "wallpaper": "poster_brick"},
+    {"name": "Orchestra Pit", "suits": ["piano", "chair"], "finish": "boards", "wallpaper": "blackbox"},
+    {"name": "Box Office", "suits": ["register", "chair", "flowers"], "finish": "terrazzo", "wallpaper": "poster_brick"},
+    {"name": "Foyer", "suits": ["carpet", "palm", "statue", "flowers"], "finish": "terrazzo", "wallpaper": "curtain_red"},
+    {"name": "Royal Box", "suits": ["chair", "carpet", "flowers"], "finish": "carpet", "wallpaper": "curtain_red"},
+    {"name": "Rehearsal Room", "suits": ["piano", "chair", "table", "carpet"], "finish": "planks", "wallpaper": "poster_brick"},
+    {"name": "Scene Dock", "suits": ["tree", "car", "crate", "boulder", "shrub"], "finish": "boards", "wallpaper": "blackbox"},
+    {"name": "Fly Gallery", "suits": ["barrel", "tv", "crate"], "finish": "planks", "wallpaper": "blackbox"},
+    {"name": "Stage Door", "suits": ["register", "box", "plant"], "finish": "checker", "wallpaper": "poster_brick"},
+    {"name": "Circle Bar", "suits": ["table", "chair", "palm", "tv"], "finish": "herringbone", "wallpaper": "curtain_red"}
+  ],
+  "objects": {
+    "bed": "prop coffin",
+    "chair": "director's chair",
+    "carpet": "stage rug",
+    "car": "pumpkin coach",
+    "table": "dressing table",
+    "tv": "spotlight",
+    "shelf": "costume rail",
+    "plant": "potted plant",
+    "tree": "painted tree",
+    "flowers": "bouquet",
+    "shrub": "prop hedge",
+    "crate": "prop trunk",
+    "box": "wig stand",
+    "register": "box-office till",
+    "palm": "potted palm",
+    "bear": "bear costume",
+    "statue": "plaster bust",
+    "piano": "rehearsal piano",
+    "boulder": "papier-mâché rock",
+    "barrel": "sandbag"
+  },
+  "visual": {
+    "accent": "#9b2335",
+    "finishes": ["boards", "planks", "carpet", "herringbone", "parquet", "terrazzo", "checker"],
+    "wallpapers": ["curtain_red", "blackbox", "poster_brick"],
+    "variants": {"carpet": ["rose", "plum"], "terrazzo": ["rose", "cream"], "checker": ["noir"]},
+    "frame": "theatre",
+    "skins": {
+      "bed": "stage_coffin",
+      "chair": "directors_chair",
+      "car": "pumpkin_coach",
+      "table": "vanity",
+      "tv": "spotlight",
+      "shelf": "costume_rack",
+      "tree": "flat_tree",
+      "crate": "prop_trunk",
+      "box": "wig_stand",
+      "barrel": "sandbag"
+    }
+  },
+  "motives": [
+    "the leading role had been promised to two people",
+    "a cruel review had ended a career, and its author had a long memory",
+    "the script had been stolen, and the real author was in the building",
+    "a forty-year-old understudy had finally run out of patience",
+    "the theatre was about to be sold and pulled down"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were by themselves in the {area} during the second act. Only one of them made the curtain call, because {motive}.",
+    "While the house applauded, {murderer} slipped into the {area} and found {victim}. The motive was hiding in plain sight: {motive}.",
+    "The {area} held two people when the lights went down. {murderer} had rehearsed the scene for years: {motive}."
+  ]
+}
