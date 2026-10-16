@@ -907,16 +907,13 @@ h3 {
     box-shadow: 0 0 0 6px #d8a93f66;
   }
 }
+/* Hint and coach cards: at the top of the dossier column (kept in view while it scrolls), or
+   below the board on narrow screens. Never over the board, where they would hide people. */
 .pl-hint {
-  position: absolute;
-  z-index: 6;
-  left: 50%;
-  bottom: 84px;
-  transform: translateX(-50%);
   display: flex;
   gap: 12px;
   align-items: center;
-  width: min(92%, 640px);
+  width: 100%;
   padding: 12px 14px;
   border-radius: 18px;
   background: var(--card);
@@ -924,22 +921,17 @@ h3 {
   box-shadow: var(--shadow);
   animation: pl-hint-in 240ms ease;
 }
+.pl-side > .pl-hint {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin-bottom: 14px;
+}
 @keyframes pl-hint-in {
   from {
     opacity: 0;
     translate: 0 12px;
   }
-}
-.pl-hint.is-top {
-  bottom: auto;
-  top: 56px;
-}
-/* The card's words let taps through to the board; only its buttons catch them. */
-.pl-hint {
-  pointer-events: none;
-}
-.pl-hint button {
-  pointer-events: auto;
 }
 .pl-hint p {
   margin: 0 0 8px;
@@ -1216,6 +1208,60 @@ h3 {
 .pl-reveal .pl-dialog-body {
   padding-top: 34px;
 }
+/* The verdict is chosen with the board in view: no dimming or blur, and the panel sits over
+   the dossier column (or along the bottom on narrow screens) instead of over the board. */
+.pl-verdict::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}
+.pl-verdict {
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 24px 60px #0005;
+}
+@media (min-width: 900px) {
+  .pl-verdict {
+    margin: auto 24px auto auto;
+    max-width: 430px;
+    max-height: calc(100dvh - 32px);
+  }
+  .pl-verdict .pl-lineup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 899px) {
+  .pl-verdict {
+    margin: auto auto 0;
+    max-width: 100vw;
+    max-height: 58dvh;
+    border-radius: 24px 24px 0 0;
+  }
+  .pl-verdict .pl-dialog-body {
+    padding: 16px 14px 18px;
+  }
+  .pl-verdict .pl-dialog-mascot {
+    display: none;
+  }
+  .pl-verdict h2 {
+    font-size: 22px;
+  }
+  .pl-verdict .pl-lineup {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .pl-verdict .pl-lineup-card {
+    padding: 8px 4px;
+    gap: 2px;
+    font-size: 14px;
+  }
+  .pl-verdict p {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+  .pl-verdict .pl-dialog-buttons {
+    margin-top: 10px;
+  }
+}
 .pl-stamp {
   position: absolute;
   top: 18px;
@@ -1466,18 +1512,21 @@ h3 {
   .pl-toast-region {
     bottom: 96px;
   }
-  .pl-hint,
-  .pl-hint.is-top {
-    position: fixed;
-    left: 10px;
-    right: 10px;
-    top: auto;
-    bottom: calc(92px + env(safe-area-inset-bottom));
-    width: auto;
-    transform: none;
+  .pl-hint {
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .pl-hint .pl-mascot {
+    width: 44px;
+    height: 44px;
   }
   .pl-hint p {
-    font-size: 16px;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .pl-hint p:last-child {
+    margin-bottom: 0;
   }
   .pl-dialog {
     max-width: calc(100vw - 16px);

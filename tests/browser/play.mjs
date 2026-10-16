@@ -51,6 +51,9 @@ function watch(page, label) {
   });
 }
 
+// Two boxes overlap when they share any area; null boxes never do.
+const overlap = (a, b) => Boolean(a && b && a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height);
+
 async function boardHelpers(page) {
   const overlay = page.locator(".pl-overlay");
   await overlay.waitFor();
@@ -149,6 +152,7 @@ try {
   await page.goto(`${base}?case=glasshouse`, { waitUntil: "networkidle" });
   await page.locator(".pl-tool", { hasText: "Hint" }).click();
   const nudge = await page.locator(".pl-hint p").textContent();
+  assert.ok(!overlap(await page.locator(".pl-hint").boundingBox(), await page.locator(".pl-overlay").boundingBox()), "the hint card is not over the board");
   await page.locator(".pl-hint .pl-secondary").click();
   await page.locator(".pl-hint .pl-secondary").click();
   await page.locator(".pl-hint .pl-primary").click();
@@ -163,14 +167,20 @@ try {
     const order = unseal(tutorial.secret, tutorial.id).hints.order;
     const solve = unseal(tutorial.secret, tutorial.id).solution;
     const help = await boardHelpers(page);
+    const board = await page.locator(".pl-overlay").boundingBox();
     for (const who of order) {
       const coached = page.locator(".pl-suspect.is-coached .pl-face");
       if (await coached.count()) await coached.first().click();
       assert.match(await page.locator(".pl-coach p").textContent(), new RegExp(tutorial.public.people.find((p) => p.id === who).name.split(" ")[0]));
+      assert.ok(!overlap(await page.locator(".pl-coach").boundingBox(), board), "the coach card never covers the board");
       await page.mouse.click(...help.point(solve[who]));
     }
     assert.match(await page.locator(".pl-coach p").textContent(), /Name the murderer|Close the case/);
-    checks.push("the training case coaches every placement in deduction order");
+    checks.push("the training case coaches every placement in deduction order, beside the board");
+    await page.locator(".pl-accuse.is-ready").click();
+    await page.locator(".pl-verdict .pl-lineup-card").first().waitFor();
+    assert.ok(!overlap(await page.locator(".pl-verdict").boundingBox(), board), "the verdict panel leaves the board in view");
+    checks.push("the verdict panel leaves the board in view");
   }
   await desktop.close();
 

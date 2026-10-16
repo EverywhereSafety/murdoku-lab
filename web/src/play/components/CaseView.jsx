@@ -120,16 +120,19 @@ function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, onHint, accuse, o
   );
 }
 
-function SuspectTray({ game, state, selected, clashes, onSelect, coached }) {
+// Narrow screens: the selected suspect's statement, or the hint or coach card in its place, so
+// the board, the card and the suspects all fit on one screen.
+function SuspectTray({ game, state, selected, clashes, onSelect, coached, guide }) {
   const person = selected ? game.person.get(selected) : null;
   const statement = selected ? game.clues.filter((c) => c.person === selected) : [];
   return (
     <div className="pl-tray">
-      {person && statement.length > 0 && (
-        <p className="pl-tray-bubble" style={{ "--accent": person.accent }}>
-          <strong>{person.name.split(" ")[0]}:</strong> {statement.map((c) => c.text).join(" ")}
-        </p>
-      )}
+      {guide ||
+        (person && statement.length > 0 && (
+          <p className="pl-tray-bubble" style={{ "--accent": person.accent }}>
+            <strong>{person.name.split(" ")[0]}:</strong> {statement.map((c) => c.text).join(" ")}
+          </p>
+        ))}
       <div className="pl-tray-row" role="listbox" aria-label={t("case.suspects")}>
         {game.people.map((p) => (
           <button
@@ -150,7 +153,7 @@ function SuspectTray({ game, state, selected, clashes, onSelect, coached }) {
   );
 }
 
-function VerdictDialog({ open, game, state, onClose, onAnswer }) {
+function VerdictDialog({ open, game, state, onClose, onAnswer, compact }) {
   const victim = game.people.find((p) => p.victim);
   const first = victim?.name.split(" ")[0] ?? "the victim";
   return (
@@ -164,10 +167,17 @@ function VerdictDialog({ open, game, state, onClose, onAnswer }) {
             {game.people
               .filter((p) => !p.victim)
               .map((p) => (
-                <button key={p.id} type="button" className="pl-lineup-card" style={{ "--accent": p.accent }} onClick={() => onAnswer(p.id)}>
-                  <Face person={p} size={72} />
-                  <span>{p.name}</span>
-                  <small>{t("verdict.accuse", { name: p.name.split(" ")[0] })}</small>
+                <button
+                  key={p.id}
+                  type="button"
+                  className="pl-lineup-card"
+                  style={{ "--accent": p.accent }}
+                  onClick={() => onAnswer(p.id)}
+                  aria-label={t("verdict.accuse", { name: p.name })}
+                >
+                  <Face person={p} size={compact ? 48 : 72} />
+                  <span>{compact ? p.name.split(" ")[0] : p.name}</span>
+                  {!compact && <small>{t("verdict.accuse", { name: p.name.split(" ")[0] })}</small>}
                 </button>
               ))}
           </div>
@@ -208,17 +218,13 @@ function OutcomeDialog({ result, game, onClose }) {
   );
 }
 
-// Cards float over the board; they dock away from the squares they point at.
-export function dockFor(game, cells) {
-  const low = (cells || []).some((cell) => Number(cell.slice(1)) > game.height * 0.55);
-  return low ? " is-top" : "";
-}
-
+// Hint and coach cards sit beside the board (below it on narrow screens), never over it, so
+// they cannot hide anyone standing on the board.
 function HintCard({ hint, game, onMore, onFix, onClose }) {
   if (!hint) return null;
   const canMore = !hint.reveal;
   return (
-    <div className={`pl-hint${dockFor(game, hint.focus?.cells)}`} role="status" aria-live="polite">
+    <div className="pl-hint" role="status" aria-live="polite">
       <Mascot pose={hint.reveal ? "pointing" : "thinking"} size={64} />
       <div className="pl-hint-body">
         <p>{t(hint.key, hint.vars)}</p>
@@ -346,7 +352,8 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
   const [next, setNext] = useState(null);
   const [zoom, setZoom] = useState(100);
   const { scrollRef, changeZoom, fitBoard } = useBoardNavigation({ zoom, setZoom, sessionId: game.id });
-  const zoomable = narrow || game.width > 9;
+  // Up to 8×8 a phone-wide board keeps squares at least 44px, so zoom is only offered above.
+  const zoomable = game.width > (narrow ? 8 : 9);
   const toastTimer = useRef(null);
 
   const say = useCallback((text, tone) => {
@@ -525,6 +532,19 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
     />
   );
 
+  const guide = coach ? (
+    <CoachCard coach={coach} onLibrary={() => onOpen(null)} />
+  ) : (
+    <HintCard hint={finished ? null : hint} game={game} onMore={showHint} onFix={fixHint} onClose={() => setHint(null)} />
+  );
+
+  // The verdict panel leaves the board in view; on narrow screens the board scrolls up above it.
+  const openVerdict = () => {
+    const top = scrollRef.current?.getBoundingClientRect().top;
+    if (narrow && top != null) window.scrollBy({ top: top - 64, behavior: reducedMotion() ? "auto" : "smooth" });
+    setVerdictOpen(true);
+  };
+
   return (
     <div className="pl-case" data-setting={game.meta.setting.id || "manor"}>
       {narrow && (
@@ -573,7 +593,17 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
               </button>
             </div>
           )}
-          {narrow && <SuspectTray game={game} state={state} selected={selected} clashes={clashes} onSelect={setSelected} coached={coach?.focus?.person} />}
+          {narrow && (
+            <SuspectTray
+              game={game}
+              state={state}
+              selected={selected}
+              clashes={clashes}
+              onSelect={setSelected}
+              coached={coach?.focus?.person}
+              guide={coach || (hint && !finished) ? guide : null}
+            />
+          )}
           <ActionBar
             snapshot={snapshot}
             notes={notes}
@@ -582,20 +612,20 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
             onRedo={() => history("redo")}
             onHint={showHint}
             accuse={accuse}
-            onAccuse={() => setVerdictOpen(true)}
+            onAccuse={openVerdict}
             onClues={() => setSheet(true)}
             narrow={narrow}
             finished={Boolean(finished)}
             onSummary={() => setRevealOpen(true)}
           />
-          {coach ? (
-            <CoachCard coach={coach} dock={dockFor(game, coach.focus?.cells)} onLibrary={() => onOpen(null)} />
-          ) : (
-            <HintCard hint={finished ? null : hint} game={game} onMore={showHint} onFix={fixHint} onClose={() => setHint(null)} />
-          )}
           {settings.timer && !finished && <p className="pl-timer">{formatTime(progress.elapsed_ms)}</p>}
         </section>
-        {!narrow && <aside className="pl-side">{dossier(false)}</aside>}
+        {!narrow && (
+          <aside className="pl-side">
+            {guide}
+            {dossier(false)}
+          </aside>
+        )}
       </div>
       {narrow && (
         <Dialog open={sheet} onClose={() => setSheet(false)} labelledBy="pl-sheet-title" className="pl-sheet">
@@ -605,7 +635,7 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
           {dossier(true)}
         </Dialog>
       )}
-      <VerdictDialog open={verdictOpen} game={game} state={state} onClose={() => setVerdictOpen(false)} onAnswer={answer} />
+      <VerdictDialog open={verdictOpen} game={game} state={state} onClose={() => setVerdictOpen(false)} onAnswer={answer} compact={narrow} />
       <OutcomeDialog result={outcome} game={game} onClose={() => setOutcome(null)} />
       <RevealDialog
         open={revealOpen}

@@ -45,10 +45,10 @@ export function useCoach(game, state, selected, finished) {
   return { key, vars: { name, statement }, pose: "thinking", focus: { cells: open.length ? open : [solution[next]], person: next } };
 }
 
-export function CoachCard({ coach, dock = "", onLibrary }) {
+export function CoachCard({ coach, onLibrary }) {
   if (!coach) return null;
   return (
-    <div className={`pl-hint pl-coach${dock}`} role="status" aria-live="polite">
+    <div className="pl-hint pl-coach" role="status" aria-live="polite">
       <Mascot pose={coach.pose} size={64} />
       <div className="pl-hint-body">
         <p>{t(coach.key, coach.vars)}</p>

@@ -1,6 +1,19 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { t } from "../i18n/index.js";
+import { reducedMotion } from "../lib/fx.js";
 import { Face } from "./ui.jsx";
+
+// Scroll a card into the dossier column's view, below the hint or coach card pinned on top.
+function bringIntoView(node) {
+  const column = node?.closest(".pl-side");
+  if (!column) return;
+  const guide = column.querySelector(":scope > .pl-hint");
+  const box = column.getBoundingClientRect();
+  const top = box.top + (guide ? guide.offsetHeight + 14 : 0);
+  const rect = node.getBoundingClientRect();
+  if (rect.top >= top && rect.bottom <= box.bottom) return;
+  column.scrollBy({ top: rect.top - top - 8, behavior: reducedMotion() ? "auto" : "smooth" });
+}
 
 // Names in clue text that point at something on the board: people, rooms, objects, ground.
 export function useReferences(game) {
@@ -56,8 +69,14 @@ export function ClueText({ text, refs, onRef }) {
 
 function SuspectCard({ game, person, index, state, selected, clashing, clues, refs, onSelect, onRef, onReview, hinted, coached }) {
   const where = state.placed[person.id];
+  const ref = useRef(null);
+  const pointedAt = coached === person.id || clues.some((clue) => clue.id === hinted);
+  useEffect(() => {
+    if (pointedAt) bringIntoView(ref.current);
+  }, [pointedAt]);
   return (
     <article
+      ref={ref}
       className={`pl-suspect${selected ? " is-selected" : ""}${person.victim ? " is-victim" : ""}${clashing ? " is-clash" : ""}${where ? " is-placed" : ""}${coached === person.id && !selected ? " is-coached" : ""}`}
       style={{ "--accent": person.accent, "--deal": index }}
       draggable
