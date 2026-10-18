@@ -2,16 +2,16 @@
 
     python scripts/package_preview.py               # → outputs/preview/murdoku-preview-<date>.zip
     python scripts/package_preview.py --no-build    # package the last build
-    python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
-                                                    # → outputs/site/murdoku/exp/
+    python scripts/package_preview.py --site https://example.org/murdoku-preview/
+                                                    # → outputs/site/murdoku-preview/
 
 The zip holds the static player (no Lab, no Python packages needed), launchers for macOS and
 Windows that serve it on http://127.0.0.1:4173/ with the Python that ships with most computers
 and open the browser, and a short guide for testers (scripts/preview/).
 
 `--site` builds for a public address instead: share links and preview images point there, every
-page carries `noindex`, and `lab/` links to the live research Lab (`--lab`, by default the
-casebook at ../../play/ beside it). Copy the folder to that path of the host; adding it changes
+page carries `noindex`, and `lab/` links to the live research Lab (`--lab`, by default
+https://everywheresafety.github.io/murdoku/play/lab/). Copy the folder to that path of the host; adding it changes
 no other page there. Nothing is uploaded by this script.
 """
 
@@ -107,7 +107,11 @@ def main():
     parser.add_argument("--no-build", action="store_true")
     parser.add_argument("--out", default=str(ROOT / "outputs" / "preview"))
     parser.add_argument("--site", help="public address the folder will be served from")
-    parser.add_argument("--lab", default="../../play/", help="where lab/ sends people")
+    parser.add_argument(
+        "--lab",
+        default="https://everywheresafety.github.io/murdoku/play/lab/",
+        help="where lab/ sends people",
+    )
     args = parser.parse_args()
     if args.site:
         url = args.site if args.site.endswith("/") else args.site + "/"

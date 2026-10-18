@@ -51,13 +51,15 @@ follow the evidence, and identify who was alone with the victim.
 Generate more cases with the setter, inspect solver deductions and difficulty
 profiles, or bring your own cases into the frontend. See [playing and hosting](docs/guides/play.md).
 
-## Experimental Play
+## Play
 
-An experimental version of Play is in preview at
-[everywheresafety.github.io/murdoku/exp/](https://everywheresafety.github.io/murdoku/exp/),
-next to the current casebook. It is a static web app that plays the same verified
-puzzles without loading Python. Its Research Lab link opens the existing `/murdoku/play/`
-casebook; local and standalone full builds include the Lab at `/lab/`.
+The player is at
+[everywheresafety.github.io/murdoku/play/](https://everywheresafety.github.io/murdoku/play/).
+It plays the verified puzzles without loading Python. The separate
+[Research Lab](https://everywheresafety.github.io/murdoku/play/lab/) is at
+`/murdoku/play/lab/`, with solver tools, exports and the Pyodide runtime.
+Existing project and blog Play links open this player. Old `/murdoku/exp/` links
+redirect to `/murdoku/play/`, preserving their query parameters and fragment.
 The homepage connects generated cases with the project's work on puzzle quality.
 Players can filter the collection and continue to a distinct unsolved case after each solve.
 The workshop introduction and main generated-case action sit on the left of the opening
@@ -75,7 +77,7 @@ Daily statistics and an expandable season calendar appear below.
 | Large classics | The 16 × 16 estate and 24 × 24 museum, drawn in their own themes |
 | Results | The reveal, a closing paragraph, stars and a share card |
 
-![Eight settings of the experimental Play](docs/assets/play-exp-settings.jpg)
+![Eight settings of Murdoku Play](docs/assets/play-exp-settings.jpg)
 
 ### How the art is made
 
@@ -129,17 +131,18 @@ bundles in `content/showcase/player-bundles.jsonl`, five classics, one training 
 re-theming the release puzzles, and do not require `outputs/showcase/`.
 `npm run export:cases` rebuilds just the 30-case library from those same inputs.
 
-Build the experimental website folder with:
+Build the production player and its standalone Research Lab with:
 
 ```bash
-python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+python scripts/build_play.py --site-url https://everywheresafety.github.io/murdoku/play/
 ```
 
-This prepares `outputs/site/murdoku/exp/` with `noindex` and a Lab link to the existing
-`/murdoku/play/`. Copying that experimental folder leaves the production casebook unchanged.
-For a standalone build including the Pyodide Lab, use
-`python scripts/build_play.py --site-url PUBLIC_BASE` to prepare `dist/` with daily share
-links for that base URL.
+This prepares `dist/` with daily share links for the production URL and the Lab at
+`lab/`. Copy the contents of `dist/` to the website checkout's `murdoku/play/`
+(`../site/murdoku/play/` in the paired checkout). The build itself does not publish.
+`package_preview.py --site` remains available for temporary previews; set its `--lab`
+to `https://everywheresafety.github.io/murdoku/play/lab/`. The former `/murdoku/exp/`
+address is retained as a redirect, rather than hosting another player build.
 See [playing and hosting](docs/guides/play.md), [the daily case](docs/guides/daily.md)
 and [the player case format](docs/reference/play-case-format.md).
 

@@ -14,7 +14,7 @@ import "./play.css";
 const params = new URLSearchParams(window.location.search);
 if (params.has("lab")) {
   params.delete("lab");
-  window.location.replace(`lab/${params.toString() ? `?${params}` : ""}`);
+  window.location.replace(`lab/${params.toString() ? `?${params}` : ""}${window.location.hash}`);
 } else {
   createRoot(document.getElementById("root")).render(<PlayApp />);
 }

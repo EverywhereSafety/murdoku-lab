@@ -157,18 +157,24 @@ design-token check. It reads versioned release content without requiring
 
 The local release then runs Vite and serves the player at `/` and the research Lab at
 `/lab/`. Use `--no-build` to serve the last build and `--port` to change the port.
-For a standalone static build with a Pyodide Lab, pass the deployment base URL to
-`python scripts/build_play.py --site-url PUBLIC_BASE`.
 
-The experimental website package uses the same frozen content:
+The production build uses the same frozen content and includes the standalone Pyodide
+Lab:
 
 ```bash
-python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+python scripts/build_play.py --site-url https://everywheresafety.github.io/murdoku/play/
 ```
 
-It writes `outputs/site/murdoku/exp/` with `noindex` and a `lab/` link to `../../play/`.
-Copying this folder to the site's `/murdoku/exp/` leaves the production `/murdoku/play/`
-casebook unchanged. None of these build commands publishes the output.
+Copy the contents of `dist/` into the website checkout's `murdoku/play/`
+(`../site/murdoku/play/` in the paired checkout). The player and daily share links use
+`/murdoku/play/`; the Research Lab lives at `/murdoku/play/lab/`. Old `/murdoku/exp/`
+links redirect to the player with query parameters and fragments preserved.
+
+For temporary previews, `scripts/package_preview.py --site PREVIEW_BASE` still creates a
+smaller player package with `noindex`. Pass
+`--lab https://everywheresafety.github.io/murdoku/play/lab/` so the preview opens the
+Research Lab directly. Use a separate preview address; `/murdoku/exp/` is the old-link
+redirect. None of these build commands publishes the output.
 
 ## Checks
 

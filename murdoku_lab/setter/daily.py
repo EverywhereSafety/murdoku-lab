@@ -458,16 +458,26 @@ def _og_page(directory, n, theme, pack, record, site_url):
     title = f"Murdoku Daily #{n} · {theme.title}"
     description = f"{pack['name']} · {record['size']}×{record['size']} {record['band']} · {theme.blurb}"
     image = f"{site_url}og/{n}.png" if site_url else f"../../og/{n}.png"
+    canonical = (
+        f'<link rel="canonical" href="{escape(site_url)}d/{n}/">'
+        f'<meta property="og:url" content="{escape(site_url)}d/{n}/">'
+        if site_url else ""
+    )
     (directory / "index.html").write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         f"<title>{escape(title)}</title>"
         f'<meta name="description" content="{escape(description)}">'
+        f"{canonical}"
         f'<meta property="og:title" content="{escape(title)}">'
         f'<meta property="og:description" content="{escape(description)}">'
         f'<meta property="og:image" content="{escape(image)}">'
         '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
         '<meta name="twitter:card" content="summary_large_image">'
-        f'<meta http-equiv="refresh" content="0; url=../../?d={n}">'
+        '<script>const target=new URL("../../",location.href);'
+        'target.search=location.search;target.searchParams.delete("case");'
+        f'target.searchParams.set("d","{n}");'
+        "target.hash=location.hash;location.replace(target.href);</script>"
+        f'<noscript><meta http-equiv="refresh" content="0; url=../../?d={n}"></noscript>'
         f'</head><body><a href="../../?d={n}">{escape(title)}</a></body></html>\n'
     )
 

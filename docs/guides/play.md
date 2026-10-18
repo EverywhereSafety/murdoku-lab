@@ -14,6 +14,11 @@ The web build has two pages:
   the session server or in the browser through Pyodide, and adds the journal, exports,
   solver views and query review.
 
+On the public site, the player lives at `/murdoku/play/` and the separate Research Lab
+at `/murdoku/play/lab/`. Existing project and blog Play links open the player. Old
+`/murdoku/exp/` links redirect to `/murdoku/play/` with their query parameters and
+fragment preserved.
+
 ## Run the local release
 
 ```bash
@@ -53,18 +58,22 @@ for testers in Chinese (`scripts/preview/`). Opening `index.html` straight from 
 work, because the browser will not let the page load its case files. Nothing is uploaded; hand
 the zip round yourself.
 
-For the experimental player beside the existing Everywhere Safety site, build a folder
-for its address:
+For a temporary player preview on another static address, use the preview packager and
+point its Lab link at the production Research Lab:
 
 ```bash
-python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+python scripts/package_preview.py --site https://example.org/murdoku-preview/ \
+  --lab https://everywheresafety.github.io/murdoku/play/lab/
 ```
 
-This prepares the current frozen collection and locked daily cases, then writes
-`outputs/site/murdoku/exp/`. Share links and preview images point at that address,
-every page carries `noindex`, and `lab/` sends people to the existing research Lab at
-`../../play/`. Copy the folder to `murdoku/exp/` of the site; production `/murdoku/play/`
-stays unchanged. The player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
+Replace the example address with your preview host. This prepares the current frozen
+collection and locked daily cases, then writes `outputs/site/murdoku-preview/`.
+Share links and preview images point at the preview address, every page carries
+`noindex`, and `lab/` links to the explicit `--lab` destination. This package is for
+temporary previews; the public `/murdoku/exp/` address remains a redirect to the canonical
+player. For production, use the complete [static build](#static-hosting) below.
+
+The player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
 (`murdoku-visual-session:<path>`), so both can live on one origin.
 
 ## Playing
@@ -208,23 +217,26 @@ public observations. Private answers stay server-side.
 
 ### Static hosting
 
-`python scripts/build_play.py --site-url PUBLIC_BASE` builds both pages for a standalone
-static host. It runs the same complete asset preparation as the local release, then adds
-the Python runtime and engine that the Lab runs in a Web Worker through Pyodide. The
-player does not load that runtime. `PUBLIC_BASE` is the URL where the player will be
-served; it sets the daily share links and preview-image URLs.
+The production build serves the player at `/murdoku/play/` and an independent Research
+Lab at `/murdoku/play/lab/`. It runs the same complete asset preparation as the local
+release, then adds the Python runtime and engine that the Lab runs in a Web Worker
+through Pyodide. The player does not load that runtime.
 
 ```bash
 npm ci
-python scripts/build_play.py --site-url https://example.org/murdoku/
+python scripts/build_play.py --site-url https://everywheresafety.github.io/murdoku/play/
 ```
 
-Replace the example URL with your host's public base URL, then serve `dist/` there.
-The player is at that base URL and the standalone Lab is at `lab/` beneath it. This full
-build includes the Lab's demo cases and answer keys. Training and evaluation continue to
-use the Python environment independently. For the Everywhere Safety experiment, use
-`package_preview.py --site` above: its smaller `/exp/` package links back to the existing
-production `/play/` Lab.
+Copy the contents of `dist/` into the website checkout's `murdoku/play/`
+(`../site/murdoku/play/` in the paired checkout). Existing Play links in the project
+and blog then open the new player, and its Research Lab link opens `lab/` beneath it.
+The old `/murdoku/exp/` address is kept as a redirect that preserves query parameters
+and fragments. The build command itself does not publish.
+
+For another static host, replace `--site-url` with the public base URL where you will
+serve `dist/`; it sets the daily share links and preview-image URLs. This full build
+includes the Lab's demo cases and answer keys. Training and evaluation continue to use
+the Python environment independently.
 
 ### Host shared play
 
