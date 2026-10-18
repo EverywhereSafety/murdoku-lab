@@ -3,10 +3,10 @@
 [Play guide](play.md) · [Case bundle format](../reference/play-case-format.md) ·
 [Setting packs](../reference/settings.md) · [Project](../../README.md)
 
-One new case a day, numbered from the start of the season, each in a different setting.
-Cases are generated ahead of time for a whole season, reviewed by a person and locked
-before they ship. The player app only reads the locked, sealed result: nothing is
-generated or solved in the browser.
+Daily cases are numbered from the start of a season, with settings rotating between days.
+The current versioned release contains 14 locked cases, dated October 12–25, 2026.
+Cases are generated, reviewed and locked before they ship. The player app only reads
+the locked, sealed result: nothing is generated or solved in the browser.
 
 ```text
 plan → generate → review (→ pick) → lock → build → local release
@@ -37,6 +37,10 @@ setting repeats within a week and a week never opens with the setting that close
 week before.
 
 ## Commands
+
+These commands describe the authoring workflow for preparing future daily content.
+Default release builds only export the currently locked cases; they do not run
+`generate`, `pick` or `lock`, or change the frozen cases' themes.
 
 All commands take `--season` (default `s01`) and work on the first `--days` days of the
 season (default: all of it).
@@ -93,7 +97,8 @@ Each pack has eight titles. A setting comes round about seven times in an eight-
 season, and the showcase uses three more, so add titles to the packs before locking a
 whole season, or some titles will repeat.
 
-**build** writes what the player app reads:
+**build** reads the versioned locked days and writes what the player app reads. It
+rebuilds their exported assets without generating new puzzles or re-theming the locks:
 
 | Output                                  | Contents                                                   |
 | --------------------------------------- | ---------------------------------------------------------- |
@@ -108,9 +113,15 @@ the address it serves on. These folders are build output and are not committed.
 
 ## In the player
 
-The home page leads with today's case, chosen by the player's local calendar day; the
-next case unlocks at local midnight. Below it, a season calendar shows each day's stars,
-missed days and the days still locked.
+The homepage places the daily case and its date picker on the right of the opening
+section. The workshop introduction and main generated-case action remain on the left.
+The picker defaults to today's case when the player's local calendar day is in the
+published season. Previous/next buttons and a native range slider let players browse
+dates; **Today** returns to the current day's case. Browsing dates does not change the
+current day or unlock future cases. A published day's case unlocks at local midnight.
+
+The daily section farther down the page retains the player's statistics and an expandable
+season calendar showing each day's stars, missed days and locked dates.
 
 - A **streak** counts days whose case was solved on that same day. Older cases can still
   be played for stars, but they do not extend a streak. An unsolved today does not break a
@@ -137,11 +148,27 @@ npm run release:local                       # http://127.0.0.1:4173/
 .venv/bin/python scripts/release_local.py --lan   # also reachable from a phone on the same Wi-Fi
 ```
 
-The script rebuilds the case library (with the showcase, if `outputs/showcase/` exists,
-re-dressed so its titles stay clear of the locked daily cases), the daily cases with share
-links for this address, the brand assets, checks the design tokens,
-runs the Vite build and serves the result: the player at `/`, the Lab at `/lab/`. Use
-`--no-build` to serve the last build and `--port` to change the port. Nothing is published.
+The script's `prepare_assets()` function is also used by `scripts/build_play.py`. Each
+default build prepares the full 30-case library (24 themed bundles from
+`content/showcase/player-bundles.jsonl`, five classics and one training case), the 14
+locked daily cases with share links for the chosen address, the brand assets and a
+design-token check. It reads versioned release content without requiring
+`outputs/showcase/`, generating new puzzles or re-theming the frozen cases.
+
+The local release then runs Vite and serves the player at `/` and the research Lab at
+`/lab/`. Use `--no-build` to serve the last build and `--port` to change the port.
+For a standalone static build with a Pyodide Lab, pass the deployment base URL to
+`python scripts/build_play.py --site-url PUBLIC_BASE`.
+
+The experimental website package uses the same frozen content:
+
+```bash
+python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+```
+
+It writes `outputs/site/murdoku/exp/` with `noindex` and a `lab/` link to `../../play/`.
+Copying this folder to the site's `/murdoku/exp/` leaves the production `/murdoku/play/`
+casebook unchanged. None of these build commands publishes the output.
 
 ## Checks
 

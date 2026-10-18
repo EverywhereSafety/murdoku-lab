@@ -33,7 +33,7 @@ Read the motivation: **[How we solved the Treasure Hunt in 20 minutes](https://e
 | -------------------- | ----------------------------------------------------------------------------------------------- |
 | Setter               | Generate boards up to 24×24 with scene roles, semantic themes and verified solutions                       |
 | Solver               | Verify accepted cases with CP-SAT and independent DFS; inspect deduction and difficulty signals |
-| Player app           | A daily case, graded hints, a coached training case and eight illustrated settings, as a static web app |
+| Player app           | A browsable generated puzzle collection, graded hints, training and daily cases, as a static web app |
 | Research Lab         | Place characters with row/column exclusions, personal notes, clue focus, exports and solver views       |
 | Text + vision export | Produce paired inputs for the same verified case: text or board PNG + clues                     |
 | Semantic diversity   | Vary settings, cast and scene labels through optional LLM theming                               |
@@ -56,15 +56,21 @@ profiles, or bring your own cases into the frontend. See [playing and hosting](d
 An experimental version of Play is in preview at
 [everywheresafety.github.io/murdoku/exp/](https://everywheresafety.github.io/murdoku/exp/),
 next to the current casebook. It is a static web app that plays the same verified
-puzzles without loading Python, and the research casebook moves to `/lab/` in the same
-build. A daily case is one of its features:
+puzzles without loading Python. Its Research Lab link opens the existing `/murdoku/play/`
+casebook; local and standalone full builds include the Lab at `/lab/`.
+The homepage connects generated cases with the project's work on puzzle quality.
+Players can filter the collection and continue to a distinct unsolved case after each solve.
+The workshop introduction and main generated-case action sit on the left of the opening
+section, with the daily case and its date picker on the right. Previous/next controls,
+**Today** and a date slider browse the published season; future cases remain locked.
+Daily statistics and an expandable season calendar appear below.
 
 | Feature | What it does |
 | --- | --- |
 | Board | Pick a suspect and tap a square; rows, columns and clashes update at once; notes, undo, drag and keyboard play |
 | Training case | A coach walks a first case one deduction at a time |
 | Hints | Three levels, from a nudge to the square itself, from solver data computed offline |
-| Daily case | A new case every day, planned by season, reviewed and locked ahead; streaks and a spoiler-free share line |
+| Daily case | Cases unlock by date from the published season; 14 locked cases in the current release, with streaks and a spoiler-free share line |
 | Settings | Eight illustrated settings, from a manor and an ocean liner to a night train and a college library |
 | Large classics | The 16 × 16 estate and 24 × 24 museum, drawn in their own themes |
 | Results | The reveal, a closing paragraph, stars and a share card |
@@ -117,8 +123,25 @@ share cards; a snail detective gave way to the Everywhere Safety mark; and every
 a setting of its own rather than one shared look.
 
 Try it locally with `npm run release:local`, or build a zip for testers with
-`npm run package:preview`; see [playing and hosting](docs/guides/play.md),
-[the daily case](docs/guides/daily.md) and [the player case format](docs/reference/play-case-format.md).
+`npm run package:preview`. Default releases use versioned content: the 24 frozen themed
+bundles in `content/showcase/player-bundles.jsonl`, five classics, one training case and
+14 locked daily cases. They rebuild the artwork and web assets without generating or
+re-theming the release puzzles, and do not require `outputs/showcase/`.
+`npm run export:cases` rebuilds just the 30-case library from those same inputs.
+
+Build the experimental website folder with:
+
+```bash
+python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+```
+
+This prepares `outputs/site/murdoku/exp/` with `noindex` and a Lab link to the existing
+`/murdoku/play/`. Copying that experimental folder leaves the production casebook unchanged.
+For a standalone build including the Pyodide Lab, use
+`python scripts/build_play.py --site-url PUBLIC_BASE` to prepare `dist/` with daily share
+links for that base URL.
+See [playing and hosting](docs/guides/play.md), [the daily case](docs/guides/daily.md)
+and [the player case format](docs/reference/play-case-format.md).
 
 ## From a puzzle to an agentic RL query
 
@@ -186,8 +209,10 @@ npm ci
 npm run release:local
 ```
 
-Open **http://127.0.0.1:4173/** for the player (today's case, the training case and the
-illustrated cases) and **/lab/** for the research Lab. To play your own cases in the Lab:
+Open **http://127.0.0.1:4173/** for the player (30 library cases and the published daily
+season) and **/lab/** for the research Lab. Each default build prepares the full library,
+locked daily cases, brand assets and design-token check from the source checkout.
+To play your own cases in the Lab:
 
 ```bash
 npm run build

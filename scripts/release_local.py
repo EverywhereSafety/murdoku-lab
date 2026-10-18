@@ -4,8 +4,8 @@
     python scripts/release_local.py --lan        # also reachable from phones on this network
     python scripts/release_local.py --no-build   # serve the last build
 
-Steps: case bundles (classics, the training case and the showcase if built, re-dressed so its
-titles stay clear of the daily cases), daily cases with link-preview pages pointing at this server, brand assets, a design-token drift check, the Vite
+Steps: case bundles (classics, the training case and the frozen showcase), daily cases with
+link-preview pages pointing at this server, brand assets, a design-token drift check, the Vite
 build, then the Lab server, which serves the static player at / and the research Lab (with its
 Python API) at /lab/. Nothing is published anywhere; stop it with Ctrl-C.
 
@@ -40,17 +40,16 @@ def run(*command):
     subprocess.run(command, check=True, cwd=ROOT)
 
 
-def build(site_url):
-    showcase = ROOT / "outputs" / "showcase" / "cases.jsonl"
-    export = [PYTHON, "-m", "murdoku_lab.visual.play_export"]
-    if showcase.exists():
-        run(PYTHON, "scripts/build_showcase.py")
-        export += ["--records", str(showcase)]
-    run(*export)
-    if (ROOT / "content" / "daily").exists():
-        run(PYTHON, "-m", "murdoku_lab.setter.daily", "build", "--site-url", site_url)
+def prepare_assets(site_url):
+    """Rebuild public assets from versioned content, without generating new puzzles."""
+    run(PYTHON, "-m", "murdoku_lab.visual.play_export")
+    run(PYTHON, "-m", "murdoku_lab.setter.daily", "build", "--site-url", site_url)
     run(PYTHON, "scripts/build_brand_assets.py")
     run(PYTHON, "-m", "murdoku_lab.visual.art.design_tokens", "--check")
+
+
+def build(site_url):
+    prepare_assets(site_url)
     run("npm", "run", "build")
 
 

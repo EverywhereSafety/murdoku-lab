@@ -28,7 +28,19 @@ export default function PlayApp() {
     loadDaily().then(setManifest);
     const pop = () => setWhere(route());
     window.addEventListener("popstate", pop);
-    return () => window.removeEventListener("popstate", pop);
+    const refreshDay = () => {
+      const day = today(new URLSearchParams(window.location.search));
+      setWhere((current) => current.day === day ? current : { ...current, day });
+    };
+    const timer = setInterval(refreshDay, 1000);
+    window.addEventListener("focus", refreshDay);
+    document.addEventListener("visibilitychange", refreshDay);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("popstate", pop);
+      window.removeEventListener("focus", refreshDay);
+      document.removeEventListener("visibilitychange", refreshDay);
+    };
   }, []);
 
   useEffect(() => {
@@ -56,17 +68,18 @@ export default function PlayApp() {
     (game, finished, progress) => {
       if (!game.bundle.daily) return;
       const { n, date } = game.bundle.daily;
+      const solvedOn = today(new URLSearchParams(window.location.search));
       setProfile((current) => {
         // The first solve counts: solving a case again later must not move its streak day.
         const before = current.daily?.[n];
-        if (before?.solved_on && before.solved_on <= where.day) return current;
+        if (before?.solved_on && before.solved_on <= solvedOn) return current;
         const next = {
           ...current,
           daily: {
             ...(current.daily || {}),
             [n]: {
               date,
-              solved_on: where.day,
+              solved_on: solvedOn,
               stars: finished.stars,
               hints: progress.hints.length,
               wrong: progress.wrong_verdicts,
@@ -78,7 +91,7 @@ export default function PlayApp() {
         return next;
       });
     },
-    [where.day],
+    [],
   );
 
   const entry = where.caseId?.startsWith("daily-") ? manifest?.days.find((d) => d.id === where.caseId) : null;

@@ -8,6 +8,7 @@ import { nextHint } from "../engine/hints.js";
 import { dropPerson, noteTap, placeTap } from "../engine/intents.js";
 import { colOf, conflicts, crossedFor, rowOf } from "../engine/rules.js";
 import { createStore } from "../engine/store.js";
+import { nextCase } from "../engine/persist.js";
 import { t } from "../i18n/index.js";
 import { feedback, reducedMotion } from "../lib/fx.js";
 import { funnel } from "../lib/funnel.js";
@@ -85,6 +86,8 @@ function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, onHint, accuse, o
         type="button"
         className={`pl-tool${notes ? " is-on" : ""}`}
         aria-pressed={notes}
+        aria-keyshortcuts="Shift+N"
+        title={`${t("action.notes")} (Shift+N)`}
         onClick={onNotes}
         disabled={finished}
       >
@@ -304,11 +307,11 @@ function RevealDialog({ open, game, finished, hints, progress, streak, onClose, 
         </div>
       )}
       <div className="pl-dialog-buttons">
-        <button type="button" className="pl-primary" onClick={share}>
+        <button type="button" className={onNext ? "pl-secondary" : "pl-primary"} onClick={share}>
           {copied ? t("reveal.copied") : t("reveal.share")}
         </button>
         {onNext && (
-          <button type="button" className="pl-secondary" onClick={onNext}>
+          <button type="button" className="pl-primary pl-next-case" onClick={onNext}>
             {t("reveal.next")}
           </button>
         )}
@@ -330,6 +333,7 @@ function RevealDialog({ open, game, finished, hints, progress, streak, onClose, 
         <a href={funnel("blog", "reveal")} target="_blank" rel="noopener">
           {t("funnel.cta")} →
         </a>
+        <a href={funnel("project", "reveal")} target="_blank" rel="noopener">{t("workshop.projectCta")} ↗</a>
       </aside>
     </Dialog>
   );
@@ -370,12 +374,14 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
   useEffect(() => {
     loadLibrary()
       .then((index) => {
-        const ids = index.cases.map((c) => c.id);
-        const i = ids.indexOf(game.id);
-        setNext(i >= 0 && i + 1 < ids.length ? ids[i + 1] : null);
+        setNext(nextCase(index.cases, {
+          id: game.id,
+          content_hash: game.bundle.content_hash,
+          setting: game.meta.setting,
+        })?.id || null);
       })
       .catch(() => setNext(null));
-  }, [game.id]);
+  }, [game.id, finished]);
 
   // Time counts only while the page is visible and the case is open.
   useEffect(() => {
@@ -457,7 +463,10 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
         history(event.shiftKey ? "redo" : "undo");
       } else if (event.metaKey || event.ctrlKey || event.altKey) {
         return;
-      } else if (k === "n") setNotes((v) => !v);
+      } else if (k === "n" && event.shiftKey) {
+        event.preventDefault();
+        if (!event.repeat && !finished) setNotes((v) => !v);
+      }
       else if (k === "escape") setSelected(null);
       else {
         const id = game.personIds.find((p) => p.toLowerCase() === k);
@@ -532,7 +541,7 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
       onRef={onRef}
       onReview={review}
       hinted={hint?.focus?.clue}
-      coached={coach?.focus?.person}
+      coached={hint ? null : coach?.focus?.person}
       compact={compact}
     />
   );
@@ -549,7 +558,7 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
         setRevealOpen(false);
       };
 
-  const guide = coach ? (
+  const guide = coach && (!hint || finished) ? (
     <CoachCard coach={coach} onLibrary={() => onOpen(null)} onAgain={playAgain} />
   ) : (
     <HintCard hint={finished ? null : hint} game={game} onMore={showHint} onFix={fixHint} onClose={() => setHint(null)} />
@@ -581,10 +590,10 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
               selected={finished ? null : selected}
               notes={notes}
               highlight={
-                coach?.focus?.cells
-                  ? { cells: coach.focus.cells, colour: "#d8a93f" }
-                  : hint?.focus?.cells
+                hint?.focus?.cells
                   ? { cells: hint.focus.cells, colour: hint.reveal ? "#d7654f" : "#d8a93f" }
+                  : coach?.focus?.cells
+                  ? { cells: coach.focus.cells, colour: "#d8a93f" }
                   : highlightCells(game, state, pinned || ref)
               }
               clashes={clashes}
@@ -617,7 +626,7 @@ function Playing({ game, markup, settings, onOpen, onSolved, profile, day }) {
               selected={selected}
               clashes={clashes}
               onSelect={setSelected}
-              coached={coach?.focus?.person}
+              coached={hint ? null : coach?.focus?.person}
               guide={coach || (hint && !finished) ? guide : null}
             />
           )}

@@ -12,6 +12,7 @@ import { act, ActionError, initialState, view } from "../../web/src/play/engine/
 import { judge, stars } from "../../web/src/play/engine/judge.js";
 import { conflicts, crossedFor } from "../../web/src/play/engine/rules.js";
 import { seal, unseal } from "../../web/src/play/engine/seal.js";
+import { caseKey, nextCase, write } from "../../web/src/play/engine/persist.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixtures = path.join(here, "..", "fixtures");
@@ -186,4 +187,100 @@ test("daily days: local calendar, streaks across DST and catch-up plays", async 
   const manifest = { days: [{ date: "2026-10-14" }, { date: "2026-10-15" }, { date: "2026-10-16" }] };
   assert.equal(daily.openDays(manifest, "2026-10-15").length, 2);
   assert.equal(daily.openDays(manifest, "2026-10-15", true).length, 3);
+});
+
+
+test("timer publishes a fresh snapshot without changing board history", async () => {
+  const { createStore } = await import("../../web/src/play/engine/store.js");
+  const store = createStore(gameFrom(cases[0]), { persist: false });
+  const before = store.getSnapshot();
+  let calls = 0;
+  const unsubscribe = store.subscribe(() => calls++);
+  store.tick(5000);
+  assert.equal(calls, 1);
+  assert.equal(store.getSnapshot().progress.elapsed_ms, 5000);
+  assert.equal(before.progress.elapsed_ms, 0);
+  assert.equal(store.getSnapshot().state, before.state);
+  store.tick(0);
+  assert.equal(calls, 1);
+  unsubscribe();
+  store.tick(1000);
+  assert.equal(calls, 1);
+  assert.equal(store.getSnapshot().progress.elapsed_ms, 6000);
+});
+
+function withSavedCases(run) {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const records = new Map();
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: { getItem: (key) => records.get(key) ?? null, setItem: (key, value) => records.set(key, value) },
+  });
+  try {
+    run((entry, finished = false) => write(caseKey(entry.id), {
+      content_hash: entry.content_hash,
+      events: [{ action: "place", person: "A", cell: "a1" }],
+      finished: finished ? { stars: 3 } : null,
+    }));
+  } finally {
+    if (previous) Object.defineProperty(globalThis, "localStorage", previous);
+    else delete globalThis.localStorage;
+  }
+}
+
+const libraryEntry = (id, setting, hash = id, kind = "themed") => ({ id, kind, content_hash: hash, setting: { id: setting } });
+
+test("next case prefers a new setting and skips the current puzzle's reskins", () => {
+  withSavedCases(() => {
+    const current = libraryEntry("current", "manor", "same-puzzle");
+    const sameSetting = libraryEntry("another-manor", "manor");
+    const reskin = libraryEntry("current-train", "train", "same-puzzle");
+    const different = libraryEntry("new-theatre", "theatre");
+    const entries = [current, sameSetting, reskin, different];
+    assert.equal(nextCase(entries, current.id), different);
+    const daily = { ...current, id: "daily-2" };
+    assert.equal(nextCase(entries.slice(1), daily), different, "daily cases also avoid their theme and reskins");
+    assert.equal(nextCase([reskin], daily), null, "a reskinned daily puzzle is not a new case");
+    assert.deepEqual(entries.map((entry) => entry.id), [current.id, sameSetting.id, reskin.id, different.id]);
+  });
+});
+
+test("next case skips solved puzzles and their reskins, and wraps past the last entry", () => {
+  withSavedCases((save) => {
+    const solved = libraryEntry("solved", "train", "solved-hash");
+    const reskin = libraryEntry("solved-liner", "liner", "solved-hash");
+    const unseen = libraryEntry("unseen", "library");
+    const current = libraryEntry("last", "manor");
+    save(solved, true);
+    assert.equal(nextCase([solved, reskin, unseen, current], current.id), unseen);
+  });
+});
+
+test("home resumes a generated puzzle before unseen cases and ignores obsolete saves", () => {
+  withSavedCases((save) => {
+    const unseen = libraryEntry("unseen", "manor");
+    const started = libraryEntry("started", "train");
+    const classic = libraryEntry("classic", "museum", "classic", "classic");
+    save(started);
+    save(classic);
+    assert.equal(nextCase([classic, unseen, started]), started);
+    save({ ...unseen, content_hash: "old-revision" }, true);
+    save(started, true);
+    assert.equal(nextCase([classic, unseen, started]), unseen);
+  });
+});
+
+test("next case falls back to classics and returns null when no distinct unsolved puzzle remains", () => {
+  withSavedCases((save) => {
+    const tutorial = libraryEntry("tutorial", "manor", "tutorial", "tutorial");
+    const generated = libraryEntry("generated", "train");
+    const classic = libraryEntry("classic", "museum", "classic", "classic");
+    save(generated, true);
+    assert.equal(nextCase([tutorial, generated, classic]), classic);
+    assert.equal(nextCase([tutorial, generated, classic], generated.id), classic);
+    assert.equal(nextCase([classic], classic.id), null);
+    save(classic, true);
+    assert.equal(nextCase([tutorial, generated, classic]), null);
+    assert.equal(nextCase([]), null);
+  });
 });

@@ -6,6 +6,10 @@ export const LINKS = {
   home: `${SITE}/`,
   project: `${SITE}/murdoku/`,
   blog: `${SITE}/blog/treasure-hunt/`,
+  quality: `${SITE}/blog/treasure-hunt/#make-the-clues-worth-following`,
+  code: "https://github.com/EverywhereSafety/murdoku-lab",
+  agents: `${SITE}/agent-horizon/`,
+  data: "https://github.com/EverywhereSafety/murdoku-lab/blob/main/docs/guides/data.md",
 };
 
 export function funnel(name, placement) {

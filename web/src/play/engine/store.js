@@ -95,6 +95,7 @@ export function createStore(game, { persist = true } = {}) {
       if (progress.finished || ms <= 0) return;
       progress = { ...progress, elapsed_ms: progress.elapsed_ms + ms };
       save();
+      emit();
     },
     restart() {
       progress = freshProgress(game);

@@ -97,6 +97,7 @@ function SuspectCard({ game, person, index, state, selected, clashing, clues, re
           {person.victim && <span className="pl-victim-tag">{t("case.victim")}</span>}
           <span className="pl-where">{where ? t("case.placedAt", { cell: where.toUpperCase() }) : t("case.notPlaced")}</span>
         </header>
+        {person.tags?.length > 0 && <p className="pl-person-tags">{person.tags.join(" · ")}</p>}
         {clues.map((clue) => (
           <p
             key={clue.id}

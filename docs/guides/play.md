@@ -7,9 +7,9 @@
 
 The web build has two pages:
 
-- **The player** at `/`: today's daily case, a coached training case, illustrated cases in
-  eight settings and the built-in classics. It is a static JavaScript app that never loads
-  Python, so it opens in about a second and works from any static host.
+- **The player** at `/`: the generated case collection, with setting and size filters,
+  guided training, daily cases and the built-in classics. It is a static JavaScript app
+  that plays exported puzzles without loading Python.
 - **The Lab** at `/lab/`: the research casebook. It runs the Python sessions, either through
   the session server or in the browser through Pyodide, and adds the journal, exports,
   solver views and query review.
@@ -21,8 +21,11 @@ npm ci
 npm run release:local
 ```
 
-This rebuilds the case library, the daily cases and the web build, then serves everything
-on one port:
+This prepares the complete release from versioned inputs: 24 frozen themed cases, five
+classics, one training case and 14 locked daily cases, plus the brand assets and a
+design-token check. It then builds the web app and serves everything on one port.
+The release does not generate new puzzles or re-theme existing release cases, and it
+does not depend on an `outputs/showcase/` directory.
 
 | URL                                   | What                                            |
 | ------------------------------------- | ----------------------------------------------- |
@@ -50,19 +53,34 @@ for testers in Chinese (`scripts/preview/`). Opening `index.html` straight from 
 work, because the browser will not let the page load its case files. Nothing is uploaded; hand
 the zip round yourself.
 
-To put the player on a static host next to an existing site, build a folder for its address:
+For the experimental player beside the existing Everywhere Safety site, build a folder
+for its address:
 
 ```bash
-.venv/bin/python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
 ```
 
-This writes `outputs/site/murdoku/exp/`. Share links and preview images point at that address,
-every page carries `noindex`, and `lab/` sends people to the live research Lab at
-`../../play/`. Copy the folder to `murdoku/exp/` of the site; no other page changes. The
-player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
+This prepares the current frozen collection and locked daily cases, then writes
+`outputs/site/murdoku/exp/`. Share links and preview images point at that address,
+every page carries `noindex`, and `lab/` sends people to the existing research Lab at
+`../../play/`. Copy the folder to `murdoku/exp/` of the site; production `/murdoku/play/`
+stays unchanged. The player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
 (`murdoku-visual-session:<path>`), so both can live on one origin.
 
 ## Playing
+
+The homepage opens with the workshop introduction and main generated-case action on the
+left, explaining the focus on unique solutions, discovery rhythm and varied worlds. The
+daily case appears on the right, with previous/next date controls, a **Today** reset and
+a native range slider for browsing the published season. Future cases remain locked.
+Daily statistics and an expandable season calendar appear farther down the page.
+Project and Blog links stay in the header; the full resource navigation stays in the footer.
+
+The main action resumes a generated case in progress or opens an unsolved case. After a
+solve, **Play another case** prefers an unseen puzzle in another setting, skips the current
+puzzle and solved versions of the same formal puzzle, and falls back to unsolved classics.
+When the collection is exhausted, the homepage offers a replay. These actions select from
+published cases; generating and publishing more remains an offline workflow.
 
 Every case has one solution. Each suspect, and the victim, stands on exactly one square;
 no two people share a row or a column; crossed-out squares are blocked. Place everyone,
@@ -70,10 +88,10 @@ then name the person who was alone with the victim.
 
 | Action                         | Touch or mouse                                 | Keyboard                       |
 | ------------------------------ | ---------------------------------------------- | ------------------------------ |
-| Pick a suspect                 | Tap their card or their standee                | Their letter (A–H)             |
+| Pick a suspect                 | Tap their card or their standee                | Their letter                   |
 | Place, move or swap            | Tap a square, or drag a card or standee        | Arrows, then Enter or Space    |
 | Pick up                        | Tap the suspect's square again                 |                                |
-| Notes (maybe → ruled out → clear) | Turn on **Notes**, or press and hold a square | N toggles Notes; Shift+Enter writes a note |
+| Notes (maybe → ruled out → clear) | Turn on **Notes**, or press and hold a square | Shift+N toggles Notes; Shift+Enter writes a note |
 | Undo, redo                     | Toolbar buttons                                | Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z   |
 | Deselect                       |                                                | Escape                         |
 
@@ -81,6 +99,8 @@ Placing someone crosses out the rest of their row and column. Two people in a ro
 column or blocked square are ringed in red. Tapping a name, room or object in a statement
 highlights it on the board. **Accuse** becomes available once everyone is placed without
 a conflict.
+
+Press a person’s letter to select them; **Shift+N** toggles Notes. Public roles appear below each person’s name.
 
 **Hints** have three levels per target: a nudge toward the statement to read, then a
 partial answer (a room or a row), then the square itself. A hint first checks whether
@@ -91,7 +111,8 @@ at most one wrong verdict; ★ otherwise. A solved case shows the murderer, a GU
 the closing paragraph, stars and time, and a spoiler-free share line.
 
 The **training case** coaches a first-time player through each deduction in order. It opens
-from the home page and from **How to play**.
+from the home page and from **How to play**. Requested hints temporarily replace the coach;
+closing or placing a hint restores the coach. These hints use the same star rules as other cases.
 
 **Settings**: night mode, sound, vibration, a visible timer (time is always kept for the
 results), and the Lab's habit of tapping for notes and holding to place.
@@ -102,17 +123,38 @@ Progress, stars and streaks stay in this browser's local storage. See the
 
 ## Build the case library
 
-The player reads static bundles from `web/public/cases/`:
+The player reads static bundles from `web/public/cases/`. Both default export commands
+read the 24 frozen themed bundles in the version-controlled
+`content/showcase/player-bundles.jsonl`, then combine them with five built-in classics
+and one training case to write the 30-case library:
 
 ```bash
-python -m murdoku_lab.visual.play_export                         # training case + classics
-python scripts/build_showcase.py                                  # 3 cases per setting pack
+python -m murdoku_lab.visual.play_export
+# Equivalent: npm run export:cases
+```
+
+For a complete release, `npm run release:local` and `scripts/build_play.py` share
+`scripts.release_local.prepare_assets()`: each build prepares this library, the 14 locked
+daily cases with share links for its base URL, the brand assets and the design-token check
+before invoking Vite. These commands read the frozen inputs each time; previous files in
+`outputs/showcase/` are not release inputs.
+
+### Generate a custom collection
+
+Generating future cases is a separate authoring workflow. For example, create three
+new cases per setting and export them in place of the frozen showcase:
+
+```bash
+python scripts/build_showcase.py
 python -m murdoku_lab.visual.play_export --records outputs/showcase/cases.jsonl
 npm run build
 ```
 
-`npm run release:local` runs these steps for you. Any JSONL of dressed records (with
-`murdoku_case` and `murdoku_theme`) can be passed with `--records`.
+An explicit `--records PATH` accepts JSONL of dressed records with `murdoku_case` and
+`murdoku_theme`. It replaces the showcase while keeping the classics and training case.
+This custom export does not update the versioned release input; running a default release
+afterward restores the frozen collection. Review and freeze new content separately before
+using it in a future release.
 
 ## The Lab
 
@@ -166,18 +208,23 @@ public observations. Private answers stay server-side.
 
 ### Static hosting
 
-`python scripts/build_play.py` builds both pages for GitHub Pages or any static host and
-adds the Python runtime and engine that the Lab's static mode runs in a Web Worker
-through Pyodide. The player does not use them.
+`python scripts/build_play.py --site-url PUBLIC_BASE` builds both pages for a standalone
+static host. It runs the same complete asset preparation as the local release, then adds
+the Python runtime and engine that the Lab runs in a Web Worker through Pyodide. The
+player does not load that runtime. `PUBLIC_BASE` is the URL where the player will be
+served; it sets the daily share links and preview-image URLs.
 
 ```bash
 npm ci
-python scripts/build_play.py
-# Publish dist/ at /murdoku/play/ or another directory.
+python scripts/build_play.py --site-url https://example.org/murdoku/
 ```
 
-Static play bundles the demo cases and their answer keys. Training and evaluation
-continue to use the Python environment independently.
+Replace the example URL with your host's public base URL, then serve `dist/` there.
+The player is at that base URL and the standalone Lab is at `lab/` beneath it. This full
+build includes the Lab's demo cases and answer keys. Training and evaluation continue to
+use the Python environment independently. For the Everywhere Safety experiment, use
+`package_preview.py --site` above: its smaller `/exp/` package links back to the existing
+production `/play/` Lab.
 
 ### Host shared play
 

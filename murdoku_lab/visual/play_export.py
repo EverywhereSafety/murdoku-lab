@@ -11,9 +11,13 @@ scene and never loads Python.
 
 A bundle holds the public observation and a sealed secret (solution, verdict, epilogue, hints;
 see seal.py). Nothing in the public part is derived from the solution.
+
+The default library includes the frozen release showcase in content/showcase/. Explicit
+--records replaces that showcase with the supplied cases; the training case and classics remain.
 """
 
 import argparse
+from copy import deepcopy
 import hashlib
 import json
 import shutil
@@ -156,6 +160,27 @@ def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt=""):
 
 
 TUTORIAL = ROOT / "content" / "tutorial" / "tutorial.json"
+FROZEN_SHOWCASE = ROOT / "content" / "showcase" / "player-bundles.jsonl"
+
+
+def frozen_bundles():
+    """Read the release showcase without regenerating its puzzles or sealed answers."""
+    if not FROZEN_SHOWCASE.is_file():
+        raise FileNotFoundError(
+            f"Missing release showcase: {FROZEN_SHOWCASE}. "
+            "Restore content/showcase/player-bundles.jsonl from the source checkout, "
+            "or pass explicit --records for a custom library."
+        )
+    bundles = [
+        json.loads(line)
+        for line in FROZEN_SHOWCASE.read_text().splitlines()
+        if line.strip()
+    ]
+    if not bundles or any(
+        data.get("schema") != SCHEMA or data.get("kind") != "themed" for data in bundles
+    ):
+        raise ValueError("Release showcase must contain themed player case bundles")
+    return bundles
 
 
 def entries(records=None):
@@ -207,53 +232,78 @@ def entries(records=None):
         )
 
 
+def write_bundle(out, data, *, thumbs=True):
+    """Write a bundle unchanged, redraw its public scene, and return its library entry."""
+    out = Path(out)
+    case_id = data["id"]
+    (out / f"{case_id}.json").write_text(
+        json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    )
+    # Player bundles omit session fields. Supply an empty session only to the renderer,
+    # leaving the frozen public facts, metadata and sealed answer payload untouched.
+    obs = deepcopy(data["public"])
+    obs.update(
+        session_id=case_id,
+        revision=0,
+        notebook="",
+        done=False,
+        terminal=None,
+        can_undo=False,
+        can_redo=False,
+        last_event=None,
+        placements={},
+        marks={},
+        exclusions={},
+    )
+    for mode in ("day", "night"):
+        (out / data["scene"][mode]).write_text(
+            casebook.scene_svg(
+                obs,
+                theme=mode,
+                layers=STATIC_LAYERS,
+                cell_labels="none",
+                backdrop=False,
+            )
+        )
+    if thumbs:
+        (out / data["thumb"]).write_text(thumbnail_svg(obs, px=320))
+    return {
+        "id": case_id,
+        "kind": data["kind"],
+        "title": data["meta"]["title"],
+        "blurb": data["meta"]["blurb"],
+        "setting": data["meta"]["setting"],
+        "size": data["meta"]["size"],
+        "difficulty": data["meta"]["difficulty"],
+        "people": data["meta"]["people"],
+        "rooms": data["meta"]["rooms"],
+        "accent": data["meta"]["accent"],
+        "goal_type": data["public"]["goal_type"],
+        "content_hash": data["content_hash"],
+        "thumb": data["thumb"],
+        "url": f"{case_id}.json",
+    }
+
+
 def export(out=OUT, records=None, *, thumbs=True):
+    # Check the release input before replacing an existing complete library.
+    frozen = frozen_bundles() if records is None else []
+    bundles = [
+        bundle(
+            case, theme, case_id=case_id, kind=kind, setting=setting, eyebrow=eyebrow
+        )
+        for case_id, kind, case, theme, setting, eyebrow in entries(records)
+    ] + frozen
+    seen = set()
+    for data in bundles:
+        if data["id"] in seen:
+            raise ValueError(f"duplicate case id {data['id']!r}")
+        seen.add(data["id"])
     out = Path(out)
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    library, seen = [], set()
-    for case_id, kind, case, theme, setting, eyebrow in entries(records):
-        if case_id in seen:
-            raise ValueError(f"duplicate case id {case_id!r}")
-        seen.add(case_id)
-        data = bundle(
-            case, theme, case_id=case_id, kind=kind, setting=setting, eyebrow=eyebrow
-        )
-        (out / f"{case_id}.json").write_text(
-            json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-        )
-        obs = public_observation(Scratchpad(case, theme))
-        for mode in ("day", "night"):
-            (out / f"{case_id}.{mode}.svg").write_text(
-                casebook.scene_svg(
-                    obs,
-                    theme=mode,
-                    layers=STATIC_LAYERS,
-                    cell_labels="none",
-                    backdrop=False,
-                )
-            )
-        if thumbs:
-            (out / f"{case_id}.thumb.svg").write_text(thumbnail_svg(obs, px=320))
-        library.append(
-            {
-                "id": case_id,
-                "kind": kind,
-                "title": data["meta"]["title"],
-                "blurb": data["meta"]["blurb"],
-                "setting": data["meta"]["setting"],
-                "size": data["meta"]["size"],
-                "difficulty": data["meta"]["difficulty"],
-                "people": data["meta"]["people"],
-                "rooms": data["meta"]["rooms"],
-                "accent": data["meta"]["accent"],
-                "goal_type": data["public"]["goal_type"],
-                "content_hash": data["content_hash"],
-                "thumb": data["thumb"],
-                "url": f"{case_id}.json",
-            }
-        )
+    library = [write_bundle(out, data, thumbs=thumbs) for data in bundles]
     index = {"schema": LIBRARY, "cases": library}
     (out / "index.json").write_text(
         json.dumps(index, ensure_ascii=False, indent=1) + "\n"
@@ -263,7 +313,9 @@ def export(out=OUT, records=None, *, thumbs=True):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--records", help="dressed records (scripts/build_showcase.py)")
+    parser.add_argument(
+        "--records", help="dressed records replacing the frozen release showcase"
+    )
     parser.add_argument("--out", default=str(OUT))
     parser.add_argument("--no-thumbs", action="store_true")
     args = parser.parse_args(argv)

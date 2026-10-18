@@ -1,6 +1,6 @@
 """Room plaques, board axes and the accessible hit layer of the casebook board."""
 
-from .geometry import CELL, PAD, by_label, connected, dimensions, origin
+from .geometry import CELL, PAD, by_label, connected, dimensions, door_geometry, origin
 from .svg import FONT_MONO, FONT_SANS, esc, num, text
 
 # Average advance of an uppercase DM Sans glyph at 1px, with the plaque's letter spacing.
@@ -27,6 +27,12 @@ def plaque_anchors(observation, skins=None):
     skins = skins or {}
     cells_by_label = by_label(observation)
     prop_kind = {p["id"]: p["art"] for p in observation["scene"]["props"]}
+    # Include doorway frames and a small clearance, not just the opening itself.
+    door_boxes = []
+    for door in observation["scene"].get("doors", []):
+        x, y, vertical = door_geometry(observation, door)
+        door_boxes.append((x - 12, y - 28, x + 12, y + 28) if vertical
+                          else (x - 28, y - 11, x + 28, y + 30))
     out = []
     for area in observation["scene"]["areas"]:
         members = [
@@ -51,23 +57,49 @@ def plaque_anchors(observation, skins=None):
                     runs.append(current)
                     current = [c]
             runs.append(current)
-            best = max(runs, key=len)
-            start = next((c for c in best if not tall(c)), best[0])
-            run = len([c for c in best if c["col"] >= start["col"]])
             needed = 24 + plaque_width(area["name"].upper(), 9.5) + 10
-            if run * CELL - 16 < needed:
-                # Rather than lose the name, hang the plate in front of the furniture.
-                start, run = best[0], len(best)
-            x, y = origin(start)
+            candidates = []
+            # Prefer the north wall. A short wall filled by a door can use the band below it.
+            for offset in (5, 36):
+                for run in runs:
+                    left, y = origin(run[0])
+                    right = origin(run[-1])[0] + CELL
+                    y += offset
+                    spans = [(left + 8, right - 8)]
+                    for dx1, dy1, dx2, dy2 in door_boxes:
+                        if y - 1 >= dy2 or y + 20 <= dy1:
+                            continue
+                        remaining = []
+                        for lo, hi in spans:
+                            if dx2 <= lo or dx1 >= hi:
+                                remaining.append((lo, hi))
+                            else:
+                                if lo < dx1:
+                                    remaining.append((lo, dx1))
+                                if dx2 < hi:
+                                    remaining.append((dx2, hi))
+                        spans = remaining
+                    for lo, hi in spans:
+                        # Reserve the shadow and stroke, too.
+                        for x in [lo + 1, *(origin(c)[0] + 8 for c in run if not tall(c))]:
+                            available = hi - x - 3
+                            if x < lo + 1 or available < 22:
+                                continue
+                            start = next((c for c in reversed(run) if origin(c)[0] <= x), run[0])
+                            candidates.append((offset, available < needed, tall(start), x, y, available, start))
+                if any(not c[1] for c in candidates):
+                    break
+            # Prefer a full name, then the wall band, then clear furniture.
+            _, _, _, x, y, available, start = min(candidates, key=lambda c: (c[1], c[0], c[2], c[3]))
             out.append(
                 {
                     "area": area["id"],
                     "number": area["number"],
                     "name": area["name"],
                     "cell": start["cell"],
-                    "x": x + 8,
-                    "y": y + 5,
-                    "available": run * CELL - 16,
+                    "x": x,
+                    "y": y,
+                    "available": available,
                 }
             )
     return out

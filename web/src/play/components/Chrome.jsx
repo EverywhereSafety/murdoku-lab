@@ -18,12 +18,14 @@ export function TopBar({ inCase, onHome, onHowTo, onSettings }) {
         <img src={assetUrl("favicon.svg")} width="34" height="34" alt="" />
         <span>{t("brand.name")}</span>
       </a>
-      <nav className="pl-nav">
+      <nav className="pl-nav" aria-label="Main navigation">
         {inCase && (
           <button type="button" className="pl-nav-link" onClick={onHome}>
             ← {t("nav.back")}
           </button>
         )}
+        <a className="pl-nav-link" href={funnel("project", "header")} target="_blank" rel="noopener">{t("nav.project")}</a>
+        <a className="pl-nav-link" href={funnel("blog", "header")} target="_blank" rel="noopener">{t("nav.blog")}</a>
         <button type="button" className="pl-nav-link" onClick={onHowTo}>
           {t("nav.howto")}
         </button>
@@ -43,7 +45,7 @@ export function Footer() {
     <footer className="pl-footer">
       <span>{t("footer.made")}</span>
       <a href={funnel("home", "footer")} target="_blank" rel="noopener">
-        everywheresafety
+        Everywhere Safety
       </a>
       <a href={funnel("project", "footer")} target="_blank" rel="noopener">
         {t("footer.project")}
@@ -51,6 +53,9 @@ export function Footer() {
       <a href={funnel("blog", "footer")} target="_blank" rel="noopener">
         {t("footer.blog")}
       </a>
+      <a href={funnel("code", "footer")} target="_blank" rel="noopener">{t("footer.code")}</a>
+      <a href={funnel("agents", "footer")} target="_blank" rel="noopener">{t("footer.agents")}</a>
+      <a href={funnel("data", "footer")} target="_blank" rel="noopener">{t("footer.data")}</a>
       <a href="lab/">{t("footer.lab")}</a>
     </footer>
   );
