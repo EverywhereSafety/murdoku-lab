@@ -66,7 +66,7 @@ try {
         `HTTP ${response.status()} ${new URL(response.url()).pathname}`,
       );
   });
-  await page.goto(origin + mounts[0], { waitUntil: "networkidle" });
+  await page.goto(origin + mounts[0] + "lab/", { waitUntil: "networkidle" });
   await page.locator('[data-cell="b1"]').waitFor();
   assert.equal(await page.locator("[data-cell]").count(), 36);
   const staticUrls = await page.evaluate(() => [
@@ -153,7 +153,7 @@ try {
   });
   checks.push("refresh restores the session within its mount path");
 
-  await page.goto(origin + mounts[1] + "index.html", {
+  await page.goto(origin + mounts[1] + "lab/index.html", {
     waitUntil: "networkidle",
   });
   await page.locator('[data-cell="b1"]').waitFor();

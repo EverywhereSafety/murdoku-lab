@@ -1,0 +1,63 @@
+{
+  "strategy": "constraint-first",
+  "variant": "classic",
+  "size": 6,
+  "n_areas": null,
+  "scene_spec": {
+    "schema": "murdoku.scene_spec/1",
+    "anchors_per_area": {},
+    "blocker_rate": 0.2,
+    "furniture_rate": 0.16
+  },
+  "rhythm_policy": {
+    "schema": "murdoku.rhythm_policy/1",
+    "orders": [
+      "canonical",
+      "characters",
+      "clues"
+    ],
+    "seeds": [
+      0,
+      1
+    ],
+    "max_first_progress_step": 8,
+    "max_progress_gap": 8,
+    "max_initial_singleton_fraction": 0.25,
+    "min_verdict_determined_fraction": 0.5,
+    "max_probe_fraction": 0.3,
+    "excluded_kinds": [
+      "area_no_parity",
+      "area_no_gt",
+      "area_no_lt",
+      "area_no_offset",
+      "not_area_no_offset",
+      "area_occupancy_parity",
+      "abs_row",
+      "abs_col",
+      "in_grid_corner"
+    ],
+    "simplify_area_options": true
+  },
+  "bands": [
+    "medium"
+  ],
+  "requested_per_band": 3,
+  "shots": 8,
+  "finished_jobs": 17,
+  "accepted_jobs": 3,
+  "written_cases": 3,
+  "wall_s": 5.838,
+  "acceptance_rate": 0.176471,
+  "landed_wall_s": 1.946,
+  "attempt_process_s": 10.0,
+  "process_s_per_accepted": 3.333,
+  "rejects": {
+    "band_miss_easy": 10,
+    "rhythm_policy": 4
+  },
+  "constraint_first": {
+    "beam": 64,
+    "max_clues": 60,
+    "solution_cap": 50
+  }
+}

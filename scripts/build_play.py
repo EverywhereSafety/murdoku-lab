@@ -1,6 +1,7 @@
 """Build the standalone casebook for GitHub Pages or any static host."""
 
 import os
+import argparse
 import gzip
 from pathlib import Path
 import subprocess
@@ -15,7 +16,15 @@ sys.path.insert(0, str(ROOT))
 
 from murdoku_lab.visual.browser import BrowserGame
 from murdoku_lab.visual.art import portrait_svg, prop_svg
+
+# The engine zip packs every murdoku_lab module imported by the time it is written; import the
+# whole casebook package up front so no lazily imported module (a theme skin, the keys) is lost.
+import murdoku_lab.visual.art.cards  # noqa: E402,F401
+import murdoku_lab.visual.art.keys  # noqa: E402,F401
+import murdoku_lab.visual.art.skins  # noqa: E402,F401
+import murdoku_lab.setter.settings  # noqa: E402,F401
 from murdoku_lab.visual.projection import ART_KINDS
+from scripts.release_local import prepare_assets
 
 PYODIDE_VERSION = "314.0.7"
 
@@ -83,6 +92,14 @@ def bundle_runtime(output):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--site-url", default="", help="public base URL for daily share links"
+    )
+    args = parser.parse_args()
+    site_url = args.site_url.rstrip("/") + "/" if args.site_url else ""
+    # Vite copies public/ at build time; prepare the complete, frozen collection first.
+    prepare_assets(site_url)
     game = BrowserGame()
     for entry in game.cases.values():
         state = game.request("/api/sessions", {"case_id": entry.slug})["result"]
@@ -100,8 +117,13 @@ def main():
             if name.startswith("murdoku_lab") and getattr(module, "__file__", None):
                 path = Path(module.__file__)
                 archive.write(path, path.relative_to(ROOT))
-        for path in (ROOT / "murdoku_lab/visual/cases").glob("*.json"):
-            archive.write(path, path.relative_to(ROOT))
+        for pattern in (
+            "murdoku_lab/visual/cases/*.json",
+            "murdoku_lab/setter/settings/*.json",
+            "murdoku_lab/resources/*.json",
+        ):
+            for path in sorted(ROOT.glob(pattern)):
+                archive.write(path, path.relative_to(ROOT))
         archive.write(ROOT / "LICENSE", "LICENSE")
         archive.write(ROOT / "NOTICE", "NOTICE")
     for kind, values, render in (

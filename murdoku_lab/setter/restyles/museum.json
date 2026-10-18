@@ -1,0 +1,93 @@
+{
+ "schema": "murdoku.restyle/1",
+ "case": "museum",
+ "look": "museum",
+ "note": "The Museum After Hours keeps its own words. Each drawing still shows the clue's noun, in a museum's manner: an antique four-poster for 'bed', a gilded throne for 'chair', a specimen cabinet for 'shelf', a meteorite on its stand for 'boulder'. Floors keep touching rooms at least 12 ΔE00 apart, so a few rooms take their second choice.",
+ "skins": {
+  "bed": "four_poster",
+  "chair": "throne",
+  "table": "reading_table",
+  "shelf": "specimen_cabinet",
+  "statue": "classical_statue",
+  "boulder": "meteorite",
+  "plant": "fern",
+  "tree": "potted_bay"
+ },
+ "rooms": {
+  "Antiquities Gallery": [
+   "marble",
+   "stone",
+   "white"
+  ],
+  "Music Gallery": [
+   "herringbone",
+   "portrait_green",
+   "honey"
+  ],
+  "Decorative Arts Gallery": [
+   "planks",
+   "damask_rose",
+   "ash"
+  ],
+  "Winter Garden": [
+   "terracotta",
+   "glass_pane",
+   "terra"
+  ],
+  "Covered Walk": [
+   "flagstone",
+   "trellis",
+   "sandstone"
+  ],
+  "Grand Gallery": [
+   "carpet",
+   "gallery_red",
+   "teal"
+  ],
+  "Furniture Gallery": [
+   "parquet",
+   "oak_panel",
+   "amber"
+  ],
+  "Exhibit Alcove 1": [
+   "terrazzo",
+   "marble_wall",
+   "rose"
+  ],
+  "Restoration Studio": [
+   "planks",
+   "whitewash",
+   "ash"
+  ],
+  "Natural History Gallery": [
+   "boards",
+   "panel_wood",
+   "walnut"
+  ],
+  "Exhibit Alcove 2": [
+   "terrazzo",
+   "marble_wall",
+   "rose"
+  ],
+  "Sculpture Gallery": [
+   "planks",
+   "crimson",
+   "oak"
+  ],
+  "Reading Room": [
+   "carpet",
+   "book_wall",
+   "navy"
+  ],
+  "Collections Store": [
+   "planks",
+   "brick",
+   "walnut"
+  ],
+  "Reception": [
+   "checker",
+   "gallery_red",
+   "noir"
+  ]
+ }
+}

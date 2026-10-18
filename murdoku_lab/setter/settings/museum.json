@@ -1,0 +1,94 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "museum",
+  "name": "The Halloway Museum",
+  "eyebrow": "A gala night at the Halloway",
+  "titles": [
+    "Night of the Long Gala",
+    "The Curse of the Golden Mask",
+    "Murder Most Antique",
+    "Closing Time",
+    "The Missing Exhibit",
+    "Black Tie, Red Herring",
+    "Dust and Diamonds",
+    "The Last Private View"
+  ],
+  "blurbs": [
+    "Champagne, speeches, and a priceless collection that someone was willing to kill for.",
+    "The doors were locked at midnight. When they opened again, the guest list was one name shorter.",
+    "Every artefact has a story. Tonight one of the guests became part of the collection.",
+    "A gala for the new wing, a family feud and a curator with a secret."
+  ],
+  "rooms": [
+    {"name": "Great Hall", "suits": ["statue", "carpet", "flowers", "palm"], "finish": "marble", "wallpaper": "marble_wall"},
+    {"name": "Egyptian Wing", "suits": ["bed", "statue", "barrel", "box"], "finish": "terrazzo", "wallpaper": "gallery_red"},
+    {"name": "Sculpture Court", "suits": ["statue", "plant", "tree", "shrub"], "finish": "marble", "wallpaper": "marble_wall"},
+    {"name": "Gem Room", "suits": ["table", "register", "crate"], "finish": "terrazzo", "wallpaper": "portrait_green"},
+    {"name": "Fossil Gallery", "suits": ["bear", "boulder", "shelf", "table"], "finish": "flagstone", "wallpaper": "gallery_red"},
+    {"name": "Portrait Gallery", "suits": ["chair", "carpet", "flowers", "palm"], "finish": "parquet", "wallpaper": "portrait_green"},
+    {"name": "Curator's Office", "suits": ["register", "shelf", "chair", "tv"], "finish": "herringbone", "wallpaper": "portrait_green"},
+    {"name": "Restoration Lab", "suits": ["table", "crate", "box", "shelf"], "finish": "checker", "wallpaper": "marble_wall"},
+    {"name": "Reading Room", "suits": ["shelf", "chair", "table", "carpet"], "finish": "parquet", "wallpaper": "portrait_green"},
+    {"name": "Carriage Hall", "suits": ["car", "statue", "boulder"], "finish": "paving", "wallpaper": "gallery_red"},
+    {"name": "Music Room", "suits": ["piano", "tv", "chair", "carpet"], "finish": "herringbone", "wallpaper": "gallery_red"},
+    {"name": "Tea Room", "suits": ["table", "chair", "flowers", "plant"], "finish": "checker", "wallpaper": "marble_wall"},
+    {"name": "Archive", "suits": ["shelf", "crate", "box", "register"], "finish": "planks", "wallpaper": "portrait_green"},
+    {"name": "Loading Dock", "suits": ["crate", "box", "car", "barrel"], "finish": "boards", "wallpaper": "brick"},
+    {"name": "Royal Gallery", "suits": ["chair", "carpet", "statue"], "finish": "marble", "wallpaper": "gallery_red"},
+    {"name": "Atrium", "suits": ["palm", "tree", "plant", "flowers", "statue"], "finish": "terrazzo", "wallpaper": "marble_wall"}
+  ],
+  "objects": {
+    "bed": "sarcophagus",
+    "chair": "gilded throne",
+    "carpet": "red carpet",
+    "car": "antique carriage",
+    "table": "display case",
+    "tv": "gramophone",
+    "shelf": "specimen cabinet",
+    "plant": "potted fern",
+    "tree": "ornamental tree",
+    "flowers": "gala flowers",
+    "shrub": "flowering shrub",
+    "crate": "shipping crate",
+    "box": "archive box",
+    "register": "ticket till",
+    "palm": "potted palm",
+    "bear": "dinosaur skull",
+    "statue": "marble statue",
+    "piano": "pianola",
+    "boulder": "meteorite",
+    "barrel": "amphora"
+  },
+  "visual": {
+    "accent": "#8e2c32",
+    "finishes": ["marble", "terrazzo", "parquet", "herringbone", "flagstone", "checker", "paving", "planks", "carpet"],
+    "wallpapers": ["gallery_red", "portrait_green", "marble_wall", "stone"],
+    "variants": {"carpet": ["rose", "plum"], "terrazzo": ["cream", "rose"], "marble": ["white", "verde"]},
+    "frame": "museum",
+    "skins": {
+      "bed": "sarcophagus",
+      "chair": "throne",
+      "car": "carriage",
+      "table": "display_case",
+      "tv": "gramophone",
+      "shelf": "specimen_cabinet",
+      "plant": "fern",
+      "bear": "dino_skull",
+      "statue": "classical_statue",
+      "boulder": "meteorite",
+      "barrel": "amphora"
+    }
+  },
+  "motives": [
+    "the star exhibit had been a forgery for thirty years",
+    "a donor wanted their gift back, and was refused",
+    "the catalogue listed an artefact that had never left the family",
+    "the new wing was about to be named after the wrong person",
+    "an expedition diary told a very different story from the official one"
+  ],
+  "epilogues": [
+    "{murderer} found {victim} in the {area} after the speeches, with nobody else about. Only one of them came back to the party, because {motive}.",
+    "The {area} was closed to guests, which suited {murderer} perfectly: {motive}.",
+    "Two people were in the {area} when the lights dimmed: {victim} and {murderer}. The reason had been in the catalogue all along: {motive}."
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "glasshouse",
+  "name": "Thornbury Glasshouses",
+  "eyebrow": "A garden party at Thornbury",
+  "titles": [
+    "Deadly Nightshade",
+    "A Thorn in the Side",
+    "The Poison Garden",
+    "Roots of Evil",
+    "Pruned",
+    "Compost Mentis",
+    "The Midsummer Bloom",
+    "Weeding Out a Killer"
+  ],
+  "blurbs": [
+    "The rarest bloom in the country is about to open, and someone will not live to see it.",
+    "Tea on the lawn, prizes for the best marrow and a guest who never came back from the greenhouses.",
+    "Everything here is carefully cultivated, including a grudge that has been growing for years.",
+    "Beautiful, rare and occasionally poisonous: the plants are not the only dangerous things on the estate."
+  ],
+  "rooms": [
+    {"name": "Palm House", "suits": ["palm", "tree", "plant", "statue"], "finish": "terracotta", "wallpaper": "glass_pane"},
+    {"name": "Fern House", "suits": ["plant", "piano", "shrub"], "finish": "flagstone", "wallpaper": "glass_pane"},
+    {"name": "Orchid House", "suits": ["plant", "flowers", "table"], "finish": "terracotta", "wallpaper": "glass_pane"},
+    {"name": "Cactus House", "suits": ["plant", "boulder", "box"], "finish": "paving", "wallpaper": "glass_pane"},
+    {"name": "Potting Shed", "suits": ["table", "crate", "box", "barrel"], "finish": "boards", "wallpaper": "whitewash"},
+    {"name": "Lily House", "suits": ["statue", "plant", "flowers"], "finish": "flagstone", "wallpaper": "glass_pane"},
+    {"name": "Seed Store", "suits": ["shelf", "crate", "box", "register"], "finish": "planks", "wallpaper": "whitewash"},
+    {"name": "Tea Pavilion", "suits": ["table", "chair", "flowers", "piano", "carpet"], "finish": "checker", "wallpaper": "trellis"},
+    {"name": "Rose Garden", "suits": ["shrub", "flowers", "bear", "statue"], "finish": "lawn", "wallpaper": "trellis"},
+    {"name": "Kitchen Garden", "suits": ["bed", "barrel", "tv", "bear"], "finish": "lawn", "wallpaper": "trellis"},
+    {"name": "Boiler Room", "suits": ["barrel", "crate", "boulder"], "finish": "paving", "wallpaper": "brick"},
+    {"name": "Victorian Walk", "suits": ["statue", "palm", "tree", "chair"], "finish": "paving", "wallpaper": "glass_pane"},
+    {"name": "Tropical Dome", "suits": ["palm", "tree", "plant", "flowers"], "finish": "terracotta", "wallpaper": "glass_pane"},
+    {"name": "Head Gardener's Office", "suits": ["register", "shelf", "chair", "carpet"], "finish": "planks", "wallpaper": "whitewash"},
+    {"name": "Apiary", "suits": ["tv", "shrub", "flowers", "bear"], "finish": "lawn", "wallpaper": "trellis"},
+    {"name": "Orangery", "suits": ["tree", "palm", "chair", "statue"], "finish": "marble", "wallpaper": "glass_pane"}
+  ],
+  "objects": {
+    "bed": "raised bed",
+    "chair": "armchair",
+    "carpet": "rug",
+    "car": "delivery van",
+    "table": "potting bench",
+    "tv": "beehive",
+    "shelf": "bookcase",
+    "plant": "orchid",
+    "tree": "lemon tree",
+    "flowers": "flowerpot",
+    "shrub": "rose bush",
+    "crate": "stack of pots",
+    "box": "watering can",
+    "register": "shop till",
+    "palm": "fan palm",
+    "bear": "garden gnome",
+    "statue": "fountain",
+    "piano": "fern case",
+    "boulder": "rockery stone",
+    "barrel": "rain barrel"
+  },
+  "visual": {
+    "accent": "#2f7d5f",
+    "finishes": ["terracotta", "flagstone", "paving", "checker", "lawn", "boards", "planks", "marble"],
+    "wallpapers": ["glass_pane", "trellis", "whitewash", "brick"],
+    "variants": {"carpet": ["sage"], "checker": ["sage"], "flagstone": ["sandstone", "grey"]},
+    "frame": "glasshouse",
+    "skins": {
+      "bed": "raised_bed",
+      "table": "potting_bench",
+      "tv": "beehive",
+      "plant": "orchid",
+      "tree": "lemon_tree",
+      "crate": "pot_stack",
+      "box": "watering_can",
+      "bear": "gnome",
+      "statue": "fountain",
+      "piano": "wardian_case",
+      "barrel": "rain_barrel"
+    }
+  },
+  "motives": [
+    "a prize-winning hybrid had been copied from a rival's notebook",
+    "the will left the glasshouses to the gardener, not the family",
+    "a single rare seed was worth more than the whole estate",
+    "an old botanist's notes proved who had really found the orchid",
+    "the poison in the tea had been grown on the premises"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were the only two in the {area} while the others judged the marrows. Only {murderer} came back for the prize-giving, because {motive}.",
+    "Nobody else was in the {area} that afternoon. {murderer} had been cultivating the moment for years: {motive}.",
+    "Among the blooms of the {area} stood two people: {victim} and {murderer}. The reason had been growing quietly: {motive}."
+  ]
+}

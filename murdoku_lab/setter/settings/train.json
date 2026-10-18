@@ -1,0 +1,95 @@
+{
+  "schema": "murdoku.setting/1",
+  "id": "train",
+  "name": "The Midnight Meridian",
+  "eyebrow": "Aboard the Midnight Meridian",
+  "titles": [
+    "Murder at Midnight",
+    "The Last Stop",
+    "Tickets, Please",
+    "Signal Failure",
+    "One Way Only",
+    "The Night Express",
+    "Change at Vienna",
+    "End of the Line"
+  ],
+  "blurbs": [
+    "Eight passengers, one locked train and a long night with no stations.",
+    "The train departed on time. Somewhere between two countries, one passenger stopped breathing.",
+    "Snow on the tracks, candles at supper and a secret in every compartment.",
+    "Nobody gets off until morning, which is exactly what the killer was counting on."
+  ],
+  "rooms": [
+    {"name": "Dining Car", "suits": ["table", "chair", "flowers"], "finish": "carpet", "wallpaper": "walnut_panels"},
+    {"name": "Observation Car", "suits": ["chair", "plant", "palm", "carpet"], "finish": "carpet", "wallpaper": "night_window"},
+    {"name": "Sleeper Car", "suits": ["bed", "carpet", "box"], "finish": "carpet", "wallpaper": "green_velvet"},
+    {"name": "Couchette Car", "suits": ["bed", "chair", "box", "shelf"], "finish": "boards", "wallpaper": "night_window"},
+    {"name": "Lounge Car", "suits": ["chair", "piano", "carpet", "tv"], "finish": "herringbone", "wallpaper": "walnut_panels"},
+    {"name": "Baggage Car", "suits": ["shelf", "car", "crate", "box"], "finish": "boards", "wallpaper": "panel_wood"},
+    {"name": "Mail Car", "suits": ["crate", "register", "box", "shelf"], "finish": "planks", "wallpaper": "panel_wood"},
+    {"name": "Kitchen Car", "suits": ["table", "barrel", "tv", "crate"], "finish": "checker", "wallpaper": "walnut_panels"},
+    {"name": "Smoking Car", "suits": ["chair", "table", "carpet", "plant"], "finish": "carpet", "wallpaper": "green_velvet"},
+    {"name": "Guard's Van", "suits": ["register", "barrel", "boulder", "crate"], "finish": "boards", "wallpaper": "panel_wood"},
+    {"name": "Locomotive Cab", "suits": ["boulder", "register", "barrel"], "finish": "paving", "wallpaper": "bulkhead"},
+    {"name": "Bar Car", "suits": ["table", "chair", "tv", "flowers"], "finish": "parquet", "wallpaper": "night_window"},
+    {"name": "Library Car", "suits": ["shelf", "chair", "register", "carpet"], "finish": "parquet", "wallpaper": "walnut_panels"},
+    {"name": "Royal Suite", "suits": ["bed", "chair", "flowers", "statue"], "finish": "carpet", "wallpaper": "green_velvet"},
+    {"name": "First-Class Compartment", "suits": ["chair", "shelf", "bear", "box"], "finish": "carpet", "wallpaper": "night_window"},
+    {"name": "Second-Class Compartment", "suits": ["chair", "shelf", "box", "bear"], "finish": "planks", "wallpaper": "night_window"}
+  ],
+  "objects": {
+    "bed": "sleeper berth",
+    "chair": "compartment seat",
+    "carpet": "corridor runner",
+    "car": "luggage trolley",
+    "table": "dining table",
+    "tv": "samovar",
+    "shelf": "luggage rack",
+    "plant": "potted fern",
+    "tree": "ornamental tree",
+    "flowers": "vase of roses",
+    "shrub": "potted azalea",
+    "crate": "mail sacks",
+    "box": "picnic hamper",
+    "register": "signal lamp",
+    "palm": "potted palm",
+    "bear": "teddy bear",
+    "statue": "stone bust",
+    "piano": "lounge piano",
+    "boulder": "coal heap",
+    "barrel": "milk churn"
+  },
+  "visual": {
+    "accent": "#2f5c48",
+    "finishes": ["carpet", "planks", "herringbone", "parquet", "checker", "boards", "paving"],
+    "wallpapers": ["walnut_panels", "night_window", "green_velvet", "panel_wood"],
+    "variants": {"carpet": ["sage", "rose", "plum"], "checker": ["noir"], "planks": ["walnut", "oak"]},
+    "frame": "train",
+    "skins": {
+      "bed": "berth",
+      "chair": "compartment_seat",
+      "car": "luggage_trolley",
+      "table": "dining_car_table",
+      "tv": "samovar",
+      "shelf": "luggage_rack",
+      "plant": "fern",
+      "crate": "mail_sacks",
+      "box": "hamper",
+      "register": "railway_lantern",
+      "boulder": "coal_heap",
+      "barrel": "milk_churn"
+    }
+  },
+  "motives": [
+    "the passport in the victim's coat was not the victim's",
+    "a fortune in bearer bonds was hidden in the luggage",
+    "an old betrayal at the border had finally caught up",
+    "the ticket had been bought by someone who was supposed to be dead",
+    "a marriage of convenience had become very inconvenient"
+  ],
+  "epilogues": [
+    "{murderer} and {victim} were the only two in the {area} as the train crossed the border. At the next stop there was one passenger fewer, because {motive}.",
+    "Nobody else passed through the {area} after midnight. {murderer} had timed it to the minute: {motive}.",
+    "Two people were in the {area} when the lights flickered in the tunnel. {murderer} had boarded with one purpose: {motive}."
+  ]
+}

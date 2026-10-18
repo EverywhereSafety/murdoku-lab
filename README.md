@@ -33,7 +33,8 @@ Read the motivation: **[How we solved the Treasure Hunt in 20 minutes](https://e
 | -------------------- | ----------------------------------------------------------------------------------------------- |
 | Setter               | Generate boards up to 24×24 with scene roles, semantic themes and verified solutions                       |
 | Solver               | Verify accepted cases with CP-SAT and independent DFS; inspect deduction and difficulty signals |
-| Playable frontend    | Place characters with row/column exclusions, personal notes, clue focus and board navigation                                   |
+| Player app           | A browsable generated puzzle collection, graded hints, training and daily cases, as a static web app |
+| Research Lab         | Place characters with row/column exclusions, personal notes, clue focus, exports and solver views       |
 | Text + vision export | Produce paired inputs for the same verified case: text or board PNG + clues                     |
 | Semantic diversity   | Vary settings, cast and scene labels through optional LLM theming                               |
 | Agent environment    | Execute stateful tools and check placement and murderer answers                                 |
@@ -49,6 +50,98 @@ follow the evidence, and identify who was alone with the victim.
 
 Generate more cases with the setter, inspect solver deductions and difficulty
 profiles, or bring your own cases into the frontend. See [playing and hosting](docs/guides/play.md).
+
+## Experimental Play
+
+An experimental version of Play is in preview at
+[everywheresafety.github.io/murdoku/exp/](https://everywheresafety.github.io/murdoku/exp/),
+next to the current casebook. It is a static web app that plays the same verified
+puzzles without loading Python. Its Research Lab link opens the existing `/murdoku/play/`
+casebook; local and standalone full builds include the Lab at `/lab/`.
+The homepage connects generated cases with the project's work on puzzle quality.
+Players can filter the collection and continue to a distinct unsolved case after each solve.
+The workshop introduction and main generated-case action sit on the left of the opening
+section, with the daily case and its date picker on the right. Previous/next controls,
+**Today** and a date slider browse the published season; future cases remain locked.
+Daily statistics and an expandable season calendar appear below.
+
+| Feature | What it does |
+| --- | --- |
+| Board | Pick a suspect and tap a square; rows, columns and clashes update at once; notes, undo, drag and keyboard play |
+| Training case | A coach walks a first case one deduction at a time |
+| Hints | Three levels, from a nudge to the square itself, from solver data computed offline |
+| Daily case | Cases unlock by date from the published season; 14 locked cases in the current release, with streaks and a spoiler-free share line |
+| Settings | Eight illustrated settings, from a manor and an ocean liner to a night train and a college library |
+| Large classics | The 16 × 16 estate and 24 × 24 museum, drawn in their own themes |
+| Results | The reveal, a closing paragraph, stars and a share card |
+
+![Eight settings of the experimental Play](docs/assets/play-exp-settings.jpg)
+
+### How the art is made
+
+- **Drawn as code.** Boards, furniture, characters and cards are SVG generated from the
+  public observation by `murdoku_lab/visual/art/` (the `casebook` style). There are no
+  bitmap or icon-pack assets, and the same drawings serve the game, case pages and
+  image exports. Fonts are OFL (Newsreader, DM Sans, DM Mono) and colours follow the
+  Everywhere Safety palette; the fonts are bundled so exported PNGs match on every machine.
+- **Board.** A 3/4 "dollhouse" view: floor finishes and colourways per room, walls with
+  caps and skirting, wallpaper on the wall faces, brass door thresholds, numbered room
+  plaques and a frame for each setting. Touching rooms get floors far enough apart in
+  colour to tell them apart.
+- **Furniture and objects.** Each prop kind has a base drawing (`art/props.py`, 27 kinds),
+  and setting packs add skins (`art/skins/<setting>.py`, 77 so far): deck chairs and a
+  lifeboat aboard the liner, a sarcophagus and a meteorite in the museum, a snowmobile at
+  the chalet. All follow one recipe, drawn in the footprint's frame with light from the
+  upper left, 2.2 px ink outlines and a soft shadow, with tall pieces rising up to 36 px
+  above their squares. Each was rendered beside its neighbours (`scripts/art_gallery.py`)
+  and redrawn until it read at board size.
+- **Mascot.** Everywhere Safety's mark, the sprinkled donut and its white rice-ball
+  friend, is kept exactly as it is, plus one thing: a deerstalker on the donut. Its four
+  poses (idle, thinking, pointing, celebrating) come from `art/brand.py`, and
+  `scripts/build_brand_assets.py` writes the favicon and app icons from them.
+- **People.** Portraits come from a generated roster of looks (`art/portraits.py`),
+  assigned so a name always has the same face. Suspects A–H are a recurring cast
+  (`resources/cast.json`), and the victim is always one of the Vane family.
+- **Settings.** A setting pack (`setter/settings/<id>.json`) is data: room names with the
+  furniture they suit, a noun and a drawing for each prop kind, wallpapers, floors, a
+  frame and an accent colour, titles, spoiler-free blurbs and closing paragraphs.
+  `settings.dress()` names each room after the furniture inside it and never changes the
+  puzzle, since the content hash ignores themes. See [setting packs](docs/reference/settings.md).
+- **Cases with their own theme.** The large classics keep every word they were written
+  with. A restyle (`setter/restyles/`) only picks drawings that still show each noun in
+  the setting's manner (the museum's "bed" is an antique four-poster, never a
+  sarcophagus) and a floor and wallpaper for each room by name.
+- **Share cards** put the same drawings in a sticker style (`art/cards.py`) and show
+  public facts only.
+- **Checks.** `scripts/check_vision_legibility.py` gates the art: text contrast, colour
+  distance between touching rooms, coordinate size at export widths, and that no two
+  drawings in a setting look alike. The older styles behind published datasets are frozen
+  byte for byte (`tests/test_legacy_art.py`).
+
+Along the way the board moved from flat stickers to the 3/4 view, with stickers kept for
+share cards; a snail detective gave way to the Everywhere Safety mark; and every case got
+a setting of its own rather than one shared look.
+
+Try it locally with `npm run release:local`, or build a zip for testers with
+`npm run package:preview`. Default releases use versioned content: the 24 frozen themed
+bundles in `content/showcase/player-bundles.jsonl`, five classics, one training case and
+14 locked daily cases. They rebuild the artwork and web assets without generating or
+re-theming the release puzzles, and do not require `outputs/showcase/`.
+`npm run export:cases` rebuilds just the 30-case library from those same inputs.
+
+Build the experimental website folder with:
+
+```bash
+python scripts/package_preview.py --site https://everywheresafety.github.io/murdoku/exp/
+```
+
+This prepares `outputs/site/murdoku/exp/` with `noindex` and a Lab link to the existing
+`/murdoku/play/`. Copying that experimental folder leaves the production casebook unchanged.
+For a standalone build including the Pyodide Lab, use
+`python scripts/build_play.py --site-url PUBLIC_BASE` to prepare `dist/` with daily share
+links for that base URL.
+See [playing and hosting](docs/guides/play.md), [the daily case](docs/guides/daily.md)
+and [the player case format](docs/reference/play-case-format.md).
 
 ## From a puzzle to an agentic RL query
 
@@ -113,12 +206,20 @@ contain answers; keep those separate from model-facing inputs.
 
 ```bash
 npm ci
+npm run release:local
+```
+
+Open **http://127.0.0.1:4173/** for the player (30 library cases and the published daily
+season) and **/lab/** for the research Lab. Each default build prepares the full library,
+locked daily cases, brand assets and design-token check from the source checkout.
+To play your own cases in the Lab:
+
+```bash
 npm run build
 python -m murdoku_lab.visual.server --port 8765 --records data/cases/demo.jsonl
 ```
 
-Open **http://localhost:8765/**. The server also includes built-in demo cases.
-See [frontend setup](docs/guides/play.md) for visual assets and hosting.
+See [playing and hosting](docs/guides/play.md) and [the daily case](docs/guides/daily.md).
 
 ## Export text and vision queries
 

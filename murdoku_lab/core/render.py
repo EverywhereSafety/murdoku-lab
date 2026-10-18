@@ -42,6 +42,13 @@ def _area_phrase(label: str) -> str:
     return label if numbered or label.lower().startswith("the ") else "the " + label
 
 
+def _a(word: str) -> str:
+    """The indefinite article for a themed noun: "an umbrella stand", "a unicorn"."""
+    w = word.lower()
+    vowel = w[:1] in "aeiou" and not w.startswith(("uni", "use", "one", "eu"))
+    return f"{'an' if vowel else 'a'} {word}"
+
+
 def render_atom(a: Atom, case: Case, th: Theme) -> str:
     s, spec = case.scene, SPECS[a.kind]
     who, other = th.name(a.holder), th.name(a.other) if a.other else ""
@@ -66,7 +73,7 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
     if a.kind == "on_grid_edge":
         return f"{who} stood on the outer border of the grid."
     if a.kind == "beside_terrain":
-        return f"{who} was beside a {th.obj(a['ter'])} terrain square."
+        return f"{who} was beside {_a(th.obj(a['ter']))} terrain square."
     if a.kind == "beside" and a["obj"] == "flowers" and th.obj("flowers") == "flowers":
         return f"{who} was beside the flowers."
 
@@ -91,13 +98,13 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
         n = abs(a["d"])
         return (
             f"Someone standing exactly {n} row{'s' if n != 1 else ''} "
-            f"{'south' if a['d'] > 0 else 'north'} of {who} was beside a "
-            f"{th.obj(a['obj'])}. (Only the rows are compared; the columns may differ.)"
+            f"{'south' if a['d'] > 0 else 'north'} of {who} was beside "
+            f"{_a(th.obj(a['obj']))}. (Only the rows are compared; the columns may differ.)"
         )
     if a.kind == "no_tag_near":
         word = "row" if a["axis"] == "row" else "column"
         return (
-            f"Nobody who is a {th.tag(a['tag'])} stood in the {word} immediately "
+            f"Nobody who is {_a(th.tag(a['tag']))} stood in the {word} immediately "
             f"before or after {who}'s {word}."
         )
     if a.kind == "offset_min":
@@ -118,15 +125,15 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
         return f"{who} was in {names}."
     if a.kind == "tag_in_area":
         # Was "Someone who woman was in A's room" — the tag is a noun, not a relative clause.
-        return f"Someone else who is a {th.tag(a['tag'])} was in {who}'s area."
+        return f"Someone else who is {_a(th.tag(a['tag']))} was in {who}'s area."
     if a.kind == "on_in_areas":
         obj = th.obj(a["obj"])
         obj = {"sand": "sand patch", "water": "water feature"}.get(obj, obj)
         group = th.area_group_label(a["areas"])
         if group:
-            return f"{who} was on a {obj} in one of the {group}."
+            return f"{who} was on {_a(obj)} in one of the {group}."
         names = " or ".join(_area_phrase(th.area(x)) for x in a["areas"])
-        return f"{who} was on a {obj} in {names}."
+        return f"{who} was on {_a(obj)} in {names}."
     if a.kind == "area_no_offset":
         d = a["d"]
         if d == 0:
@@ -175,7 +182,12 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
             fields[name] = val + 1  # 1-based for a reader
         else:
             fields[name] = val  # side / axis / par / d: plain words already
-    return spec.template.format(**fields).replace("a flowers", "the flowers")
+    template = spec.template
+    for name in ("obj", "tag", "ter"):
+        value = fields.get(name)
+        if isinstance(value, str) and _a(value).startswith("an "):
+            template = re.sub(rf"\ba (?={{{name}}})", "an ", template)
+    return template.format(**fields).replace("a flowers", "the flowers")
 
 
 def render_clue(c: Clue, case: Case, th: Theme) -> str:

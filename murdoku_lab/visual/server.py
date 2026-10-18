@@ -8,7 +8,13 @@ from pathlib import Path
 import re
 from urllib.parse import parse_qs, unquote, urlsplit
 
-from murdoku_lab.visual.art import scene_svg, observation_svg, portrait_svg, prop_svg
+from murdoku_lab.visual.art import (
+    DEFAULT_STYLE,
+    scene_svg,
+    observation_svg,
+    portrait_svg,
+    prop_svg,
+)
 from murdoku_lab.visual.projection import ART_KINDS
 from murdoku_lab.visual.demos import catalogue
 from murdoku_lab.environment.vision import VISUAL_SCHEMAS
@@ -139,16 +145,18 @@ class Handler(BaseHTTPRequestHandler):
                 "scene.png",
                 "observation.png",
             ):
-                style = q.get("style", ["art"])[0]
+                style = q.get("style", [DEFAULT_STYLE])[0]
                 selected = q.get("selected", [None])[0]
                 focus = q.get("focus", [""])[0].split(",") if q.get("focus") else []
                 fn = scene_svg if match[2].startswith("scene.") else observation_svg
                 vector = fn(state, style=style, selected=selected, focus_cells=focus)
                 if match[2].endswith(".png"):
-                    from murdoku_lab.visual.raster import png_from_svg
+                    from murdoku_lab.visual.raster import png_for_style
 
                     try:
-                        return self.respond(png_from_svg(vector), mime="image/png")
+                        return self.respond(
+                            png_for_style(vector, style), mime="image/png"
+                        )
                     except (RuntimeError, OSError):
                         return self.respond(
                             {
@@ -162,7 +170,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond({"error": "Unknown API route."}, 404)
         # A source directory / private answer key is never a static-file root.
         dist = (ROOT / "dist").resolve()
-        file = (dist / ("index.html" if path == "/" else path.lstrip("/"))).resolve()
+        # Directory URLs (/, /lab/) serve their index.html, like any static host.
+        relative = path.lstrip("/") + ("index.html" if path.endswith("/") else "")
+        file = (dist / relative).resolve()
         if not file.is_relative_to(dist) or not file.is_file():
             return self.respond(
                 {"error": "File not found. Build the UI with npm run build."}, 404

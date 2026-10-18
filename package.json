@@ -8,9 +8,17 @@
     "build": "vite build",
     "test:browser": "node tests/browser/visual.mjs",
     "test:proxy": "node tests/browser/proxy.mjs",
-    "render": "node scripts/render_visual.mjs"
+    "render": "node scripts/render_visual.mjs",
+    "test:engine": "node --test 'tests/engine/*.test.mjs'",
+    "export:cases": ".venv/bin/python -m murdoku_lab.visual.play_export",
+    "test:play": "node tests/browser/play.mjs",
+    "release:local": ".venv/bin/python scripts/release_local.py",
+    "package:preview": ".venv/bin/python scripts/package_preview.py"
   },
   "dependencies": {
+    "@fontsource/dm-mono": "^5.3.0",
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/newsreader": "^5.3.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

@@ -29,20 +29,25 @@ class MurdokuToolEnvironment:
         )
         theme.validate(case)
         self.pad = Scratchpad(case, theme)
+        from murdoku_lab.visual.art.styles import record_style
+
+        # Every image of an episode is drawn in the style its record was exported with.
+        self.artwork_style = record_style(record)
         self.done = False
         self.board_revision = 0
         self.presentation_notes = []
 
-    def render_png(self, *, scope="board", style="art"):
+    def render_png(self, *, scope="board", style=None):
         from murdoku_lab.visual.projection import public_observation
         from murdoku_lab.visual.art import board_svg, scene_svg, observation_svg
-        from murdoku_lab.visual.raster import png_from_svg
+        from murdoku_lab.visual.raster import png_for_style
 
         renderers = {"board": board_svg, "scene": scene_svg, "full": observation_svg}
         if scope not in renderers:
             raise ValueError("unknown image scope")
+        style = style or self.artwork_style
         observation = public_observation(self.pad, revision=self.board_revision)
-        return png_from_svg(renderers[scope](observation, style=style))
+        return png_for_style(renderers[scope](observation, style=style), style)
 
     async def finalize(self, reason):
         if reason not in (

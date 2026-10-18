@@ -178,7 +178,7 @@ def test_both_views_keep_cells_doors_and_conflicting_occupants():
         session.act(dict(action="place", person="A", cell="b1"))
         session.act(dict(action="place", person="B", cell="b1"))
         state = session.observe()
-        for mode in ("art", "diagram"):
+        for mode in ("casebook", "art", "diagram"):
             root = ET.fromstring(scene_svg(state, style=mode))
             hits = [n for n in root.iter() if "data-cell" in n.attrib]
             assert {n.attrib["data-cell"] for n in hits} == {
