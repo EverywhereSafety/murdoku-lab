@@ -7,15 +7,25 @@
     python -m murdoku_lab.setter.daily lock --days 14
     python -m murdoku_lab.setter.daily status
     python -m murdoku_lab.setter.daily build                  # → web/public/daily, og, d/<n>
+    python -m murdoku_lab.setter.daily release --out site/murdoku/play --site-url https://…/
+
+`release` is what the website's daily job runs. It downloads only the days now due from the private
+dataset, two days ahead so that a missed run leaves no gap, and builds them.
 
 A season (config/daily/season-<id>.json) fixes the weekly rhythm of board sizes and bands, the
 epoch that numbers cases (#1 is the epoch's day), and the setting rotation: no setting repeats
-within a week. Each day gets a few candidates from the constraint-first farm with seeds derived
-from sha256("murdoku/daily/v1/<date>/<j>"), so a day can always be regenerated. Locking picks a
-candidate (the reviewer's pick, or the first that keeps the variety rules: a new room layout and
+within a week. Cases stay out of the repository, in data/daily/<season>/ (MURDOKU_DAILY_DIR replaces
+data/daily), a local copy of a private dataset. Each day gets a few candidates from the
+constraint-first farm with seeds derived from sha256("murdoku/daily/v1/<date>/<j>"), prefixed from
+the season's `salted_from` date with the private salt in <season>/seed_salt.txt, so a day can always
+be regenerated but the public code cannot reveal upcoming cases. Locking picks a candidate
+(the reviewer's pick, or the one nearest the day's target difficulty that keeps the variety rules: a new room layout and
 not yesterday's murderer letter, farming a few more candidates when none does), dresses it in the
-day's setting (preferring a title the setting has not used yet and a victim not seen in the last
-five days) and records the candidate, seed, git revision and solver version. Locked cases are listed in
+day's setting (with a title in season for the date that neither an earlier daily case nor the
+frozen showcase uses for the setting, and preferably a victim not seen in the last five days) and
+records the candidate, seed, git revision and solver version. The season's `calendar` gives
+chosen dates such as holidays their own setting, label, title, blurb, size and band. Locking stops at the
+first day it cannot fill, so locked days never leave a gap. Locked cases are listed in
 content/daily/published.json so dataset exports can leave them out.
 """
 
@@ -25,6 +35,8 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -35,6 +47,9 @@ from murdoku_lab.core.theme import Theme
 from murdoku_lab.paths import PROJECT_ROOT
 
 ROOT = PROJECT_ROOT
+SALT_FILE = "seed_salt.txt"
+RELEASE_AHEAD = 2  # days a case is published early, so a missed daily run leaves no gap
+LOW_RUNWAY = 30  # warn when fewer days of cases than this are left
 WEEKDAYS = (
     "monday",
     "tuesday",
@@ -53,18 +68,35 @@ def season(season_id="s01"):
 
 
 def content_dir(spec):
-    return ROOT / "content" / "daily" / spec["season"]
+    base = os.environ.get("MURDOKU_DAILY_DIR")
+    return (Path(base) if base else ROOT / "data" / "daily") / spec["season"]
 
 
 def number(spec, date):
     return (date - dt.date.fromisoformat(spec["epoch"])).days + 1
 
 
-def seed_for(date, j):
+def seed_for(date, j, salt=""):
     digest = hashlib.sha256(
-        f"murdoku/daily/v1/{date.isoformat()}/{j}".encode()
+        f"{salt}murdoku/daily/v1/{date.isoformat()}/{j}".encode()
     ).hexdigest()
     return int(digest[:8], 16)
+
+
+def _salt(spec, date):
+    """The private salt for `date`: "" while its seeds are public, None when it is not here."""
+    salted_from = spec.get("salted_from")
+    if not salted_from or date < dt.date.fromisoformat(salted_from):
+        return ""
+    path = content_dir(spec) / SALT_FILE
+    return path.read_text().strip() if path.is_file() else None
+
+
+def _require_seeds(spec, day):
+    if not day["seeds"]:
+        raise SystemExit(
+            f"{day['date']} needs the private salt in {content_dir(spec) / SALT_FILE}"
+        )
 
 
 def _rotation(spec, week):
@@ -80,6 +112,44 @@ def _rotation(spec, week):
     return order
 
 
+def _with_calendar(spec, rotation, first_day):
+    """The week's rotation with each calendar day's setting swapped onto its weekday."""
+    calendar = spec.get("calendar", {})
+    rotation = list(rotation)
+    for offset in range(7):
+        day = first_day + dt.timedelta(days=offset)
+        setting = calendar.get(day.isoformat(), {}).get("setting")
+        if setting:
+            i, j = rotation.index(setting), day.weekday() % len(rotation)
+            rotation[i], rotation[j] = rotation[j], rotation[i]
+    return rotation
+
+
+def _rhythm(spec, date, weekday):
+    """Board size and band for a date: the weekly rhythm, any later change to it, then the calendar."""
+    size, band = spec["rhythm"][weekday]
+    for start, changes in sorted(spec.get("rhythm_from", {}).items()):
+        if date.isoformat() >= start and weekday in changes:
+            size, band = changes[weekday]
+    entry = spec.get("calendar", {}).get(date.isoformat(), {})
+    return entry.get("size", size), entry.get("band", band)
+
+
+def _by_target(spec, day, pool):
+    """Candidate indices: on a calendar day those showing most of its drawings first, then closest
+    to the difficulty this kind of day aims for."""
+    target = spec.get("target_cost", {}).get(f"{day['size']} {day['band']}")
+    entry = spec.get("calendar", {}).get(day.get("date"), {})
+
+    def rank(i):
+        kinds = {p.pid for p in pool[i].scene.props}
+        missing = len(set(entry.get("skins", ())) - kinds)
+        distance = 0 if target is None else abs(pool[i].certificate["cost"] - target)
+        return missing, distance
+
+    return sorted(range(len(pool)), key=rank)
+
+
 def plan(spec, days=None):
     start = dt.date.fromisoformat(spec["start"])
     total = days or spec["weeks"] * 7
@@ -87,7 +157,7 @@ def plan(spec, days=None):
     for i in range(total):
         date = start + dt.timedelta(days=i)
         weekday = WEEKDAYS[date.weekday()]
-        size, band = spec["rhythm"][weekday]
+        size, band = _rhythm(spec, date, weekday)
         week = i // 7
         rotation = _rotation(spec, week)
         if (
@@ -95,6 +165,9 @@ def plan(spec, days=None):
             and rotation[0] == _rotation(spec, week - 1)[(7 - 1) % len(rotation)]
         ):
             rotation = rotation[1:] + rotation[:1]
+        rotation = _with_calendar(spec, rotation, start + dt.timedelta(days=week * 7))
+        entry = spec.get("calendar", {}).get(date.isoformat(), {})
+        salt = _salt(spec, date)
         out.append(
             {
                 "date": date.isoformat(),
@@ -103,8 +176,12 @@ def plan(spec, days=None):
                 "size": size,
                 "band": band,
                 "setting": rotation[date.weekday() % len(rotation)],
-                "special": spec.get("special", {}).get(weekday),
-                "seeds": [seed_for(date, j) for j in range(spec["candidates"])],
+                "special": entry.get("name") or spec.get("special", {}).get(weekday),
+                "seeds": (
+                    []
+                    if salt is None
+                    else [seed_for(date, j, salt) for j in range(spec["candidates"])]
+                ),
             }
         )
     return out
@@ -165,6 +242,7 @@ def generate(spec, days=None, workers=6):
         path = _candidates_path(spec, day["date"])
         if path.exists() and path.read_text().strip():
             continue
+        _require_seeds(spec, day)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
         started = time.time()
@@ -210,6 +288,68 @@ def _layout(case):
     return hashlib.sha256(json.dumps(case.scene.area_of).encode()).hexdigest()[:16]
 
 
+SHOWCASE = ROOT / "content" / "showcase" / "player-bundles.jsonl"
+
+
+def showcase_titles(setting_id):
+    """Titles the frozen player showcase uses for one setting."""
+    if not SHOWCASE.is_file():
+        return []
+    rows = (json.loads(line) for line in SHOWCASE.read_text().splitlines() if line)
+    return [
+        r["meta"]["title"] for r in rows if r["meta"]["setting"]["id"] == setting_id
+    ]
+
+
+def _days_left(pack, title, date):
+    """How long `title` stays in season after an ISO `date`; 366 if it has no season."""
+    window = pack.get("seasons", {}).get(title)
+    if not window:
+        return 366
+    today = dt.date.fromisoformat(date)
+    month, day = map(int, window[1].split("-"))
+    return (dt.date(today.year, month, day) - today).days % 365
+
+
+def title_schedule(spec, days=None):
+    """A title for each day still to lock, or None when none is left. A calendar day keeps its own;
+    any other day takes the in-season title whose season ends soonest, so dated titles land on
+    fitting days and timeless ones are kept for when nothing else suits."""
+    from murdoku_lab.setter import settings
+
+    calendar = spec.get("calendar", {})
+    reserved = {entry["title"] for entry in calendar.values() if entry.get("title")}
+    used = {s: set(showcase_titles(s)) | reserved for s in spec["settings"]}
+    locked = {}
+    for record in locked_days(spec):
+        locked[record["date"]] = record
+        used[record["setting"]].add(record["murdoku_theme"]["title"])
+    schedule = {}
+    for day in plan(spec, days):
+        date, setting = day["date"], day["setting"]
+        if date in locked:
+            continue
+        if calendar.get(date, {}).get("title"):
+            schedule[date] = calendar[date]["title"]
+            continue
+        pack = settings.load(setting)
+        pool = [
+            title
+            for title in pack["titles"]
+            if title not in used[setting] and settings.in_season(pack, title, date)
+        ]
+        schedule[date] = min(
+            pool,
+            key=lambda title: (
+                _days_left(pack, title, date),
+                hashlib.sha256(f"{date}|{title}".encode()).hexdigest(),
+            ),
+            default=None,
+        )
+        used[setting].add(schedule[date])
+    return schedule
+
+
 def lock(spec, days=None):
     """Pick, dress and lock every planned day with candidates; earlier locks stay as they are."""
     from murdoku_lab.setter import settings
@@ -221,7 +361,7 @@ def lock(spec, days=None):
     except Exception:  # noqa: BLE001
         solver = "unknown"
     git = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"],
+        ["git", "describe", "--always", "--dirty"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -242,13 +382,23 @@ def lock(spec, days=None):
                 record["victim"],
             )
         )
+    titles = title_schedule(spec, days)
     for day in plan(spec, days):
         date = day["date"]
         if date in locks:
             continue
+        # Lock an unbroken run of days: stop at the first day that has not been generated.
+        if not _candidates_path(spec, date).exists():
+            break
+        if not day["seeds"]:
+            print(f"{date} needs the private salt; stopping here")
+            break
+        if not titles.get(date):
+            print(
+                f"no {day['setting']} title left for {date}; add one before locking it"
+            )
+            break
         pool = candidates(spec, date)
-        if not pool:
-            continue
         # Six Vanes take turns as victims, so "no repeat within five days" is always possible.
         recent = history[-5:]
         layouts = {h[1] for h in history}
@@ -258,35 +408,49 @@ def lock(spec, days=None):
             yesterday = history[-1][2] if history else None
             return _layout(case) not in layouts and letter != yesterday
 
-        # Top a day up from further seeds when none of its candidates keeps the variety rules.
+        # Top a day up from further seeds when it has no candidate that keeps the variety rules.
         for extra in range(1, 4):
             if any(fits(c) for c in pool) or date in picks:
                 break
+            when = dt.date.fromisoformat(date)
             _farm(
                 day,
-                seed_for(dt.date.fromisoformat(date), len(day["seeds"]) + extra),
+                seed_for(when, len(day["seeds"]) + extra, _salt(spec, when)),
                 2,
                 _candidates_path(spec, date),
             )
             pool = candidates(spec, date)
-        order = list(range(len(pool)))
+        if not pool:
+            print(
+                f"no candidates for {date} after top-ups; farm more before locking it"
+            )
+            break
+        order = _by_target(spec, day, pool)
         if date in picks:
             order = [picks[date]] + [i for i in order if i != picks[date]]
         j = next((i for i in order if fits(pool[i])), order[0])
         case = pool[j]
         victims = {h[3] for h in recent}
-        used_titles = set()
-        for earlier in sorted(locks):
-            previous = json.loads((days_dir / f"{earlier}.json").read_text())
-            if previous["setting"] == day["setting"]:
-                used_titles.add(Theme.from_json(previous["murdoku_theme"]).title)
+        # The title is settled; only one Vane in six may be fresh, so try salts for the victim.
+        entry = spec.get("calendar", {}).get(date, {})
         dressings = []
-        for attempt in range(40):
+        for attempt in range(200):
             salt = date if attempt == 0 else f"{date}#{attempt}"
-            dressings.append((salt, settings.dress(case, day["setting"], salt=salt)))
-        fresh = [d for d in dressings if d[1].title not in used_titles]
-        best = [d for d in fresh if d[1].name(case.victim) not in victims]
-        salt, theme = (best or fresh or dressings)[0]
+            theme = settings.dress(
+                case,
+                day["setting"],
+                salt=salt,
+                title=titles[date],
+                blurb=entry.get("blurb"),
+                date=date,
+                objects=entry.get("objects"),
+                skins=entry.get("skins"),
+            )
+            dressings.append((salt, theme))
+            if theme.name(case.victim) not in victims:
+                break
+        best = [d for d in dressings if d[1].name(case.victim) not in victims]
+        salt, theme = (best or dressings)[0]
         record = {
             "schema": "murdoku.daily_case/1",
             "date": date,
@@ -300,6 +464,13 @@ def lock(spec, days=None):
             "victim": theme.name(case.victim),
             "murdoku_case": case.to_json(),
             "murdoku_theme": theme.to_json(),
+            "epilogue": settings.epilogue(
+                theme,
+                case,
+                case.murderer,
+                case.scene.area_of[case.solution[case.victim]],
+                motive=entry.get("motive"),
+            ),
         }
         _write(days_dir / f"{date}.json", record)
         locks[date] = {
@@ -338,14 +509,20 @@ def status(spec, days=None):
     return rows
 
 
-def locked_days(spec):
+def locked_days(spec, through=None):
+    """Locked days in date order; with an ISO `through`, only those up to that date."""
     days_dir = content_dir(spec) / "days"
-    return [json.loads(p.read_text()) for p in sorted(days_dir.glob("*.json"))]
+    return [
+        json.loads(p.read_text())
+        for p in sorted(days_dir.glob("*.json"))
+        if not through or p.stem <= through
+    ]
 
 
-def build(spec, out=None, site_url=""):
-    """Write the locked days for the player: bundles sealed with their date, scenes, thumbs,
-    share images and a link-preview page per day."""
+def build(spec, out=None, site_url="", through=None):
+    """Write the locked days up to `through` for the player: bundles sealed with their date, scenes,
+    thumbs, share images and a link-preview page per day. With no days to write it stops before
+    touching `out`, so a missing dataset cannot wipe a site."""
     from murdoku_lab.environment.state import Scratchpad
     from murdoku_lab.setter import settings
     from murdoku_lab.visual.art import STATIC_LAYERS, casebook, thumbnail_svg
@@ -354,17 +531,20 @@ def build(spec, out=None, site_url=""):
     from murdoku_lab.visual.projection import public_observation
     from murdoku_lab.visual.raster import bundled_profile, png_from_svg
 
+    records = locked_days(spec, through)
+    if not records:
+        raise SystemExit(
+            f"no locked daily cases in {content_dir(spec)}; fetch them first"
+        )
     out = Path(out or ROOT / "web" / "public")
     daily_dir = out / "daily"
     for directory in (daily_dir, out / "og", out / "d"):
         if directory.exists():
-            import shutil
-
             shutil.rmtree(directory)
     daily_dir.mkdir(parents=True)
     (out / "og").mkdir()
     manifest = []
-    for record in locked_days(spec):
+    for record in records:
         case = Case.from_json(record["murdoku_case"])
         theme = Theme.from_json(record["murdoku_theme"])
         pack = settings.load(theme.setting_id)
@@ -378,6 +558,7 @@ def build(spec, out=None, site_url=""):
             setting=pack["name"],
             eyebrow=f"Daily case #{n}",
             salt=record["date"],
+            epilogue=record.get("epilogue"),
         )
         data["daily"] = {
             "n": n,
@@ -450,6 +631,58 @@ def build(spec, out=None, site_url=""):
     return index
 
 
+def fetch(spec, through):
+    """Download the locked days due by ISO `through` from the private dataset, and nothing later.
+    Uses the `hf` command, which logs in by itself on GitHub Actions (see the daily guide).
+    """
+    source = spec["dataset"]
+    files = [
+        f"{spec['season']}/days/{day['date']}.json"
+        for day in plan(spec)
+        if day["date"] <= through
+    ]
+    subprocess.run(
+        [
+            str(Path(sys.executable).with_name("hf")),
+            "download",
+            source["repo"],
+            *files,
+            "--repo-type",
+            "dataset",
+            "--revision",
+            source["revision"],
+            "--local-dir",
+            str(content_dir(spec).parent),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+
+
+def _today():
+    return dt.datetime.now(dt.timezone.utc).date()
+
+
+def release(spec, out, site_url, through=None, ahead=RELEASE_AHEAD, download=True):
+    """Fetch and build the days now due, and say how many days of cases are left."""
+    today = _today()
+    chosen = through
+    through = through or (today + dt.timedelta(days=ahead)).isoformat()
+    if download:
+        fetch(spec, through)
+    index = build(spec, out, site_url, through=through)
+    latest = index["days"][-1]
+    if not chosen and latest["date"] < today.isoformat():
+        raise SystemExit(f"no daily case left for {today}; lock the next batch")
+    left = (dt.date.fromisoformat(plan(spec)[-1]["date"]) - today).days
+    if left < LOW_RUNWAY:
+        print(f"::warning::only {left} days of daily cases left; lock the next batch")
+    print(
+        f"released through {latest['date']} (#{latest['n']}); {left} days of cases left"
+    )
+    return index
+
+
 def _og_page(directory, n, theme, pack, record, site_url):
     """A tiny page per case for link previews; people who open it land on the case."""
     from html import escape
@@ -461,7 +694,8 @@ def _og_page(directory, n, theme, pack, record, site_url):
     canonical = (
         f'<link rel="canonical" href="{escape(site_url)}d/{n}/">'
         f'<meta property="og:url" content="{escape(site_url)}d/{n}/">'
-        if site_url else ""
+        if site_url
+        else ""
     )
     (directory / "index.html").write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -501,6 +735,15 @@ def main(argv=None):
     p = sub.add_parser("build")
     p.add_argument("--out", default=None)
     p.add_argument("--site-url", default="")
+    p.add_argument("--through", default=None, help="last date to build, YYYY-MM-DD")
+    p = sub.add_parser("fetch")
+    p.add_argument("--through", required=True, help="last date to download, YYYY-MM-DD")
+    p = sub.add_parser("release")
+    p.add_argument("--out", required=True)
+    p.add_argument("--site-url", required=True)
+    p.add_argument("--through", default=None, help="last date to release, YYYY-MM-DD")
+    p.add_argument("--ahead", type=int, default=RELEASE_AHEAD)
+    p.add_argument("--no-fetch", action="store_true", help="use the days already here")
     args = parser.parse_args(argv)
     spec = season(args.season)
     if args.command == "plan":
@@ -528,8 +771,19 @@ def main(argv=None):
     elif args.command == "status":
         print("\n".join(status(spec, args.days)))
     elif args.command == "build":
-        index = build(spec, args.out, args.site_url)
+        index = build(spec, args.out, args.site_url, through=args.through)
         print(f"built {len(index['days'])} daily cases")
+    elif args.command == "fetch":
+        fetch(spec, args.through)
+    elif args.command == "release":
+        release(
+            spec,
+            args.out,
+            args.site_url,
+            through=args.through,
+            ahead=args.ahead,
+            download=not args.no_fetch,
+        )
     return 0
 
 

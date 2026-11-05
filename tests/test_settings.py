@@ -221,3 +221,37 @@ def test_restyled_rooms_get_the_floors_their_spec_names(slug):
         assert style["finish"] == finish, theme.area(area)
         if variant:
             assert style["variant"] == variant[0], theme.area(area)
+
+
+def test_seasons_keep_titles_and_blurbs_to_fitting_dates():
+    pack = settings.load("chalet")
+    assert settings.in_season(pack, "Whiteout", "2027-01-10")  # wraps the new year
+    assert settings.in_season(pack, "Whiteout", "2026-12-01")
+    assert not settings.in_season(pack, "Whiteout", "2027-04-10")
+    assert settings.in_season(pack, "Cold Feet", "2027-07-01")  # no season
+    snowy = "The snow has buried the road, the lights keep flickering, and one guest is never going home."
+    assert not settings.in_season(pack, snowy, "2027-05-03")
+    entry = glasshouse()
+    blurbs = {
+        settings.dress(entry.case, "chalet", salt=str(s), date="2027-05-03").blurb
+        for s in range(24)
+    }
+    assert snowy not in blurbs and len(blurbs) > 1
+
+
+def test_a_season_must_name_a_known_title_and_real_dates():
+    pack = copy.deepcopy(settings.load("chalet"))
+    pack["seasons"] = {"Never Written": ["12-01", "02-28"]}
+    with pytest.raises(ValueError, match="unknown title"):
+        settings.validate(pack)
+    pack["seasons"] = {"Whiteout": ["December", "March"]}
+    with pytest.raises(ValueError, match="bad season"):
+        settings.validate(pack)
+
+
+def test_dress_can_take_a_chosen_title_and_blurb():
+    entry = glasshouse()
+    theme = settings.dress(
+        entry.case, "manor", title="Chosen", blurb="Written for today."
+    )
+    assert (theme.title, theme.blurb) == ("Chosen", "Written for today.")

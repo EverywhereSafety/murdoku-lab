@@ -98,8 +98,9 @@ def main():
     )
     args = parser.parse_args()
     site_url = args.site_url.rstrip("/") + "/" if args.site_url else ""
-    # Vite copies public/ at build time; prepare the complete, frozen collection first.
-    prepare_assets(site_url)
+    # Vite copies public/ at build time; prepare the complete, frozen collection first. Daily
+    # cases stay out: the website's daily job releases them, so no future case ships here.
+    prepare_assets(site_url, with_daily=False)
     game = BrowserGame()
     for entry in game.cases.values():
         state = game.request("/api/sessions", {"case_id": entry.slug})["result"]

@@ -3,8 +3,10 @@
   "season": "s01",
   "epoch": "2026-10-12",
   "start": "2026-10-12",
-  "weeks": 8,
+  "weeks": 30,
+  "dataset": {"repo": "EverywhereSafety/murdoku-daily", "revision": "main"},
   "candidates": 3,
+  "salted_from": "2026-11-09",
   "rhythm": {
     "monday": [6, "easy"],
     "tuesday": [6, "medium"],
@@ -14,6 +16,167 @@
     "saturday": [8, "medium"],
     "sunday": [9, "hard"]
   },
+  "rhythm_from": {
+    "2026-11-09": {"saturday": [8, "hard"]}
+  },
+  "target_cost": {
+    "6 easy": 12,
+    "6 medium": 20,
+    "7 medium": 25,
+    "7 hard": 36,
+    "8 medium": 28,
+    "8 hard": 43,
+    "9 hard": 48
+  },
   "special": {"sunday": "Sunday Special"},
-  "settings": ["manor", "liner", "museum", "theatre", "chalet", "glasshouse", "train", "library"]
+  "settings": ["manor", "liner", "museum", "theatre", "chalet", "glasshouse", "train", "library"],
+  "calendar": {
+    "2026-11-13": {
+      "name": "Friday the 13th",
+      "setting": "museum",
+      "title": "Friday the Thirteenth",
+      "blurb": "Nobody at the Halloway believes in curses. Tonight, somebody should have.",
+      "motive": "the museum's most cursed piece was about to be exposed as an insurance fraud",
+      "objects": {"statue": "black cat", "barrel": "cracked mirror", "boulder": "cursed idol"},
+      "skins": {"statue": "black_cat", "barrel": "cracked_mirror", "boulder": "cursed_idol"}
+    },
+    "2026-11-26": {
+      "name": "Thanksgiving",
+      "setting": "manor",
+      "size": 7,
+      "band": "medium",
+      "title": "Grace Before Murder",
+      "blurb": "The whole family is home for the feast, and somebody will not be giving thanks.",
+      "motive": "the family recipe had been stolen, along with the family fortune",
+      "objects": {"statue": "wheat sheaf", "barrel": "cornucopia", "boulder": "giant pumpkin"},
+      "skins": {"statue": "wheat_sheaf", "barrel": "cornucopia", "boulder": "giant_pumpkin"}
+    },
+    "2026-12-24": {
+      "name": "Christmas Eve",
+      "setting": "manor",
+      "size": 7,
+      "band": "medium",
+      "title": "Not a Creature Was Stirring",
+      "blurb": "The stockings are hung, the house is asleep, and one guest has made a very naughty list.",
+      "motive": "a gift under the tree held a letter nobody was meant to read",
+      "objects": {"statue": "Christmas tree", "barrel": "pile of gifts", "boulder": "Christmas pudding"},
+      "skins": {"statue": "christmas_tree", "barrel": "gift_pile", "boulder": "plum_pudding"}
+    },
+    "2026-12-25": {
+      "name": "Christmas Day",
+      "setting": "chalet",
+      "title": "Murder Under the Mistletoe",
+      "blurb": "Snow on the peaks, carols by the fire and one gift that nobody wanted to unwrap.",
+      "motive": "a Christmas card from twenty years ago had finally been answered",
+      "objects": {"statue": "Christmas tree", "barrel": "pile of gifts", "boulder": "yule log"},
+      "skins": {"statue": "christmas_tree", "barrel": "gift_pile", "boulder": "yule_log"}
+    },
+    "2026-12-31": {
+      "name": "New Year's Eve",
+      "setting": "liner",
+      "size": 7,
+      "band": "medium",
+      "title": "The Stroke of Midnight",
+      "blurb": "Champagne on ice, the band counting down, and a toast that one passenger will never finish.",
+      "motive": "a debt fell due at midnight on the last day of the year",
+      "objects": {"statue": "champagne tower", "barrel": "ice bucket", "boulder": "bunch of balloons"},
+      "skins": {"statue": "champagne_tower", "barrel": "ice_bucket", "boulder": "party_balloons"}
+    },
+    "2027-01-01": {
+      "name": "New Year's Day",
+      "setting": "manor",
+      "title": "New Year, Old Grudges",
+      "blurb": "Resolutions were made last night. One of them has already been carried out.",
+      "motive": "an old grudge was not going to be allowed into the new year",
+      "objects": {"statue": "champagne tower", "barrel": "crate of fireworks", "boulder": "bunch of balloons"},
+      "skins": {"statue": "champagne_tower", "barrel": "firework_crate", "boulder": "party_balloons"}
+    },
+    "2027-02-06": {
+      "name": "Lunar New Year",
+      "setting": "train",
+      "size": 8,
+      "band": "medium",
+      "title": "Year of the Scapegoat",
+      "blurb": "Everyone is heading home for the reunion dinner. One passenger will never arrive.",
+      "motive": "a family debt must be settled before the new year, and this one had waited long enough",
+      "objects": {"statue": "red lantern", "barrel": "kumquat tree", "boulder": "pyramid of oranges"},
+      "skins": {"statue": "red_lantern", "barrel": "kumquat_tree", "boulder": "orange_pyramid"}
+    },
+    "2027-02-14": {
+      "name": "Valentine's Day",
+      "setting": "liner",
+      "size": 8,
+      "band": "medium",
+      "title": "Love on the Rocks",
+      "blurb": "A dozen roses, a table for two and a love letter that was never meant to be opened.",
+      "motive": "a valentine had reached the wrong person, twenty years too late",
+      "objects": {"statue": "bouquet of roses", "barrel": "box of chocolates", "boulder": "heart cushion"},
+      "skins": {"statue": "rose_bouquet", "barrel": "chocolate_box", "boulder": "heart_cushion"}
+    },
+    "2027-02-20": {
+      "name": "Lantern Festival",
+      "setting": "glasshouse",
+      "size": 8,
+      "band": "medium",
+      "title": "The Lantern Riddle",
+      "blurb": "A paper lantern in every window, a riddle on every lantern, and one answer worth killing for.",
+      "motive": "the answer to the last riddle named the person who had stolen the family fortune",
+      "objects": {"statue": "lantern stand", "barrel": "red lantern", "boulder": "bowl of rice balls"},
+      "skins": {"statue": "lantern_stand", "barrel": "red_lantern", "boulder": "rice_balls"}
+    },
+    "2027-03-15": {
+      "name": "The Ides of March",
+      "setting": "theatre",
+      "title": "Beware the Ides",
+      "blurb": "The company is playing Julius Caesar tonight, and someone has taken the script far too seriously.",
+      "motive": "an old friend had been promised the lead, and had read enough Shakespeare to know what to do",
+      "objects": {"statue": "bust of Caesar", "barrel": "broken pillar", "boulder": "laurel wreath"},
+      "skins": {"statue": "caesar_bust", "barrel": "roman_pillar", "boulder": "laurel_wreath"}
+    },
+    "2027-03-17": {
+      "name": "St Patrick's Day",
+      "setting": "liner",
+      "title": "The Luck of the Irish",
+      "blurb": "Next stop Queenstown, a shamrock in every buttonhole, and one passenger whose luck has run out.",
+      "motive": "a lucky charm had been won in a card game and never given back",
+      "objects": {"statue": "pot of shamrocks", "barrel": "stout keg", "boulder": "pot of gold"},
+      "skins": {"statue": "shamrock_pot", "barrel": "green_keg", "boulder": "pot_of_gold"}
+    },
+    "2027-03-21": {
+      "setting": "train"
+    },
+    "2027-03-28": {
+      "name": "Easter Sunday",
+      "setting": "glasshouse",
+      "size": 8,
+      "band": "medium",
+      "title": "A Bad Egg",
+      "blurb": "The children are hunting for painted eggs among the ferns. They are about to find something else.",
+      "motive": "the egg hunt had turned up something buried long ago",
+      "objects": {"statue": "stone rabbit", "barrel": "basket of eggs", "boulder": "painted egg"},
+      "skins": {"statue": "stone_rabbit", "barrel": "egg_basket", "boulder": "painted_egg"}
+    },
+    "2027-04-01": {
+      "name": "April Fools' Day",
+      "setting": "theatre",
+      "size": 7,
+      "band": "medium",
+      "title": "No Laughing Matter",
+      "blurb": "The pranks started at breakfast. By curtain-up, one of them had gone much too far.",
+      "motive": "a practical joke years ago had ended a career, and this was the punchline",
+      "objects": {"statue": "jester's dummy", "barrel": "jack-in-the-box", "boulder": "whoopee cushion"},
+      "skins": {"statue": "jester", "barrel": "jack_in_box", "boulder": "whoopee_cushion"}
+    },
+    "2027-05-09": {
+      "name": "Mother's Day",
+      "setting": "manor",
+      "size": 8,
+      "band": "medium",
+      "title": "Mother Knows Best",
+      "blurb": "Breakfast on a tray, flowers from the children, and a will that was changed only yesterday.",
+      "motive": "the changed will cut out every child but one",
+      "objects": {"statue": "vase of carnations", "barrel": "ribboned hat box", "boulder": "breakfast tray"},
+      "skins": {"statue": "carnations", "barrel": "gift_hatbox", "boulder": "breakfast_tray"}
+    }
+  }
 }

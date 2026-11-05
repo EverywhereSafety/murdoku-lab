@@ -18,7 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["black==26.3.1", "pytest>=7.4", "fonttools>=4.50"]
-data = ["huggingface-hub>=1.0,<2"]
+data = ["huggingface-hub>=1.19,<2"]
 
 [project.scripts]
 murdoku-generate = "murdoku_lab.setter.generate:main"

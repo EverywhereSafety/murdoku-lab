@@ -102,8 +102,10 @@ def _difficulty(case):
     return {"band": band, "label": BANDS.get(band, "Classic"), "minutes": [lo, hi]}
 
 
-def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt=""):
-    """One case for the player: public facts in the clear, answers sealed."""
+def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt="", epilogue=None):
+    """One case for the player: public facts in the clear, answers sealed. A daily case locks its
+    `epilogue`; anything else draws from the pack's first endings, so its text never changes.
+    """
     obs = public_observation(
         Scratchpad(case, theme), case_id=case_id, setting=setting, eyebrow=eyebrow
     )
@@ -125,8 +127,8 @@ def bundle(case, theme, *, case_id, kind, setting, eyebrow, salt=""):
     if theme.setting_id and secret["murderer"]:
         from murdoku_lab.setter import settings
 
-        secret["epilogue"] = settings.epilogue(
-            theme, case, secret["murderer"], victim_area
+        secret["epilogue"] = epilogue or settings.epilogue(
+            theme, case, secret["murderer"], victim_area, pool=settings.FIRST_ENDINGS
         )
     visual = theme.visual or {}
     meta = {

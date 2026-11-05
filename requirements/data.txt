@@ -1,1 +1,1 @@
-huggingface_hub>=1.0,<2
+huggingface_hub>=1.19,<2

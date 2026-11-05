@@ -72,7 +72,7 @@ Daily statistics and an expandable season calendar appear below.
 | Board | Pick a suspect and tap a square; rows, columns and clashes update at once; notes, undo, drag and keyboard play |
 | Training case | A coach walks a first case one deduction at a time |
 | Hints | Three levels, from a nudge to the square itself, from solver data computed offline |
-| Daily case | Cases unlock by date from the published season; 14 locked cases in the current release, with streaks and a spoiler-free share line |
+| Daily case | Cases unlock by date and reach the site a day at a time from a private dataset, with streaks and a spoiler-free share line |
 | Settings | Eight illustrated settings, from a manor and an ocean liner to a night train and a college library |
 | Large classics | The 16 × 16 estate and 24 × 24 museum, drawn in their own themes |
 | Results | The reveal, a closing paragraph, stars and a share card |
@@ -126,9 +126,10 @@ a setting of its own rather than one shared look.
 
 Try it locally with `npm run release:local`, or build a zip for testers with
 `npm run package:preview`. Default releases use versioned content: the 24 frozen themed
-bundles in `content/showcase/player-bundles.jsonl`, five classics, one training case and
-14 locked daily cases. They rebuild the artwork and web assets without generating or
-re-theming the release puzzles, and do not require `outputs/showcase/`.
+bundles in `content/showcase/player-bundles.jsonl`, five classics and one training case, plus
+daily cases when `data/daily/` holds a local copy of the private dataset. They rebuild the
+artwork and web assets without generating or re-theming the release puzzles, and do not
+require `outputs/showcase/`.
 `npm run export:cases` rebuilds just the 30-case library from those same inputs.
 
 Build the production player and its standalone Research Lab with:
@@ -137,9 +138,10 @@ Build the production player and its standalone Research Lab with:
 python scripts/build_play.py --site-url https://everywheresafety.github.io/murdoku/play/
 ```
 
-This prepares `dist/` with daily share links for the production URL and the Lab at
-`lab/`. Copy the contents of `dist/` to the website checkout's `murdoku/play/`
-(`../site/murdoku/play/` in the paired checkout). The build itself does not publish.
+This prepares `dist/` with the player and the Lab at `lab/`. Copy the contents of `dist/` over
+the website checkout's `murdoku/play/` (`../site/murdoku/play/` in the paired checkout),
+keeping its `daily/`, `og/` and `d/` folders, which the website's
+[daily job](docs/guides/daily.md#daily-release) maintains. The build itself does not publish.
 `package_preview.py --site` remains available for temporary previews; set its `--lab`
 to `https://everywheresafety.github.io/murdoku/play/lab/`. The former `/murdoku/exp/`
 address is retained as a redirect, rather than hosting another player build.
@@ -212,9 +214,9 @@ npm ci
 npm run release:local
 ```
 
-Open **http://127.0.0.1:4173/** for the player (30 library cases and the published daily
-season) and **/lab/** for the research Lab. Each default build prepares the full library,
-locked daily cases, brand assets and design-token check from the source checkout.
+Open **http://127.0.0.1:4173/** for the player (30 library cases, plus daily cases if
+`data/daily/` holds them) and **/lab/** for the research Lab. Each default build prepares the
+full library, brand assets and design-token check from the source checkout.
 To play your own cases in the Lab:
 
 ```bash
