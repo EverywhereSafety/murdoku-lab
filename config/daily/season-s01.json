@@ -4,7 +4,7 @@
   "epoch": "2026-10-12",
   "start": "2026-10-12",
   "weeks": 30,
-  "dataset": {"repo": "EverywhereSafety/murdoku-daily", "revision": "main"},
+  "dataset": {"repo": "EverywhereSafety/murdoku-daily", "revision": "2d94260f60b6ff65290b822af1a2b7bd4910686a"},
   "candidates": 3,
   "salted_from": "2026-11-09",
   "rhythm": {
