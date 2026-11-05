@@ -64,7 +64,7 @@ The homepage connects generated cases with the project's work on puzzle quality.
 Players can filter the collection and continue to a distinct unsolved case after each solve.
 The workshop introduction and main generated-case action sit on the left of the opening
 section, with the daily case and its date picker on the right. Previous/next controls,
-**Today** and a date slider browse the published season; future cases remain locked.
+**Today** and a date slider browse the released cases; a case stays locked until its date.
 Daily statistics and an expandable season calendar appear below.
 
 | Feature | What it does |
@@ -91,7 +91,7 @@ Daily statistics and an expandable season calendar appear below.
   plaques and a frame for each setting. Touching rooms get floors far enough apart in
   colour to tell them apart.
 - **Furniture and objects.** Each prop kind has a base drawing (`art/props.py`, 27 kinds),
-  and setting packs add skins (`art/skins/<setting>.py`, 77 so far): deck chairs and a
+  and setting packs add skins (`art/skins/<setting>.py`, 102 so far): deck chairs and a
   lifeboat aboard the liner, a sarcophagus and a meteorite in the museum, a snowmobile at
   the chalet. All follow one recipe, drawn in the footprint's frame with light from the
   upper left, 2.2 px ink outlines and a soft shadow, with tall pieces rising up to 36 px
@@ -114,8 +114,8 @@ Daily statistics and an expandable season calendar appear below.
   the setting's manner (the museum's "bed" is an antique four-poster, never a
   sarcophagus) and a floor and wallpaper for each room by name.
 - **Holiday cases.** A season's `calendar` gives chosen dates their own setting, title,
-  blurb, closing paragraph and objects, drawn in `art/skins/holiday_*.py`, so Christmas Day
-  has its tree on the board. See [the daily case](docs/guides/daily.md#a-season).
+  blurb, closing paragraph and objects (`art/skins/holiday_*.py`, 37 so far), so Christmas
+  Day has its tree on the board. See [the daily case](docs/guides/daily.md#a-season).
 - **Share cards** put the same drawings in a sticker style (`art/cards.py`) and show
   public facts only.
 - **Checks.** `scripts/check_vision_legibility.py` gates the art: text contrast, colour

@@ -81,7 +81,7 @@ The player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
 The homepage opens with the workshop introduction and main generated-case action on the
 left, explaining the focus on unique solutions, discovery rhythm and varied worlds. The
 daily case appears on the right, with previous/next date controls, a **Today** reset and
-a native range slider for browsing the published season. Future cases remain locked.
+a native range slider for browsing the released cases. A case stays locked until its date.
 Daily statistics and an expandable season calendar appear farther down the page.
 Project and Blog links stay in the header; the full resource navigation stays in the footer.
 
