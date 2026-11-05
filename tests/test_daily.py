@@ -366,7 +366,7 @@ def test_fetch_rejects_dates_with_no_due_cases_before_downloading(
 
 
 def test_release_builds_through_two_days_ahead_and_says_what_is_left(
-    spec, monkeypatch, capsys
+    spec, tmp_path, monkeypatch, capsys
 ):
     today = daily.dt.date(2027, 1, 10)
     fetched, built = [], []
@@ -375,63 +375,222 @@ def test_release_builds_through_two_days_ahead_and_says_what_is_left(
 
     def build(s, out, url, through=None):
         built.append(through)
-        return _built_days(s, through)
+        return _built_days(s, through, out=out)
 
     monkeypatch.setattr(daily, "build", build)
-    daily.release(spec, "site", "https://example.org/")
+    daily.release(spec, tmp_path / "site", "https://example.org/")
     assert fetched == built == ["2027-01-12"]
     assert "::warning::" not in capsys.readouterr().out
 
 
-def _built_days(spec, through, without=()):
-    return {
+def _built_days(spec, through, without=(), out=None):
+    index = {
         "days": [
             {"date": day["date"], "n": day["n"]}
             for day in daily.plan(spec)
             if day["date"] <= through and day["date"] not in without
         ]
     }
+    if out is not None:
+        for name in ("daily", "og", "d"):
+            (Path(out) / name).mkdir(parents=True, exist_ok=True)
+        (Path(out) / "daily" / "manifest.json").write_text(json.dumps(index))
+    return index
 
 
 def test_release_warns_when_cases_run_low_and_fails_before_they_run_out(
-    spec, monkeypatch, capsys
+    spec, tmp_path, monkeypatch, capsys
 ):
     last = daily.dt.date.fromisoformat(daily.plan(spec)[-1]["date"])
     monkeypatch.setattr(daily, "fetch", lambda s, through: None)
     monkeypatch.setattr(
-        daily, "build", lambda s, out, url, through=None: _built_days(s, through)
+        daily,
+        "build",
+        lambda s, out, url, through=None: _built_days(s, through, out=out),
     )
     monkeypatch.setattr(daily, "_today", lambda: last - daily.dt.timedelta(days=5))
-    daily.release(spec, "site", "https://example.org/")
+    daily.release(spec, tmp_path / "site", "https://example.org/")
     assert "::warning::only 5 days" in capsys.readouterr().out
     # The last case is still to come, so there is time to add more.
     monkeypatch.setattr(daily, "_today", lambda: last - daily.dt.timedelta(days=1))
     with pytest.raises(SystemExit, match=f"end on {last}"):
-        daily.release(spec, "site", "https://example.org/")
+        daily.release(spec, tmp_path / "site", "https://example.org/")
 
 
-def test_release_fails_when_the_dataset_lacks_a_day(spec, monkeypatch):
+def test_release_fails_when_the_dataset_lacks_a_day(spec, tmp_path, monkeypatch):
     monkeypatch.setattr(daily, "_today", lambda: daily.dt.date(2027, 1, 10))
     monkeypatch.setattr(daily, "fetch", lambda s, through: None)
     monkeypatch.setattr(
         daily,
         "build",
-        lambda s, out, url, through=None: _built_days(s, through, {"2027-01-09"}),
+        lambda s, out, url, through=None: _built_days(
+            s, through, {"2027-01-09"}, out=out
+        ),
     )
     with pytest.raises(SystemExit, match="2027-01-09"):
-        daily.release(spec, "site", "https://example.org/")
+        daily.release(spec, tmp_path / "site", "https://example.org/")
     with pytest.raises(SystemExit, match="2027-01-09"):
-        daily.release(spec, "site", "https://example.org/", through="2027-01-09")
+        daily.release(
+            spec, tmp_path / "site", "https://example.org/", through="2027-01-09"
+        )
 
 
-def test_release_through_a_chosen_date_ignores_the_days_after_it(spec, monkeypatch):
+def test_release_through_a_chosen_date_ignores_the_days_after_it(
+    spec, tmp_path, monkeypatch
+):
     monkeypatch.setattr(daily, "_today", lambda: daily.dt.date(2027, 1, 10))
     monkeypatch.setattr(daily, "fetch", lambda s, through: None)
     monkeypatch.setattr(
-        daily, "build", lambda s, out, url, through=None: _built_days(s, through)
+        daily,
+        "build",
+        lambda s, out, url, through=None: _built_days(s, through, out=out),
     )
-    index = daily.release(spec, "site", "https://example.org/", through="2026-11-07")
+    index = daily.release(
+        spec, tmp_path / "site", "https://example.org/", through="2026-11-07"
+    )
     assert index["days"][-1]["date"] == "2026-11-07"
+
+
+@pytest.fixture
+def release_cases(spec, tmp_path, monkeypatch):
+    from murdoku_lab.setter import settings
+    from murdoku_lab.visual.demos import glasshouse
+
+    trial = {**spec, "weeks": 1}
+    monkeypatch.setenv("MURDOKU_DAILY_DIR", str(tmp_path / "data"))
+    monkeypatch.setattr(
+        daily, "_today", lambda: daily.dt.date.fromisoformat(spec["start"])
+    )
+    case = glasshouse().case
+    for day in daily.plan(trial):
+        daily._write(
+            daily.content_dir(trial) / "days" / f"{day['date']}.json",
+            {
+                **day,
+                "murdoku_case": case.to_json(),
+                "murdoku_theme": settings.dress(case, day["setting"]).to_json(),
+            },
+        )
+    return trial
+
+
+def _existing_site(site):
+    for relative in (
+        "daily/manifest.json",
+        "og/old.png",
+        "d/1/index.html",
+        "index.html",
+    ):
+        path = site / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"previous published content")
+    return _site_files(site)
+
+
+def _site_files(site):
+    return {p.relative_to(site): p.read_bytes() for p in site.rglob("*") if p.is_file()}
+
+
+@pytest.mark.parametrize("failure", ["missing_day", "renderer", "season_end"])
+def test_failed_release_preserves_existing_site(
+    release_cases, tmp_path, monkeypatch, failure
+):
+    site = tmp_path / "site"
+    before = _existing_site(site)
+    through = daily.plan(release_cases)[2]["date"]
+    error = SystemExit
+    match = "no daily case"
+    if failure == "missing_day":
+        date = daily.plan(release_cases)[1]["date"]
+        (daily.content_dir(release_cases) / "days" / f"{date}.json").unlink()
+    elif failure == "renderer":
+        from murdoku_lab.visual import raster
+
+        def broken(*args, **kwargs):
+            raise RuntimeError("renderer unavailable")
+
+        monkeypatch.setattr(raster, "png_from_svg", broken)
+        error, match = RuntimeError, "renderer unavailable"
+    else:
+        last = daily.dt.date.fromisoformat(daily.plan(release_cases)[-1]["date"])
+        monkeypatch.setattr(daily, "_today", lambda: last - daily.dt.timedelta(days=1))
+        through, match = None, "daily cases end"
+    with pytest.raises(error, match=match):
+        daily.release(
+            release_cases, site, "https://example.org/", through, download=False
+        )
+    assert _site_files(site) == before
+    assert not list(tmp_path.glob(".daily-release-*"))
+
+
+@pytest.mark.parametrize("existing", [False, True])
+def test_successful_release_installs_complete_output(release_cases, tmp_path, existing):
+    site = tmp_path / "nested" / "site"
+    if existing:
+        _existing_site(site)
+    days = daily.plan(release_cases)[:3]
+    index = daily.release(
+        release_cases, site, "https://example.org/", days[-1]["date"], download=False
+    )
+    assert json.loads((site / "daily" / "manifest.json").read_text()) == index
+    assert [d["date"] for d in index["days"]] == [d["date"] for d in days]
+    for day in days:
+        bundle = json.loads((site / "daily" / f"daily-{day['n']}.json").read_text())
+        secret = unseal(bundle["secret"], bundle["id"], day["date"])
+        assert secret["solution"]
+        assert (site / "og" / f"{day['n']}.png").read_bytes().startswith(b"\x89PNG")
+        assert (
+            f"https://example.org/og/{day['n']}.png"
+            in (site / "d" / str(day["n"]) / "index.html").read_text()
+        )
+    assert not (site / "og" / "old.png").exists()
+    assert not list(site.parent.glob(".daily-release-*"))
+    if existing:
+        assert (site / "index.html").read_bytes() == b"previous published content"
+
+
+def test_release_restores_previous_output_if_installation_fails(
+    release_cases, tmp_path, monkeypatch
+):
+    site = tmp_path / "site"
+    before = _existing_site(site)
+    rename = Path.rename
+
+    def interrupted(source, target):
+        if source.parent.name.startswith(".daily-release-") and target == site / "og":
+            raise OSError("directory move failed")
+        return rename(source, target)
+
+    monkeypatch.setattr(Path, "rename", interrupted)
+    with pytest.raises(OSError, match="directory move failed"):
+        daily.release(
+            release_cases,
+            site,
+            "https://example.org/",
+            daily.plan(release_cases)[2]["date"],
+            download=False,
+        )
+    assert _site_files(site) == before
+    assert not list(tmp_path.glob(".daily-release-*"))
+
+
+@pytest.mark.parametrize("download", [False, True])
+def test_release_rejects_invalid_dates_before_touching_output(
+    spec, tmp_path, monkeypatch, download
+):
+    site = tmp_path / "site"
+    before = _existing_site(site)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid dates must fail before fetching or building")
+
+    monkeypatch.setattr(daily, "fetch", forbidden)
+    monkeypatch.setattr(daily, "build", forbidden)
+    with pytest.raises(SystemExit, match="invalid release date"):
+        daily.release(
+            spec, site, "https://example.org/", "not-a-date", download=download
+        )
+    assert _site_files(site) == before
 
 
 def test_build_without_cases_stops_before_touching_the_site(

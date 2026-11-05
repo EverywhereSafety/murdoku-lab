@@ -223,8 +223,10 @@ mean to publish further ahead: the site is public, so anyone can read a released
 
 **Failures.** The job fails if the dataset lacks a day that is due, or if the cases end within the
 two days it releases ahead, and GitHub emails whoever last edited the workflow. A failed run
-publishes nothing, so the site keeps the days already released while you add more. The job warns
-once fewer than 30 days of cases remain.
+publishes nothing. `release` builds in a temporary directory and replaces `daily/`, `og/` and
+`d/` only after the build and completeness checks succeed, so a failed download, build or check
+keeps the previous output files. An invalid `--through` date or a date before the season starts
+is rejected before downloading. The job warns once fewer than 30 days of cases remain.
 
 **Setup**, once. It needs no stored secret. On the dataset's Hugging Face page, someone with
 write access opens **Settings → Trusted Publishers** and adds GitHub Actions with repository

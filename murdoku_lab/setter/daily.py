@@ -41,6 +41,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from murdoku_lab.core.instance import Case
 from murdoku_lab.core.theme import Theme
@@ -707,28 +708,60 @@ def _today():
     return dt.datetime.now(dt.timezone.utc).date()
 
 
+def _install_release(staged, out):
+    """Replace the three generated folders, restoring the previous ones if a move fails."""
+    out.mkdir(parents=True, exist_ok=True)
+    previous = staged / "previous"
+    previous.mkdir()
+    names = ("daily", "og", "d")
+    installed = []
+    try:
+        for name in names:
+            target = out / name
+            if target.exists():
+                target.rename(previous / name)
+            (staged / name).rename(target)
+            installed.append(name)
+    except OSError:
+        for name in reversed(names):
+            if name in installed:
+                shutil.rmtree(out / name)
+            if (previous / name).exists():
+                (previous / name).rename(out / name)
+        raise
+
+
 def release(spec, out, site_url, through=None, ahead=RELEASE_AHEAD, download=True):
     """Fetch and build the days now due, and say how many days of cases are left. It fails if a day
     is missing or the cases end before `through`. `hf download` skips files the dataset lacks, so
-    this check is what notices them, while the site still has days it released earlier.
+    this check is what notices them, while the site still has days it released earlier. Build in
+    a temporary directory and replace the output only after the build and checks succeed.
     """
     today = _today()
     chosen = through
-    through = through or (today + dt.timedelta(days=ahead)).isoformat()
+    through = _through_date(through or (today + dt.timedelta(days=ahead)).isoformat())
     if download:
         fetch(spec, through)
-    index = build(spec, out, site_url, through=through)
-    released = {day["date"] for day in index["days"]}
-    missing = [
-        day["date"]
-        for day in plan(spec)
-        if day["date"] <= through and day["date"] not in released
-    ]
-    if missing:
-        raise SystemExit(f"no daily case for {', '.join(missing)}; upload it")
-    latest = index["days"][-1]
-    if not chosen and latest["date"] < through:
-        raise SystemExit(f"daily cases end on {latest['date']}; lock the next batch")
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    # Staging beside the output keeps directory moves on the same filesystem.
+    with TemporaryDirectory(prefix=".daily-release-", dir=out.parent) as directory:
+        staged = Path(directory)
+        index = build(spec, staged, site_url, through=through)
+        released = {day["date"] for day in index["days"]}
+        missing = [
+            day["date"]
+            for day in plan(spec)
+            if day["date"] <= through and day["date"] not in released
+        ]
+        if missing:
+            raise SystemExit(f"no daily case for {', '.join(missing)}; upload it")
+        latest = index["days"][-1]
+        if not chosen and latest["date"] < through:
+            raise SystemExit(
+                f"daily cases end on {latest['date']}; lock the next batch"
+            )
+        _install_release(staged, out)
     left = (dt.date.fromisoformat(plan(spec)[-1]["date"]) - today).days
     if left < LOW_RUNWAY:
         print(f"::warning::only {left} days of daily cases left; lock the next batch")
