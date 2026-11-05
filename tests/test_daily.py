@@ -1,9 +1,11 @@
 """The daily schedule: rhythm, rotation, reproducible seeds, locked content and the build."""
 
 import json
+from pathlib import Path
 
 import pytest
 
+from murdoku_lab.core.instance import Case
 from murdoku_lab.setter import daily, export_queries
 from murdoku_lab.visual.seal import unseal
 
@@ -82,8 +84,89 @@ def test_build_writes_sealed_bundles_and_preview_pages(spec, tmp_path):
     assert (tmp_path / "og" / f"{first['n']}.png").read_bytes().startswith(b"\x89PNG")
 
 
-def test_lock_tops_up_an_empty_day_and_never_leaves_a_gap(spec, tmp_path, monkeypatch):
+def _speaking_days(spec):
+    return [
+        d
+        for d in daily.locked_days(spec)
+        if daily.everyone_speaks(Case.from_json(d["murdoku_case"]))
+    ]
+
+
+def test_everyone_speaks_asks_it_of_the_living_only():
+    from dataclasses import replace
+
+    from murdoku_lab.visual import demos
+
+    case = demos.catalogue()["glasshouse"].case
+    assert daily.everyone_speaks(case)
+    suspect = next(p for p in case.characters if p != case.victim)
+    without = tuple(c for c in case.clues if c.holder != suspect)
+    assert not daily.everyone_speaks(replace(case, clues=without))
+    without = tuple(c for c in case.clues if c.holder != case.victim)
+    assert daily.everyone_speaks(replace(case, clues=without))
+
+
+def test_cases_not_yet_live_give_every_suspect_a_statement(spec):
+    days = [d for d in daily.locked_days(spec) if d["date"] >= "2026-10-26"]
+    if not days:
+        pytest.skip("no locked daily cases in this checkout")
+    silent = [
+        d["n"]
+        for d in days
+        if not daily.everyone_speaks(Case.from_json(d["murdoku_case"]))
+    ]
+    assert silent == []
+
+
+def test_lock_stops_rather_than_leave_a_suspect_silent(
+    spec, tmp_path, monkeypatch, capsys
+):
+    from dataclasses import replace
+
+    days = _speaking_days(spec)
+    if not days:
+        pytest.skip("needs a locked daily case")
+    case = Case.from_json(days[0]["murdoku_case"])
+    suspect = next(p for p in case.characters if p != case.victim)
+    quiet = replace(case, clues=tuple(c for c in case.clues if c.holder != suspect))
+    monkeypatch.setattr(daily, "ROOT", tmp_path)
+    monkeypatch.delenv("MURDOKU_DAILY_DIR", raising=False)
+    monkeypatch.setattr(daily, "_farm", lambda day, seed, count, path, workers=6: None)
+    trial = {**spec, "season": "trial"}
+    first = daily.plan(trial, 1)[0]["date"]
+    (daily.content_dir(trial) / "candidates").mkdir(parents=True)
+    path = daily._candidates_path(trial, first)
+    path.write_text(json.dumps({"murdoku_case": quiet.to_json()}) + "\n")
+    assert list(daily.lock(trial, 1)) == []
+    assert "every suspect a statement" in capsys.readouterr().out
+    # With a candidate that speaks, the day locks on it, whatever comes first in the file.
+    with path.open("a") as out:
+        out.write(json.dumps({"murdoku_case": case.to_json()}) + "\n")
+    locks = daily.lock(trial, 1)
+    assert locks[first]["candidate"] == 1
+
+
+def test_farm_keeps_only_candidates_it_does_not_have(spec, tmp_path, monkeypatch):
     days = daily.locked_days(spec)
+    if len(days) < 2:
+        pytest.skip("needs two locked daily cases")
+    rows = [json.dumps({"murdoku_case": d["murdoku_case"]}) + "\n" for d in days[:2]]
+    path = tmp_path / "day.jsonl"
+    path.write_text(rows[0])
+
+    def run(command, **_):
+        Path(command[command.index("--out") + 1]).write_text(rows[0] + rows[1])
+
+    monkeypatch.setattr(daily.subprocess, "run", run)
+    daily._farm({"size": 6, "band": "easy"}, 1, 2, path)
+    daily._farm({"size": 6, "band": "easy"}, 1, 2, path)
+    assert [c.content_hash() for c in daily._read_cases(path)] == [
+        Case.from_json(d["murdoku_case"]).content_hash() for d in days[:2]
+    ]
+
+
+def test_lock_tops_up_an_empty_day_and_never_leaves_a_gap(spec, tmp_path, monkeypatch):
+    days = _speaking_days(spec)
     if len(days) < 3:
         pytest.skip("needs three locked daily cases")
     rows = [json.dumps({"murdoku_case": d["murdoku_case"]}) + "\n" for d in days[:3]]

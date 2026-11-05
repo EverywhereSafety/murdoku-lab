@@ -19,7 +19,7 @@ data/daily), a local copy of a private dataset. Each day gets a few candidates f
 constraint-first farm with seeds derived from sha256("murdoku/daily/v1/<date>/<j>"), prefixed from
 the season's `salted_from` date with the private salt in <season>/seed_salt.txt, so a day can always
 be regenerated but the public code cannot reveal upcoming cases. Locking picks a candidate
-(the reviewer's pick, or the one nearest the day's target difficulty that keeps the variety rules: a new room layout and
+in which every living suspect has a statement (the reviewer's pick, or the one nearest the day's target difficulty that keeps the variety rules: a new room layout and
 not yesterday's murderer letter, farming a few more candidates when none does), dresses it in the
 day's setting (with a title in season for the date that neither an earlier daily case nor the
 frozen showcase uses for the setting, and preferably a victim not seen in the last five days) and
@@ -228,8 +228,15 @@ def _farm(day, seed, count, path, workers=6):
         stderr=subprocess.DEVNULL,
     )
     if scratch.exists():
+        # A seed farmed twice yields the same cases, so keep only the new ones.
+        known = {case.content_hash() for case in _read_cases(path)}
         with path.open("a") as out:
-            out.write(scratch.read_text())
+            for line in scratch.read_text().splitlines():
+                row = json.loads(line)
+                case = Case.from_json(row.get("murdoku_case", row))
+                if case.content_hash() not in known:
+                    known.add(case.content_hash())
+                    out.write(line + "\n")
         scratch.unlink()
     for stats in path.parent.glob(f"{scratch.stem}*.farm_stats.json"):
         stats.unlink()
@@ -257,12 +264,23 @@ def generate(spec, days=None, workers=6):
     return out
 
 
-def candidates(spec, date):
-    path = _candidates_path(spec, date)
+def _read_cases(path):
     if not path.exists():
         return []
     rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
     return [Case.from_json(row.get("murdoku_case", row)) for row in rows]
+
+
+def candidates(spec, date):
+    return _read_cases(_candidates_path(spec, date))
+
+
+def everyone_speaks(case):
+    """Every living suspect has a statement, as in the original game. The setter drops any clue the
+    solution does not need, which can leave a suspect with none, so locking has to choose for this.
+    """
+    spoken = {clue.holder for clue in case.clues}
+    return all(p in spoken for p in case.characters if p != case.victim)
 
 
 def _picks_path(spec):
@@ -406,7 +424,11 @@ def lock(spec, days=None):
         def fits(case):
             letter = case.murderer
             yesterday = history[-1][2] if history else None
-            return _layout(case) not in layouts and letter != yesterday
+            return (
+                everyone_speaks(case)
+                and _layout(case) not in layouts
+                and letter != yesterday
+            )
 
         # Top a day up from further seeds when it has no candidate that keeps the variety rules.
         for extra in range(1, 4):
@@ -420,13 +442,14 @@ def lock(spec, days=None):
                 _candidates_path(spec, date),
             )
             pool = candidates(spec, date)
-        if not pool:
+        order = [i for i in _by_target(spec, day, pool) if everyone_speaks(pool[i])]
+        if not order:
             print(
-                f"no candidates for {date} after top-ups; farm more before locking it"
+                f"no candidate for {date} gives every suspect a statement after "
+                "top-ups; farm more before locking it"
             )
             break
-        order = _by_target(spec, day, pool)
-        if date in picks:
+        if picks.get(date) in order:
             order = [picks[date]] + [i for i in order if i != picks[date]]
         j = next((i for i in order if fits(pool[i])), order[0])
         case = pool[j]
