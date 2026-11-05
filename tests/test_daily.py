@@ -106,8 +106,8 @@ def test_everyone_speaks_asks_it_of_the_living_only():
     assert daily.everyone_speaks(replace(case, clues=without))
 
 
-def test_cases_not_yet_live_give_every_suspect_a_statement(spec):
-    days = [d for d in daily.locked_days(spec) if d["date"] >= "2026-10-26"]
+def test_every_case_gives_every_suspect_a_statement(spec):
+    days = daily.locked_days(spec)
     if not days:
         pytest.skip("no locked daily cases in this checkout")
     silent = [
@@ -193,6 +193,60 @@ def test_lock_tops_up_an_empty_day_and_never_leaves_a_gap(spec, tmp_path, monkey
     monkeypatch.setattr(daily, "_farm", farm)
     assert sorted(daily.lock(trial, 3)) == [first, empty, third]
     assert farmed == [empty]
+
+
+def test_a_day_relocked_between_locked_days_suits_both_sides(
+    spec, tmp_path, monkeypatch
+):
+    days = _speaking_days(spec)
+    if len(days) < 10:
+        pytest.skip("needs several locked daily cases")
+    before = days[0]
+    after = next(d for d in days if d["murderer"] != before["murderer"])
+    repeats = next(
+        d for d in days if d["murderer"] == after["murderer"] and d is not after
+    )
+    other = next(
+        d for d in days if d["murderer"] not in {before["murderer"], after["murderer"]}
+    )
+    row = lambda d: json.dumps({"murdoku_case": d["murdoku_case"]}) + "\n"
+    monkeypatch.setattr(daily, "ROOT", tmp_path)
+    monkeypatch.delenv("MURDOKU_DAILY_DIR", raising=False)
+    monkeypatch.setattr(daily, "_farm", lambda day, seed, count, path, workers=6: None)
+    trial = {**spec, "season": "trial"}
+    first, middle, third = (d["date"] for d in daily.plan(trial, 3))
+    root = daily.content_dir(trial)
+    (root / "candidates").mkdir(parents=True)
+    daily._candidates_path(trial, first).write_text(row(before))
+    daily._candidates_path(trial, middle).write_text(row(other))
+    daily._candidates_path(trial, third).write_text(row(after))
+    locks = daily.lock(trial, 3)
+    assert sorted(locks) == [first, middle, third]
+
+    del locks[middle]
+    daily._write(root / "lock.json", locks)
+    (root / "days" / f"{middle}.json").unlink()
+    # The first candidate repeats tomorrow's murderer letter, so the next one is taken.
+    daily._candidates_path(trial, middle).write_text(row(repeats) + row(other))
+    monkeypatch.setattr(daily, "_by_target", lambda s, d, pool: list(range(len(pool))))
+    assert daily.lock(trial, 3)[middle]["candidate"] == 1
+    record = json.loads((root / "days" / f"{middle}.json").read_text())
+    neighbours = [
+        json.loads((root / "days" / f"{d}.json").read_text())["victim"]
+        for d in (first, third)
+    ]
+    assert record["victim"] not in neighbours
+
+
+def test_calendar_nouns_read_after_a(spec):
+    from murdoku_lab.setter import settings
+
+    nouns = [
+        noun
+        for entry in spec["calendar"].values()
+        for noun in entry.get("objects", {}).values()
+    ]
+    assert nouns and not [n for n in nouns if settings.bare_plural(n)]
 
 
 def test_seeds_stay_private_from_the_salted_date(spec, tmp_path, monkeypatch):

@@ -20,9 +20,9 @@ constraint-first farm with seeds derived from sha256("murdoku/daily/v1/<date>/<j
 the season's `salted_from` date with the private salt in <season>/seed_salt.txt, so a day can always
 be regenerated but the public code cannot reveal upcoming cases. Locking picks a candidate
 in which every living suspect has a statement (the reviewer's pick, or the one nearest the day's target difficulty that keeps the variety rules: a new room layout and
-not yesterday's murderer letter, farming a few more candidates when none does), dresses it in the
+a murderer letter unlike the days beside it, farming a few more candidates when none does), dresses it in the
 day's setting (with a title in season for the date that neither an earlier daily case nor the
-frozen showcase uses for the setting, and preferably a victim not seen in the last five days) and
+frozen showcase uses for the setting, and preferably a victim not seen within five days) and
 records the candidate, seed, git revision and solver version. The season's `calendar` gives
 chosen dates such as holidays their own setting, label, title, blurb, size and band. Locking stops at the
 first day it cannot fill, so locked days never leave a gap. Locked cases are listed in
@@ -368,6 +368,14 @@ def title_schedule(spec, days=None):
     return schedule
 
 
+def _locked_near(history, date, reach):
+    """What is locked within `reach` days of an ISO `date`, on both sides: a day relocked between
+    locked days has to suit the days after it as well."""
+    when = dt.date.fromisoformat(date)
+    around = (when + dt.timedelta(days=k) for k in range(-reach, reach + 1) if k)
+    return [history[d.isoformat()] for d in around if d.isoformat() in history]
+
+
 def lock(spec, days=None):
     """Pick, dress and lock every planned day with candidates; earlier locks stay as they are."""
     from murdoku_lab.setter import settings
@@ -389,16 +397,13 @@ def lock(spec, days=None):
     locks = _read(lock_path, {})
     published = _read(ROOT / "content" / "daily" / "published.json", {})
     days_dir = content_dir(spec) / "days"
-    history = []
+    history = {}
     for date in sorted(locks):
         record = json.loads((days_dir / f"{date}.json").read_text())
-        history.append(
-            (
-                date,
-                _layout(Case.from_json(record["murdoku_case"])),
-                record["murderer"],
-                record["victim"],
-            )
+        history[date] = (
+            _layout(Case.from_json(record["murdoku_case"])),
+            record["murderer"],
+            record["victim"],
         )
     titles = title_schedule(spec, days)
     for day in plan(spec, days):
@@ -417,17 +422,14 @@ def lock(spec, days=None):
             )
             break
         pool = candidates(spec, date)
-        # Six Vanes take turns as victims, so "no repeat within five days" is always possible.
-        recent = history[-5:]
-        layouts = {h[1] for h in history}
+        layouts = {h[0] for h in history.values()}
+        beside = {h[1] for h in _locked_near(history, date, 1)}
 
         def fits(case):
-            letter = case.murderer
-            yesterday = history[-1][2] if history else None
             return (
                 everyone_speaks(case)
                 and _layout(case) not in layouts
-                and letter != yesterday
+                and case.murderer not in beside
             )
 
         # Top a day up from further seeds when it has no candidate that keeps the variety rules.
@@ -455,10 +457,11 @@ def lock(spec, days=None):
         case = pool[j]
         if not fits(case):
             print(
-                f"warning: {date} repeats a layout or yesterday's murderer letter; "
-                "pick another candidate here or the day before"
+                f"warning: {date} repeats a layout or the murderer letter of a day beside it; "
+                "pick another candidate here or on that day"
             )
-        victims = {h[3] for h in recent}
+        # Six Vanes take turns as victims, so "no repeat within five days" is always possible.
+        victims = {h[2] for h in _locked_near(history, date, 5)}
         # The title is settled; only one Vane in six may be fresh, so try salts for the victim.
         entry = spec.get("calendar", {}).get(date, {})
         dressings = []
@@ -511,7 +514,7 @@ def lock(spec, days=None):
             "locked_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         }
         published[case.content_hash()] = f"{spec['season']}/{date}"
-        history.append((date, _layout(case), case.murderer, theme.name(case.victim)))
+        history[date] = (_layout(case), case.murderer, theme.name(case.victim))
         print(f"locked {date} #{day['n']} {day['setting']}: {theme.title}")
     _write(lock_path, locks)
     _write(ROOT / "content" / "daily" / "published.json", published)

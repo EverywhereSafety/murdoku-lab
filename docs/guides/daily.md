@@ -95,16 +95,18 @@ candidate nearest the day's target difficulty that keeps the variety rules.
 
 **lock** dresses and freezes, in date order, every planned day that has been generated and
 has no lock yet. Earlier locks never change, and it stops at the first day it cannot fill,
-so the locked days never leave a gap. For each day it:
+so the locked days never leave a gap. To redo a day, delete its entry in `lock.json` and its
+`days/<date>.json`: `lock` fills it in again and checks it against the days on both sides. For
+each day it:
 
 1. takes only a candidate in which every living suspect has a statement, as in the original
-   game, and keeps to the variety rules: a room layout not used earlier in the season, and a
-   murderer letter different from yesterday's. When no candidate fits, or the day came out
-   with none, it farms two more from further seeds, up to three times, and it stops if no
+   game, and keeps to the variety rules: a room layout not used anywhere in the season, and a
+   murderer letter different from the days beside it. When no candidate fits, or the day came
+   out with none, it farms two more from further seeds, up to three times, and it stops if no
    candidate gives every suspect a statement;
 2. dresses the case in the day's setting, with a title that neither an earlier daily case nor
    the frozen showcase (`content/showcase/`) uses for that setting, and preferably a victim who
-   has not appeared in the last five days. A calendar day keeps its own title and blurb. Any
+   does not appear within five days. A calendar day keeps its own title and blurb. Any
    other day takes the in-season title whose season ends soonest, so dated titles land on
    fitting days and timeless ones are kept for when nothing else suits;
 3. writes `days/<date>.json` (case and theme), adds the candidate, seed, dressing salt,
