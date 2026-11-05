@@ -224,9 +224,9 @@ once fewer than 30 days of cases remain.
 **Setup**, once. It needs no stored secret. On the dataset's Hugging Face page, someone with
 write access opens **Settings → Trusted Publishers** and adds GitHub Actions with repository
 `EverywhereSafety/EverywhereSafety.github.io`, branch `main` and workflow `murdoku-daily.yml`, and
-ticks **Read-only**. The job then gets a one-hour token that can only read this dataset. On GitHub
-it uses its own `GITHUB_TOKEN`, with the permissions the workflow file declares. A push made with
-that token does not start a GitHub Pages build, so the job asks for one through the API. Once the
+ticks **Read-only**. The job then gets a one-hour token that can only read this dataset, and a run
+from any other repository or branch is refused. On GitHub it uses its own `GITHUB_TOKEN`, with the
+permissions the workflow file declares, and its push starts the usual GitHub Pages build. Once the
 workflow is merged, run it by hand and check that its commit reaches the site.
 
 **A new batch.** Generate and lock in `data/daily/`, then upload the result as one commit:
