@@ -114,6 +114,12 @@ def in_season(pack, text, date):
     return start <= day <= end if start <= end else day >= start or day <= end
 
 
+def bare_plural(noun):
+    """Whether a noun cannot follow "a": "mail sacks" cannot; "vase of roses" and "sarcophagus" can."""
+    head = noun.split(" of ")[0]
+    return head.endswith("s") and not head.endswith(("ss", "us"))
+
+
 def validate(pack):
     """Schema and taste checks a pack must pass before it can dress a case."""
     from murdoku_lab.visual.art import materials, props
@@ -156,6 +162,11 @@ def validate(pack):
     nouns = [v.lower() for v in objects.values()]
     if len(set(nouns)) != len(nouns):
         problems.append("object nouns must be distinct")
+    plural = [noun for noun in objects.values() if bare_plural(noun)]
+    if plural:
+        problems.append(
+            f"statements say 'a <noun>', so these cannot be nouns: {plural}"
+        )
     visual = pack["visual"]
     known_skins = props.all_skins()
     for kind, skin in (visual.get("skins") or {}).items():

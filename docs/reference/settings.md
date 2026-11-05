@@ -101,7 +101,8 @@ of the same name; the Lab keeps drawing it as written.
 - schema, required fields, at least nine distinct room names;
 - room `suits` name real prop kinds; finishes, wallpapers, floor variants, skins and the
   frame all exist; colours are `#rrggbb`;
-- every classic prop kind has a noun, and nouns are distinct;
+- every classic prop kind has a noun, and nouns are distinct and can follow "a" in a
+  statement: "vase of roses", not "roses";
 - titles and blurbs mention no room, object, cast member or spatial word (north, left,
   beside, corner, row, alone, …);
 - `seasons` name real titles or blurbs and use `MM-DD` dates;

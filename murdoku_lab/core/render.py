@@ -187,7 +187,7 @@ def render_atom(a: Atom, case: Case, th: Theme) -> str:
         value = fields.get(name)
         if isinstance(value, str) and _a(value).startswith("an "):
             template = re.sub(rf"\ba (?={{{name}}})", "an ", template)
-    return template.format(**fields).replace("a flowers", "the flowers")
+    return re.sub(r"\ba flowers\b", "the flowers", template.format(**fields))
 
 
 def render_clue(c: Clue, case: Case, th: Theme) -> str:

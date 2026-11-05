@@ -159,6 +159,21 @@ def test_clues_say_an_before_a_vowel(demo_cases):
         renamed = dataclasses.replace(theme, objects={**theme.objects, kind: noun})
         text = render_clue(clue, case, renamed)
         assert f"{article} {noun}" in text, text
+    # A noun that merely ends in "flowers" keeps its own words.
+    renamed = dataclasses.replace(
+        theme, objects={**theme.objects, kind: "gala flowers"}
+    )
+    assert "gala flowers" in render_clue(clue, case, renamed)
+
+
+def test_a_noun_has_to_read_after_a():
+    assert settings.bare_plural("mail sacks")
+    for noun in ("vase of roses", "stack of books", "sarcophagus", "wireless", "globe"):
+        assert not settings.bare_plural(noun)
+    pack = copy.deepcopy(settings.load("train"))
+    pack["objects"]["crate"] = "mail sacks"
+    with pytest.raises(ValueError, match="mail sacks"):
+        settings.validate(pack)
 
 
 @pytest.mark.parametrize("slug", sorted(settings.restyles()))
