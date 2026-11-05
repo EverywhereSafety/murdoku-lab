@@ -216,9 +216,10 @@ reach a date at 10:00 UTC the day before. GitHub can delay or drop scheduled run
 releases through two days ahead and one missed run leaves no gap. The player keeps a case
 locked until its date. Run the workflow by hand to catch up, or to release through a chosen date.
 
-**Failures.** The job fails if the dataset lacks a day that is due, or if no case is left for
-today, and GitHub emails whoever last edited the workflow. It warns once fewer than 30 days of
-cases remain. It stops before touching the site when it has nothing to build.
+**Failures.** The job fails if the dataset lacks a day that is due, or if the cases end within the
+two days it releases ahead, and GitHub emails whoever last edited the workflow. A failed run
+publishes nothing, so the site keeps the days already released while you add more. The job warns
+once fewer than 30 days of cases remain.
 
 **Setup**, once. It needs no stored secret. On the dataset's Hugging Face page, someone with
 write access opens **Settings → Trusted Publishers** and adds GitHub Actions with repository

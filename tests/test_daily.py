@@ -226,7 +226,7 @@ def test_release_builds_through_two_days_ahead_and_says_what_is_left(
 
     def build(s, out, url, through=None):
         built.append(through)
-        return {"days": [{"date": through, "n": 1}]}
+        return _built_days(s, through)
 
     monkeypatch.setattr(daily, "build", build)
     daily.release(spec, "site", "https://example.org/")
@@ -234,24 +234,55 @@ def test_release_builds_through_two_days_ahead_and_says_what_is_left(
     assert "::warning::" not in capsys.readouterr().out
 
 
-def test_release_warns_when_cases_run_low_and_fails_when_they_run_out(
+def _built_days(spec, through, without=()):
+    return {
+        "days": [
+            {"date": day["date"], "n": day["n"]}
+            for day in daily.plan(spec)
+            if day["date"] <= through and day["date"] not in without
+        ]
+    }
+
+
+def test_release_warns_when_cases_run_low_and_fails_before_they_run_out(
     spec, monkeypatch, capsys
 ):
     last = daily.dt.date.fromisoformat(daily.plan(spec)[-1]["date"])
     monkeypatch.setattr(daily, "fetch", lambda s, through: None)
     monkeypatch.setattr(
-        daily,
-        "build",
-        lambda s, out, url, through=None: {
-            "days": [{"date": last.isoformat(), "n": 9}]
-        },
+        daily, "build", lambda s, out, url, through=None: _built_days(s, through)
     )
     monkeypatch.setattr(daily, "_today", lambda: last - daily.dt.timedelta(days=5))
     daily.release(spec, "site", "https://example.org/")
     assert "::warning::only 5 days" in capsys.readouterr().out
-    monkeypatch.setattr(daily, "_today", lambda: last + daily.dt.timedelta(days=1))
-    with pytest.raises(SystemExit):
+    # The last case is still to come, so there is time to add more.
+    monkeypatch.setattr(daily, "_today", lambda: last - daily.dt.timedelta(days=1))
+    with pytest.raises(SystemExit, match=f"end on {last}"):
         daily.release(spec, "site", "https://example.org/")
+
+
+def test_release_fails_when_the_dataset_lacks_a_day(spec, monkeypatch):
+    monkeypatch.setattr(daily, "_today", lambda: daily.dt.date(2027, 1, 10))
+    monkeypatch.setattr(daily, "fetch", lambda s, through: None)
+    monkeypatch.setattr(
+        daily,
+        "build",
+        lambda s, out, url, through=None: _built_days(s, through, {"2027-01-09"}),
+    )
+    with pytest.raises(SystemExit, match="2027-01-09"):
+        daily.release(spec, "site", "https://example.org/")
+    with pytest.raises(SystemExit, match="2027-01-09"):
+        daily.release(spec, "site", "https://example.org/", through="2027-01-09")
+
+
+def test_release_through_a_chosen_date_ignores_the_days_after_it(spec, monkeypatch):
+    monkeypatch.setattr(daily, "_today", lambda: daily.dt.date(2027, 1, 10))
+    monkeypatch.setattr(daily, "fetch", lambda s, through: None)
+    monkeypatch.setattr(
+        daily, "build", lambda s, out, url, through=None: _built_days(s, through)
+    )
+    index = daily.release(spec, "site", "https://example.org/", through="2026-11-07")
+    assert index["days"][-1]["date"] == "2026-11-07"
 
 
 def test_build_without_cases_stops_before_touching_the_site(

@@ -430,6 +430,11 @@ def lock(spec, days=None):
             order = [picks[date]] + [i for i in order if i != picks[date]]
         j = next((i for i in order if fits(pool[i])), order[0])
         case = pool[j]
+        if not fits(case):
+            print(
+                f"warning: {date} repeats a layout or yesterday's murderer letter; "
+                "pick another candidate here or the day before"
+            )
         victims = {h[3] for h in recent}
         # The title is settled; only one Vane in six may be fresh, so try salts for the victim.
         entry = spec.get("calendar", {}).get(date, {})
@@ -664,16 +669,27 @@ def _today():
 
 
 def release(spec, out, site_url, through=None, ahead=RELEASE_AHEAD, download=True):
-    """Fetch and build the days now due, and say how many days of cases are left."""
+    """Fetch and build the days now due, and say how many days of cases are left. It fails if a day
+    is missing or the cases end before `through`. `hf download` skips files the dataset lacks, so
+    this check is what notices them, while the site still has days it released earlier.
+    """
     today = _today()
     chosen = through
     through = through or (today + dt.timedelta(days=ahead)).isoformat()
     if download:
         fetch(spec, through)
     index = build(spec, out, site_url, through=through)
+    released = {day["date"] for day in index["days"]}
+    missing = [
+        day["date"]
+        for day in plan(spec)
+        if day["date"] <= through and day["date"] not in released
+    ]
+    if missing:
+        raise SystemExit(f"no daily case for {', '.join(missing)}; upload it")
     latest = index["days"][-1]
-    if not chosen and latest["date"] < today.isoformat():
-        raise SystemExit(f"no daily case left for {today}; lock the next batch")
+    if not chosen and latest["date"] < through:
+        raise SystemExit(f"daily cases end on {latest['date']}; lock the next batch")
     left = (dt.date.fromisoformat(plan(spec)[-1]["date"]) - today).days
     if left < LOW_RUNWAY:
         print(f"::warning::only {left} days of daily cases left; lock the next batch")
