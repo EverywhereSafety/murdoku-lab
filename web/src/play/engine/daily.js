@@ -1,19 +1,16 @@
-// Daily cases by the player's local calendar day. Dates are plain YYYY-MM-DD strings and all
-// day arithmetic goes through Date.UTC, so daylight-saving changes never skip or repeat a day.
+// Daily cases change at midnight UTC, so every player has the same case at the same moment.
+// Dates are plain YYYY-MM-DD strings and all day arithmetic goes through Date.UTC.
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-export function localDay(now = new Date()) {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+export function utcDay(now = new Date()) {
+  return now.toISOString().slice(0, 10);
 }
 
 // ?date=YYYY-MM-DD previews another day locally.
 export function today(params = new URLSearchParams(), now = new Date()) {
   const forced = params.get("date");
-  return forced && ISO.test(forced) ? forced : localDay(now);
+  return forced && ISO.test(forced) ? forced : utcDay(now);
 }
 
 function utc(iso) {
@@ -44,8 +41,7 @@ export function todaysCase(manifest, day) {
 }
 
 export function msToMidnight(now = new Date()) {
-  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return next - now;
+  return utc(addDays(utcDay(now), 1)) - now;
 }
 
 // A streak counts days whose case was solved on that very day. Replaying an older case earns

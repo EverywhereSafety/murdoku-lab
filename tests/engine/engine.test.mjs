@@ -174,7 +174,13 @@ test("daily days: local calendar, streaks across DST and catch-up plays", async 
   assert.equal(daily.addDays("2026-10-31", 2), "2026-11-02");
   assert.equal(daily.addDays("2027-03-27", 2), "2027-03-29");
   assert.equal(daily.today(new URLSearchParams("date=2026-10-20")), "2026-10-20");
-  assert.equal(daily.today(new URLSearchParams("date=bad"), new Date(2026, 9, 15, 23, 30)), "2026-10-15");
+  // the day turns over at midnight UTC, whatever the player's time zone
+  const noDate = new URLSearchParams("date=bad");
+  assert.equal(daily.today(noDate, new Date("2026-10-15T23:59:59Z")), "2026-10-15");
+  assert.equal(daily.today(noDate, new Date("2026-10-16T00:00:00Z")), "2026-10-16");
+  assert.equal(daily.today(noDate, new Date("2026-10-15T20:30:00-04:00")), "2026-10-16");
+  assert.equal(daily.msToMidnight(new Date("2026-10-15T23:00:00Z")), 3600000);
+  assert.equal(daily.msToMidnight(new Date("2026-12-31T00:00:00Z")), 86400000);
   const record = {
     1: { date: "2026-10-12", solved_on: "2026-10-12", stars: 3 },
     2: { date: "2026-10-13", solved_on: "2026-10-13", stars: 2 },

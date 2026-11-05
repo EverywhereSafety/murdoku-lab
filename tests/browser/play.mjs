@@ -236,24 +236,25 @@ try {
     const day = manifest.days[Math.min(3, manifest.days.length - 1)];
     const later = manifest.days.find((d) => d.date > day.date);
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    // Real local midnight updates both the library and an already-open locked route.
-    const clockContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    // Midnight UTC updates both the library and an already-open locked route, in any time zone.
+    const timezoneId = "America/Los_Angeles";
+    const clockContext = await browser.newContext({ timezoneId, viewport: { width: 1440, height: 900 } });
     const rollover = await clockContext.newPage();
     watch(rollover, "midnight");
     const nextDay = manifest.days.find((d) => d.n === day.n + 1);
     if (nextDay) {
-      await rollover.clock.install({ time: new Date(`${day.date}T23:59:59`) });
+      await rollover.clock.install({ time: new Date(`${day.date}T23:59:59Z`) });
       await rollover.goto(base, { waitUntil: "networkidle" });
-      await rollover.clock.pauseAt(new Date(`${day.date}T23:59:59.900`));
+      await rollover.clock.pauseAt(new Date(`${day.date}T23:59:59.900Z`));
       await rollover.clock.runFor(2000);
       await rollover.waitForFunction((n) => document.querySelector(".pl-card.is-today .pl-card-setting")?.textContent.includes(`#${n} ·`), nextDay.n);
       assert.equal(await rollover.locator(`.pl-day[title^="#${nextDay.n} ·"]`).isEnabled(), true);
       await rollover.close();
       await clockContext.close();
-      const lockedContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      const lockedContext = await browser.newContext({ timezoneId, viewport: { width: 1440, height: 900 } });
       const lockedPage = await lockedContext.newPage();
       watch(lockedPage, "locked-midnight");
-      await lockedPage.clock.install({ time: new Date(`${day.date}T23:59:58`) });
+      await lockedPage.clock.install({ time: new Date(`${day.date}T23:59:58Z`) });
       await lockedPage.goto(`${base}?d=${nextDay.n}`, { waitUntil: "networkidle" });
       await lockedPage.locator(".pl-empty h2").waitFor();
       await lockedPage.clock.fastForward(4000);

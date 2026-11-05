@@ -138,10 +138,10 @@ locked days always build to byte-identical files.
 
 The homepage places the daily case and its date picker on the right of the opening
 section. The workshop introduction and main generated-case action remain on the left.
-The picker defaults to today's case when the player's local calendar day is in the
-published season. Previous/next buttons and a native range slider let players browse
-dates; **Today** returns to the current day's case. Browsing dates does not change the
-current day or unlock future cases. A published day's case unlocks at local midnight.
+The picker defaults to today's case when the current UTC date is in the published
+season. Previous/next buttons and a native range slider let players browse dates;
+**Today** returns to the current day's case. Browsing dates does not change the current
+day or unlock future cases. A published day's case unlocks at midnight UTC.
 
 The daily section farther down the page retains the player's statistics and an expandable
 season calendar showing each day's stars, missed days and locked dates.
@@ -211,10 +211,10 @@ Locked cases stay private until they are due. The website repository's scheduled
    season's `dataset` (repository and pinned revision) and rebuilds them with `build --through`;
 3. commits whatever changed under `murdoku/play/daily`, `og` and `d`, normally one new case.
 
-**Timing.** A case unlocks at the player's local midnight, and the first time zones (UTC+14)
-reach a date at 10:00 UTC the day before. GitHub can delay or drop scheduled runs, so each run
-releases through two days ahead and one missed run leaves no gap. The player keeps a case
-locked until its date. Run the workflow by hand to catch up, or to release through a chosen date.
+**Timing.** A case unlocks at midnight UTC for every player, whatever their time zone. GitHub can
+delay or drop scheduled runs, so each run releases through two days ahead and one missed run leaves
+no gap. The player keeps a case locked until its date, so the time the job runs does not change when
+players see a case. Run the workflow by hand to catch up, or to release through a chosen date.
 
 **Failures.** The job fails if the dataset lacks a day that is due, or if the cases end within the
 two days it releases ahead, and GitHub emails whoever last edited the workflow. A failed run
