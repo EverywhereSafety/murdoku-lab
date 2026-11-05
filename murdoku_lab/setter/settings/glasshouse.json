@@ -11,14 +11,60 @@
     "Pruned",
     "Compost Mentis",
     "The Midsummer Bloom",
-    "Weeding Out a Killer"
+    "Weeding Out a Killer",
+    "Bed of Thorns",
+    "The Hothouse Murders",
+    "Grafted",
+    "Blooming Murder",
+    "Death in the Undergrowth",
+    "The Gardener's Revenge",
+    "Under Glass",
+    "Seeds of Doubt",
+    "Nipped in the Bud",
+    "Late Bloomer",
+    "Cut Back Hard",
+    "Green Fingers",
+    "Foxglove",
+    "Wolfsbane",
+    "A Rare Specimen",
+    "Hemlock for Tea",
+    "Pushing Up Daisies",
+    "Root Cause",
+    "Dead-Heading",
+    "A Slow-Acting Poison",
+    "Invasive Species",
+    "A Bitter Harvest",
+    "Cross-Pollination",
+    "Gone to Seed",
+    "The Greenhouse Effect",
+    "Perennial Problems"
   ],
   "blurbs": [
     "The rarest bloom in the country is about to open, and someone will not live to see it.",
     "Tea on the lawn, prizes for the best marrow and a guest who never came back from the greenhouses.",
     "Everything here is carefully cultivated, including a grudge that has been growing for years.",
-    "Beautiful, rare and occasionally poisonous: the plants are not the only dangerous things on the estate."
+    "Beautiful, rare and occasionally poisonous: the plants are not the only dangerous things on the estate.",
+    "The judges are tasting the jam, the band is playing, and one exhibitor has been pruned for good.",
+    "Under all that glass the air is warm, still and heavy with secrets.",
+    "A prize-winning hybrid, a stolen cutting and a rivalry that finally bore fruit.",
+    "The estate is famous for its rare specimens. Tonight it gains one more.",
+    "Nothing here grows without someone's careful attention, and that includes the gossip.",
+    "The head gardener knows which plants can kill. So, it seems, does somebody else.",
+    "A rare flower blooms one night a year, and this year it has an audience of suspects.",
+    "The heating has failed, the judging is at dawn, and tempers are running hotter than the pipes."
   ],
+  "seasons": {
+    "A Bitter Harvest": ["09-01", "12-15"],
+    "Gone to Seed": ["09-01", "12-15"],
+    "Cut Back Hard": ["12-01", "03-15"],
+    "Nipped in the Bud": ["03-01", "05-31"],
+    "Late Bloomer": ["03-01", "05-31"],
+    "Cross-Pollination": ["03-01", "06-30"],
+    "Blooming Murder": ["03-15", "06-30"],
+    "Pushing Up Daisies": ["03-15", "06-30"],
+    "Tea on the lawn, prizes for the best marrow and a guest who never came back from the greenhouses.": ["05-01", "09-30"],
+    "The judges are tasting the jam, the band is playing, and one exhibitor has been pruned for good.": ["05-01", "09-30"]
+  },
   "rooms": [
     {"name": "Palm House", "suits": ["palm", "tree", "plant", "statue"], "finish": "terracotta", "wallpaper": "glass_pane"},
     {"name": "Fern House", "suits": ["plant", "piano", "shrub"], "finish": "flagstone", "wallpaper": "glass_pane"},
@@ -76,7 +122,11 @@
       "bear": "gnome",
       "statue": "fountain",
       "piano": "wardian_case",
-      "barrel": "rain_barrel"
+      "barrel": "rain_barrel",
+      "carpet": "jute_rug",
+      "car": "delivery_van",
+      "boulder": "rockery_stone",
+      "chair": "wicker_armchair"
     }
   },
   "motives": [
@@ -84,11 +134,26 @@
     "the will left the glasshouses to the gardener, not the family",
     "a single rare seed was worth more than the whole estate",
     "an old botanist's notes proved who had really found the orchid",
-    "the poison in the tea had been grown on the premises"
+    "the poison in the tea had been grown on the premises",
+    "the champion's secret fertiliser had a very unpleasant history",
+    "a cutting taken in the night had made someone's whole career",
+    "the estate's accounts had been buried under the compost for years",
+    "an old rose had been named for the wrong person",
+    "the sale of the glasshouses would turn the estate into a car park",
+    "a rival's prize bloom had died just before the last show, and not by chance",
+    "the plant hunter's journals showed who had really died on that expedition",
+    "a quiet dose of nightshade had once settled another inheritance",
+    "the gardener's lad had grown up to look very like the master of the house",
+    "the rarest seed in the collection had been swapped for a common one"
   ],
   "epilogues": [
     "{murderer} and {victim} were the only two in the {area} while the others judged the marrows. Only {murderer} came back for the prize-giving, because {motive}.",
     "Nobody else was in the {area} that afternoon. {murderer} had been cultivating the moment for years: {motive}.",
-    "Among the blooms of the {area} stood two people: {victim} and {murderer}. The reason had been growing quietly: {motive}."
+    "Among the blooms of the {area} stood two people: {victim} and {murderer}. The reason had been growing quietly: {motive}.",
+    "Plants make poor witnesses. {murderer} knew it when {victim} came into the {area}: {motive}.",
+    "The air in the {area} was thick and still, and nobody heard a thing. {murderer} had watched this grudge take root years ago: {motive}.",
+    "{victim} went to the {area} for a cutting. {murderer} had come to prune something else, because {motive}.",
+    "It takes patience to grow anything worthwhile. {murderer} had plenty, and the {area} to use it in: {motive}.",
+    "By the time the sprinklers came on, {murderer} had gone and {victim} had not. The reason had been growing for years: {motive}."
   ]
 }

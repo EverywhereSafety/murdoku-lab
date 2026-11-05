@@ -17,13 +17,17 @@ __all__ = [
     "bulb",
     "f",
     "face_pattern",
+    "fringe",
     "grad",
     "highlight",
+    "keyboard",
     "legs",
     "lying",
     "outlined",
+    "rug",
     "s",
     "shadow",
+    "spaced",
     "star",
     "wheel",
 ]
@@ -207,6 +211,59 @@ def armchair(
             )
     o.append(legs(((cx - 26, 76), (cx + 26, 76)), 84, 5, leg))
     return "".join(o)
+
+
+def keyboard(x0, x1, y, height=15, *, ivory="#fbf7ee", sharp="#1f1a17", keys=11):
+    """A piano's keys seen from above the front: an ivory band, black keys in twos and threes."""
+    step = (x1 - x0) / keys
+    lines = "".join(
+        f"M{f(x0 + i * step)} {f(y + 1)}v{f(height - 2)}" for i in range(1, keys)
+    )
+    sharps = "".join(
+        f'<rect x="{f(x0 + (i + 0.68) * step)}" y="{f(y + 1)}" width="{f(0.64 * step)}" '
+        f'height="{f(height * 0.62)}" fill="{sharp}"/>'
+        for i in range(keys - 1)
+        if i % 7 not in (2, 6)
+    )
+    return (
+        f'<rect x="{f(x0)}" y="{f(y)}" width="{f(x1 - x0)}" height="{f(height)}" rx="1.5" fill="{ivory}" {s(1.8)}/>'
+        f'<path d="{lines}" stroke="#9a9086" stroke-width=".9"/>{sharps}'
+    )
+
+
+def rug(w, h, draw, *, box=None):
+    """A flat rug laid along the longer side of its footprint. `draw(length, width)` paints in a
+    frame with (0, 0)–(length, width) whichever way the footprint runs; its ends are x 0 and x
+    length."""
+    x0, y0, x1, y1 = box or (8, 12, w - 8, h - 10)
+    length, width = x1 - x0, y1 - y0
+    place = f"translate({f(x0)} {f(y0)})"
+    if width > length:
+        length, width = width, length
+        place = f"translate({f(x1)} {f(y0)}) rotate(90)"
+    return (
+        f'<rect x="{f(x0 + 3)}" y="{f(y0 + 5)}" width="{f(x1 - x0)}" height="{f(y1 - y0)}" rx="3" '
+        f'fill="#1b130e" fill-opacity=".25" filter="url(#mk-softer)"/>'
+        f'<g transform="{place}">{draw(length, width)}</g>'
+    )
+
+
+def fringe(length, width, colour, *, step=6, reach=5):
+    """Tassels off a rug's two ends, in the frame `rug` gives its drawer."""
+    d = "".join(
+        f"M{-reach} {f(y)}h{reach}M{f(length)} {f(y)}h{reach}"
+        for y in spaced(step / 2, width - step / 2, step)
+    )
+    return (
+        f'<path d="{d}" stroke="{colour}" stroke-width="2.2" stroke-linecap="round"/>'
+    )
+
+
+def spaced(start, stop, step):
+    """As many values `step` apart as fit between start and stop, centred so a pattern sits evenly."""
+    n = int((stop - start) / step + 1e-9)
+    first = start + (stop - start - n * step) / 2
+    return [first + i * step for i in range(n + 1)]
 
 
 def star(cx, cy, r, fill, *, inner=0.45, line=1.0):

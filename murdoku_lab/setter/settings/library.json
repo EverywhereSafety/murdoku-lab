@@ -11,14 +11,55 @@
     "The Missing Manuscript",
     "Final Examination",
     "Footnotes to a Murder",
-    "Out of Print"
+    "Out of Print",
+    "Michaelmas Murder",
+    "The Silent Fellow",
+    "Marginalia",
+    "An Unfinished Thesis",
+    "Dead Languages",
+    "The Last Lecture",
+    "Ex Libris",
+    "A Matter of Record",
+    "Publish or Perish",
+    "Tenure",
+    "Sabbatical",
+    "Peer Review",
+    "Late Fees",
+    "Restricted Section",
+    "First-Class Honours",
+    "Works Cited",
+    "Errata",
+    "Ibid.",
+    "The Visiting Scholar",
+    "High Table",
+    "Viva Voce",
+    "Sent Down",
+    "End of Term",
+    "Required Reading",
+    "A Dissertation on Death",
+    "Citation Needed"
   ],
   "blurbs": [
     "The end of term, a priceless manuscript and a fellow who will not be returning next year.",
     "The bell has rung for dinner. One scholar is still among the books, and will be for ever.",
     "Centuries of learning, a college at war with itself and one very final examination.",
-    "Quiet, please. Somebody in this college is about to get away with murder."
+    "Quiet, please. Somebody in this college is about to get away with murder.",
+    "Exams are over, the punts are out, and one tutor has marked a last paper.",
+    "Somewhere in the college a rare first edition has vanished, and so has a fellow.",
+    "Candlelight at high table, gossip over port and a death that nobody can explain.",
+    "Every scholar here has a theory. Only one of them knows what really happened.",
+    "The Master is retiring, the fellows are plotting, and one vote has just been permanently cast.",
+    "Nothing ever happens in this college. That is precisely why nobody noticed for hours.",
+    "A rival scholar arrives to read a paper. By the end of the evening, there is an obituary to write.",
+    "Some books here are chained in place. Some secrets ought to have been."
   ],
+  "seasons": {
+    "Michaelmas Murder": ["10-01", "12-15"],
+    "End of Term": ["12-01", "12-20"],
+    "Final Examination": ["04-15", "06-30"],
+    "The end of term, a priceless manuscript and a fellow who will not be returning next year.": ["11-15", "12-20"],
+    "Exams are over, the punts are out, and one tutor has marked a last paper.": ["05-01", "07-31"]
+  },
   "rooms": [
     {"name": "Reading Room", "suits": ["table", "chair", "shelf", "carpet"], "finish": "parquet", "wallpaper": "book_wall"},
     {"name": "Rare Books Room", "suits": ["shelf", "register", "crate", "statue"], "finish": "herringbone", "wallpaper": "book_wall"},
@@ -77,7 +118,9 @@
       "bear": "owl",
       "statue": "globe",
       "boulder": "telescope",
-      "barrel": "umbrella_stand"
+      "barrel": "umbrella_stand",
+      "carpet": "faded_rug",
+      "piano": "practice_piano"
     }
   },
   "motives": [
@@ -85,11 +128,26 @@
     "the college silver had been quietly sold to pay a debt",
     "the election for the new master was closer than anyone admitted",
     "a medieval manuscript in the archive was a very modern forgery",
-    "a bequest to the college came with a clause nobody had read"
+    "a bequest to the college came with a clause nobody had read",
+    "a footnote in an old journal proved the great discovery was stolen",
+    "the college's oldest benefactor had made a fortune nobody could mention",
+    "a research student's notebook had been published under another name",
+    "the new master had promised the same post to three people",
+    "a chained book had been sold and replaced with a clever copy",
+    "an exam paper had been leaked, and one career had been built on it",
+    "a long-closed inquiry into a student's death had just been reopened",
+    "the rival's paper was about to demolish a lifetime of work",
+    "a college ghost story had been covering for a very real crime",
+    "the treasurer's books balanced only if nobody read them"
   ],
   "epilogues": [
     "{murderer} and {victim} were the only two in the {area} after the bell for dinner. Only {murderer} came to high table, because {motive}.",
     "Nobody else had a key to the {area} that evening. {murderer} had made sure of that: {motive}.",
-    "The {area} was silent except for two people: {victim} and {murderer}. The reason had been in the archive all along: {motive}."
+    "The {area} was silent except for two people: {victim} and {murderer}. The reason had been in the archive all along: {motive}.",
+    "A college notices nothing before the porter's morning round. {murderer} and {victim} had the {area} until then: {motive}.",
+    "{victim} had come to the {area} to check a reference. {murderer} had checked it first: {motive}.",
+    "The evening bell covered the rest. {murderer} left the {area} in time for evensong, because {motive}.",
+    "Academic quarrels are said to be so bitter because the stakes are so small. In the {area}, {murderer} found the stakes were not small at all: {motive}.",
+    "{murderer} has marked many final papers, but only one in the {area}: {motive}."
   ]
 }

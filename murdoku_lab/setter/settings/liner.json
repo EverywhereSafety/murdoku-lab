@@ -11,13 +11,47 @@
     "One Passenger Short",
     "The Purser's Ledger",
     "Fog off the Grand Banks",
-    "Last Dance Before Landfall"
+    "Last Dance Before Landfall",
+    "Man Overboard",
+    "All Ashore",
+    "The Atlantic Affair",
+    "Murder at Sea",
+    "A Berth for the Dead",
+    "Steaming into Danger",
+    "The Fourth Funnel",
+    "Rough Waters",
+    "Abandon Ship",
+    "Dead in the Water",
+    "All at Sea",
+    "Ship of Fools",
+    "The Maiden Voyage",
+    "Women and Children First",
+    "Full Steam Ahead",
+    "Lost at Sea",
+    "A One-Way Passage",
+    "The Stowaway",
+    "The Captain's Log",
+    "Neither Port nor Starboard",
+    "Cocktails at Sunset",
+    "Deep Water",
+    "Turn of the Tide",
+    "First-Class Murder",
+    "Sink or Swim",
+    "The Missing Manifest"
   ],
   "blurbs": [
     "Five days at sea, a famous family aboard, and one passenger who will not reach port.",
     "Champagne on the upper deck, fog on the water, and a scream that nobody admits to hearing.",
     "The orchestra kept playing. The stewards kept pouring. Somebody kept a secret all the way across the ocean.",
-    "A maiden voyage, a fortune in the purser's safe and a guest list that did not add up."
+    "A maiden voyage, a fortune in the purser's safe and a guest list that did not add up.",
+    "Halfway across the ocean, the band strikes up a waltz and one dancer never returns to the floor.",
+    "First class, second chances and a passenger list with one name too many.",
+    "The whistle sounds at dawn. By then, the killer hopes to be ashore.",
+    "An heiress, a card sharp and a stowaway: someone aboard is not who they claim to be.",
+    "The ship's orchestra knows every waltz. The stewards know every secret. Neither is talking.",
+    "Somewhere past the halfway mark, a cabin door was found open and a bed not slept in.",
+    "The captain's dinner, the last of the champagne, and one empty seat that nobody can explain.",
+    "Land is three days off, the radio has gone quiet, and the purser has started counting heads."
   ],
   "rooms": [
     {"name": "Grand Saloon", "suits": ["chair", "piano", "carpet", "flowers", "palm"], "finish": "marble", "wallpaper": "deco_gold"},
@@ -75,7 +109,9 @@
       "bear": "life_ring",
       "statue": "figurehead",
       "boulder": "anchor",
-      "barrel": "rope_coil"
+      "barrel": "rope_coil",
+      "carpet": "turkey_rug",
+      "piano": "ship_piano"
     }
   },
   "motives": [
@@ -83,11 +119,26 @@
     "an old wager from a previous crossing was finally called in",
     "the jewels in the purser's safe were paste, and someone knew why",
     "a shipboard romance had ended badly, twenty crossings ago",
-    "the cargo was insured for far more than it was worth"
+    "the cargo was insured for far more than it was worth",
+    "a forged ticket had bought a new name and a new life",
+    "the ship's doctor had signed a certificate that should never have been signed",
+    "a stolen painting was crossing the ocean in someone else's luggage",
+    "an old shipwreck had left one survivor too many",
+    "the fortune waiting in New York could only go to one of them",
+    "the captain's log for an earlier voyage had been torn out and kept",
+    "a card game had ended with a debt nobody could pay",
+    "a stowaway had recognised a face from another life",
+    "the marriage announced at the captain's table was already one marriage too many",
+    "the shipping line would not survive the truth about the last crossing"
   ],
   "epilogues": [
     "{murderer} and {victim} were the only two in the {area} when the band struck up. By the time it stopped, {murderer} had settled an old account: {motive}.",
     "Nobody else was in the {area}. {murderer} had waited five days at sea for that moment, because {motive}.",
-    "The {area} held two passengers that night, and only {murderer} walked back to the cabins. The reason was simple: {motive}."
+    "The {area} held two passengers that night, and only {murderer} walked back to the cabins. The reason was simple: {motive}.",
+    "The ocean keeps its secrets, but the {area} did not. {murderer} and {victim} were alone there, because {motive}.",
+    "At dawn the stewards found the {area} empty and one passenger missing. {murderer} was already at breakfast, which took some nerve: {motive}.",
+    "{murderer} had booked this crossing for one reason and one meeting in the {area}: {motive}.",
+    "Everyone else was out to watch the sunset. {murderer} chose the {area} and the company of {victim}, because {motive}.",
+    "{victim} never reached port. {murderer} went ashore with a smile and one less worry: {motive}."
   ]
 }

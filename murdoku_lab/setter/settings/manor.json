@@ -11,13 +11,47 @@
     "Dust on the Keys",
     "Secrets in the Silver Drawer",
     "The Long Weekend",
-    "Supper for Eight, Seven Remaining"
+    "Supper for Eight, Seven Remaining",
+    "The Alderwick Affair",
+    "Murder at the Manor",
+    "A Family Matter",
+    "The Uninvited Guest",
+    "Dinner Is Served",
+    "Port and Poison",
+    "The Black Sheep",
+    "Heir Apparent",
+    "Death Duties",
+    "The Butler's Day Off",
+    "Cut from the Will",
+    "A Gentleman's Agreement",
+    "The Dowager's Last Word",
+    "Blood Will Out",
+    "A Title to Die For",
+    "The Family Silver",
+    "An Inconvenient Relative",
+    "Skeletons in the Closet",
+    "A Question of Succession",
+    "Cold Soup, Colder Company",
+    "Too Many Cousins",
+    "The Housekeeper Knows",
+    "An Heirloom to Kill For",
+    "Polite Society",
+    "Not Quite a Gentleman",
+    "Bad Blood at Alderwick"
   ],
   "blurbs": [
     "A country house, a reading of the will, and one guest who never came down to supper.",
     "Rain against the windows, a fire in every grate, and a family that cannot agree on anything.",
     "Everyone came for the anniversary. Someone came for something else.",
-    "The clocks were wound, the silver polished, and by morning the house had a new heir."
+    "The clocks were wound, the silver polished, and by morning the house had a new heir.",
+    "The family has gathered for a birthday. By the end of the evening, it has one member fewer.",
+    "Fog over the lawns, a cold supper and a butler who saw more than anyone should.",
+    "An old feud, a new will and a long night when every door in the house was locked.",
+    "The guests dressed for dinner. One of them dressed for murder.",
+    "Three generations under one roof, and not one of them willing to leave before the lawyers do.",
+    "The invitations promised a quiet weekend. The host had other plans, and so did somebody else.",
+    "A portrait has gone missing, the port has gone round, and one guest has gone for good.",
+    "Everyone at dinner smiled at the announcement. One of them had already decided to stop it."
   ],
   "rooms": [
     {"name": "Library", "suits": ["shelf", "chair", "register", "carpet"], "finish": "parquet", "wallpaper": "panel_wood"},
@@ -89,7 +123,11 @@
       "box": "hatbox",
       "bear": "bearskin",
       "boulder": "millstone",
-      "barrel": "wine_cask"
+      "barrel": "wine_cask",
+      "carpet": "persian_rug",
+      "piano": "grand_piano",
+      "statue": "marble_bust",
+      "car": "motor_car"
     }
   },
   "motives": [
@@ -97,11 +135,26 @@
     "an old debt of honour had finally come due",
     "a letter had turned up in the wrong drawer",
     "the family silver was not quite as silver as it looked",
-    "a forty-year-old wager was about to be settled"
+    "a forty-year-old wager was about to be settled",
+    "the family portrait had been painted over someone's face",
+    "a quiet engagement would have cut three cousins out of the estate",
+    "the deeds to the house had been gambled away twice",
+    "the gamekeeper's confession had been kept in a locked box for years",
+    "the heir was not, strictly speaking, an heir",
+    "a long-lost brother had written to say he was on his way home",
+    "the butler's savings had paid for the new roof, and nobody had said thank you",
+    "a secret marriage had been recorded in the parish register",
+    "the dowager's diamonds had been sold decades ago and replaced with glass",
+    "a blackmail letter had arrived with the morning post, in a familiar hand"
   ],
   "epilogues": [
     "{murderer} and {victim} were alone in the {area}. Nobody else saw a thing, which was rather the point: {motive}.",
     "Only {murderer} was in the {area} with {victim}. The rest of the house was busy being innocent, and {murderer} knew it: {motive}.",
-    "The {area} held two people that evening, and one of them walked out. {murderer} had a reason: {motive}."
+    "The {area} held two people that evening, and one of them walked out. {murderer} had a reason: {motive}.",
+    "Supper was cold by the time anyone thought to look in the {area}. {murderer} had counted on it: {motive}.",
+    "Two went into the {area} and the house heard only one come out. {murderer} never did explain the mud on those shoes, but the reason was plain enough: {motive}.",
+    "{victim} had asked for a quiet word in the {area}. {murderer} obliged, because {motive}.",
+    "The family blamed the draught, the dog and each other. Only {murderer} had shared the {area} with {victim}, because {motive}.",
+    "By the time the gong sounded, {murderer} had left the {area} and straightened the pictures. As for why: {motive}."
   ]
 }

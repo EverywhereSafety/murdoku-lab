@@ -15,6 +15,8 @@ GRADIENTS = {
     "meteor": ("#64636d", "#2f2e36"),
     "marble": ("#f6f3ec", "#d4cdbf"),
     "bedpost": ("#7b4a2b", "#4b2817"),
+    "carpet-red": ("#cb2733", "#a01722"),
+    "rosewood": ("#5c2f26", "#38190f"),
 }
 
 
@@ -662,6 +664,95 @@ def _marble_wall(pid):
     return k.face_pattern(pid, body)
 
 
+def _red_carpet(length, width):
+    gold, twist = "#e3bd62", "#a8782a"
+    edge = 7
+    rope = f'x="{edge}" y="{edge}" width="{f(length - 2 * edge)}" height="{f(width - 2 * edge)}" rx="3" fill="none"'
+    o = [
+        f'<rect width="{f(length)}" height="{f(width)}" rx="3" fill="{grad("carpet-red")}" {s(2)}/>',
+        f'<path d="M12 {f(width * 0.32)}H{f(length * 0.45)}M{f(length * 0.5)} {f(width * 0.68)}H{f(length - 12)}" '
+        f'stroke="#ffffff" stroke-opacity=".1" stroke-width="3" stroke-linecap="round"/>',
+        f'<rect {rope} stroke="{INK}" stroke-width="7.4"/>',
+        f'<rect {rope} stroke="{gold}" stroke-width="4.8"/>',
+        f'<rect {rope} stroke="{twist}" stroke-width="4.8" stroke-dasharray="1.8 3.6"/>',
+    ]
+    for x, y in (
+        (edge, edge),
+        (length - edge, edge),
+        (edge, width - edge),
+        (length - edge, width - edge),
+    ):
+        o.append(
+            f'<circle cx="{f(x)}" cy="{f(y)}" r="4.4" fill="{grad("gold")}" {s(1.4)}/>'
+        )
+    return "".join(o)
+
+
+def red_carpet(w, h):
+    return k.rug(w, h, _red_carpet)
+
+
+def pianola(w, h):
+    cx = w / 2
+    x0, x1 = cx - 36, cx + 36
+    wood, gold = grad("rosewood"), grad("gold")
+    o = [shadow(cx, h - 12, 40, 8)]
+    # turned legs and the foot treadles that pump the roll
+    for x in (x0 + 7, x1 - 7):
+        o.append(
+            f'<path d="M{f(x - 5)} 72H{f(x + 5)}L{f(x + 2.6)} 86H{f(x - 2.6)}Z" fill="{wood}" {s(1.8)}/>'
+            f'<circle cx="{f(x)}" cy="76" r="2.6" fill="{gold}" {s(1)}/>'
+        )
+    for x in (cx - 12, cx + 12):
+        o.append(
+            f'<path d="M{f(x - 4)} 72H{f(x + 4)}L{f(x + 8)} 86H{f(x - 8)}Z" fill="{grad("brass")}" {s(1.6)}/>'
+        )
+    # the case and its carved crest
+    o.append(
+        f'<path d="M{f(x0 + 4)} -6Q{f(x0 + 6)} -20 {f(cx - 15)} -17Q{f(cx - 10)} -30 {f(cx)} -30Q{f(cx + 10)} -30 {f(cx + 15)} -17Q{f(x1 - 6)} -20 {f(x1 - 4)} -6Z" fill="{wood}" {s()}/>'
+        f'<path d="M{f(x0 + 10)} -8Q{f(x0 + 12)} -15 {f(cx - 17)} -13M{f(x1 - 10)} -8Q{f(x1 - 12)} -15 {f(cx + 17)} -13M{f(cx - 8)} -11Q{f(cx - 6)} -23 {f(cx)} -23Q{f(cx + 6)} -23 {f(cx + 8)} -11" fill="none" stroke="#e3bd62" stroke-width="2" stroke-linecap="round"/>'
+        f'<circle cx="{f(cx)}" cy="-32" r="3.6" fill="{gold}" {s(1.3)}/>'
+    )
+    o.append(
+        f'<rect x="{f(x0)}" y="-7" width="72" height="81" rx="3" fill="{wood}" {s()}/>'
+    )
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="-9" width="76" height="6" rx="2.4" fill="{gold}" {s(1.6)}/>'
+    )
+    # the spool box: a paper roll running between two spools behind glass
+    o.append(
+        f'<rect x="{f(x0 + 7)}" y="0" width="58" height="35" rx="2" fill="#1d0f0b" stroke="#e3bd62" stroke-width="2.4"/>'
+        f'<rect x="{f(cx - 22)}" y="5" width="44" height="26" fill="#fbf5e6" stroke="{INK}" stroke-width="1"/>'
+    )
+    holes = "".join(
+        f'<rect x="{f(cx - 20 + col * 4)}" y="{f(10 + (col * 7) % 5 + row * 6)}" width="2" height="{2 + (col * 3 + row) % 3}" fill="#3a2a22"/>'
+        for col in range(11)
+        for row in range(3)
+        if (col * 5 + row * 3) % 4 != 3
+    )
+    o.append(holes)
+    for y in (2, 27):
+        o.append(
+            f'<rect x="{f(cx - 27)}" y="{y}" width="54" height="7" rx="3.5" fill="{grad("brass")}" {s(1.3)}/>'
+        )
+    # pilasters beside it
+    for x in (x0 + 3.5, x1 - 3.5):
+        o.append(
+            f'<path d="M{f(x)} 2V36" stroke="#e3bd62" stroke-width="2.2" stroke-dasharray="3 3" stroke-linecap="round"/>'
+        )
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="38" width="76" height="26" rx="2" fill="{wood}" {s()}/>'
+    )
+    o.append(k.keyboard(x0 + 1, x1 - 1, 42, 15))
+    # a gilded rosette on the lower panel
+    o.append(
+        f'<path d="M{f(x0 + 8)} 68H{f(cx - 11)}M{f(cx + 11)} 68H{f(x1 - 8)}" stroke="#e3bd62" stroke-width="1.8" stroke-linecap="round"/>'
+        f'<circle cx="{f(cx)}" cy="68" r="5.4" fill="{gold}" {s(1.3)}/>'
+        f'<circle cx="{f(cx)}" cy="68" r="1.8" fill="#7a2f3f"/>'
+    )
+    return "".join(o)
+
+
 SKINS = {
     "four_poster": four_poster,
     "sarcophagus": sarcophagus,
@@ -674,11 +765,27 @@ SKINS = {
     "dino_skull": dino_skull,
     "amphora": amphora,
     "meteorite": meteorite,
+    "red_carpet": red_carpet,
+    "pianola": pianola,
 }
 WALLPAPERS = {
     "gallery_red": _gallery_red,
     "portrait_green": _portrait_green,
     "marble_wall": _marble_wall,
 }
-STRETCH = {"four_poster", "sarcophagus", "carriage", "display_case", "specimen_cabinet"}
-TALL = {"four_poster", "throne", "gramophone", "specimen_cabinet", "classical_statue"}
+STRETCH = {
+    "four_poster",
+    "sarcophagus",
+    "carriage",
+    "display_case",
+    "specimen_cabinet",
+    "red_carpet",
+}
+TALL = {
+    "four_poster",
+    "throne",
+    "gramophone",
+    "specimen_cabinet",
+    "classical_statue",
+    "pianola",
+}

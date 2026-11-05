@@ -7,6 +7,9 @@ GRADIENTS = {
     "pumpkin": ("#f7a650", "#d9701f"),
     "burlap": ("#d6b37a", "#b48e55"),
     "stage-black": ("#3a3a42", "#202026"),
+    "chipped": ("#6f9c95", "#4d7670"),
+    "plaster": ("#fbf9f2", "#d9d3c4"),
+    "scenic": ("#ac9f92", "#837769"),
 }
 
 
@@ -481,6 +484,222 @@ def _posters(pid):
     return k.face_pattern(pid, body)
 
 
+def _stage_rug(length, width):
+    ground, border, faded, teal = "#8a5450", "#5d3f47", "#b6925f", "#5e7d78"
+    cx, cy = length / 2, width / 2
+    o = [k.fringe(length, width, "#d2c09c", step=8, reach=4)]
+    o.append(
+        f'<rect width="{f(length)}" height="{f(width)}" rx="2" fill="{ground}" {s(2)}/>'
+        f'<rect x="4" y="4" width="{f(length - 8)}" height="{f(width - 8)}" fill="none" stroke="{border}" stroke-width="5"/>'
+        f'<rect x="8.5" y="8.5" width="{f(length - 17)}" height="{f(width - 17)}" fill="none" stroke="{faded}" stroke-width="1.8" stroke-dasharray="14 3 6 4"/>'
+    )
+    # a tired lattice of diamonds, worn through in places
+    for i, x in enumerate(k.spaced(20, length - 20, 22)):
+        for j, y in enumerate(k.spaced(19, width - 19, 20)):
+            if (i * 3 + j * 5) % 7 == 3:
+                continue
+            colour = teal if (i + j) % 2 else faded
+            o.append(
+                f'<path d="M{f(x - 7)} {f(y)}L{f(x)} {f(y - 6)}L{f(x + 7)} {f(y)}L{f(x)} {f(y + 6)}Z" fill="{colour}" fill-opacity=".8"/>'
+            )
+    o.append(
+        f'<path d="M{f(length * 0.14)} {f(width * 0.74)}q9 -7 18 -2q6 7 -5 10q-12 3 -13 -8Z" fill="#c3a78f" fill-opacity=".75"/>'
+        f'<path d="M{f(length * 0.74)} {f(width * 0.14)}q9 -4 15 1q3 7 -7 8q-10 0 -8 -9Z" fill="#c3a78f" fill-opacity=".75"/>'
+    )
+    # one corner has curled up and shows its backing
+    o.append(
+        f'<path d="M{f(length - 15)} {f(width)}L{f(length)} {f(width - 15)}V{f(width)}Z" fill="#efe3c8" {s(1.6)}/>'
+    )
+    # the stage manager's spike mark
+    a = min(width * 0.44, 34)
+    for dy in (-1, 1):
+        o.append(
+            k.outlined(
+                f"M{f(cx - a)} {f(cy - dy * a)}L{f(cx + a)} {f(cy + dy * a)}",
+                "#f6d94c",
+                7,
+                ink_width=9.4,
+                cap="butt",
+            )
+        )
+    o.append(
+        f'<path d="M{f(cx - a * 0.8)} {f(cy - a * 0.8)}L{f(cx - 5)} {f(cy - 5)}" stroke="#ffffff" stroke-opacity=".55" stroke-width="1.6"/>'
+    )
+    return "".join(o)
+
+
+def stage_rug(w, h):
+    return k.rug(w, h, _stage_rug)
+
+
+def rehearsal_piano(w, h):
+    cx = w / 2
+    x0, x1 = cx - 36, cx + 36
+    paint, bare = grad("chipped"), "#c99a62"
+    o = [shadow(cx, h - 12, 40, 8)]
+    # castors: this one gets wheeled from room to room
+    for x in (x0 + 10, x1 - 10):
+        o.append(
+            f'<path d="M{f(x)} 74V80" stroke="{INK}" stroke-width="4"/>'
+            f'<circle cx="{f(x)}" cy="83" r="5.4" fill="#26262b" {s(1.6)}/>'
+            f'<circle cx="{f(x)}" cy="83" r="1.8" fill="#9aa1a8"/>'
+        )
+    o.append(
+        f'<rect x="{f(x0)}" y="-1" width="72" height="77" rx="3" fill="{paint}" {s()}/>'
+    )
+    # the lid sits crooked on a sprung hinge, a mug left on top of it
+    o.append(
+        f'<g transform="rotate(-2.6 {f(cx)} -6)"><rect x="{f(x0 - 3)}" y="-10" width="78" height="9" rx="2" fill="#7fa79f" {s(2)}/>'
+        f'<path d="M{f(x0 + 8)} -10l3 5 7 -1 3 5h-13l-3 -5Z" fill="{bare}"/></g>'
+    )
+    o.append(
+        f'<rect x="{f(cx + 18)}" y="-27" width="13" height="15" rx="2" fill="#f4efe2" {s(1.5)}/>'
+        f'<path d="M{f(cx + 31)} -23q6 1 0 7" fill="none" stroke="{INK}" stroke-width="1.8"/>'
+        f'<ellipse cx="{f(cx + 24.5)}" cy="-26.6" rx="5" ry="1.3" fill="#5a3826"/>'
+    )
+    # flaking paint: bare wood at the edges and corners
+    chips = (
+        f"M{f(x0 + 1)} 6l8 -2 3 7 -6 5 -5 -1Z",
+        f"M{f(x1 - 1)} 18l-7 3 -2 7 5 5 4 0Z",
+        f"M{f(x0 + 1)} 28l5 2 2 6 -7 1Z",
+        f"M{f(x1 - 12)} 75l3 -9 7 -2 3 5 -1 6Z",
+        f"M{f(x0 + 1)} 75l2 -10 8 -1 4 6 -2 5Z",
+        f"M{f(cx + 2)} 66l7 -1 2 5 -8 2Z",
+    )
+    o.append(
+        f'<path d="{"".join(chips)}" fill="{bare}" stroke="#7a4d33" stroke-width="1"/>'
+    )
+    # sheet music, loose on the desk
+    for rot, x in ((-6, cx - 24), (5, cx - 1)):
+        o.append(
+            f'<g transform="rotate({rot} {f(x + 12)} 20)"><rect x="{f(x)}" y="4" width="25" height="31" rx="1" fill="#fbf8ef" {s(1.5)}/>'
+            f'<path d="M{f(x + 3)} 10h19M{f(x + 3)} 13h19M{f(x + 3)} 16h19M{f(x + 3)} 23h19M{f(x + 3)} 26h19M{f(x + 3)} 29h19" stroke="#8a8478" stroke-width=".9"/>'
+            f'<circle cx="{f(x + 8)}" cy="13" r="2" fill="{INK}"/><circle cx="{f(x + 15)}" cy="10" r="2" fill="{INK}"/><circle cx="{f(x + 11)}" cy="26" r="2" fill="{INK}"/><circle cx="{f(x + 19)}" cy="29" r="2" fill="{INK}"/></g>'
+        )
+    # yellowed keys, one missing; gaffer tape over a split in the panel
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="37" width="76" height="24" rx="2" fill="{paint}" {s()}/>'
+    )
+    o.append(k.keyboard(x0 + 1, x1 - 1, 40, 15, ivory="#efe2bd", sharp="#2a2420"))
+    o.append(f'<rect x="{f(x0 + 40)}" y="41" width="6" height="13.4" fill="#2a1d16"/>')
+    o.append(
+        f'<path d="M{f(x0 + 12)} 62L{f(x0 + 26)} 75" stroke="{INK}" stroke-width="1.4"/>'
+        f'<rect x="{f(x0 + 8)}" y="64" width="24" height="7" rx="1" fill="#3a3a42" {s(1.3)} transform="rotate(-8 {f(x0 + 20)} 67)"/>'
+    )
+    return "".join(o)
+
+
+def plaster_bust(w, h):
+    cx = w / 2
+    plaster = grad("plaster")
+    o = [shadow(cx, h - 12, 30, 8)]
+    # stood on a prop crate
+    o.append(
+        k.block(
+            cx - 25,
+            cx + 17,
+            52,
+            60,
+            86,
+            lid="#c99764",
+            face=grad("wood-front"),
+            side="#7d5131",
+        )
+    )
+    o.append(
+        f'<path d="M{f(cx - 22)} 63L{f(cx + 14)} 83M{f(cx + 14)} 63L{f(cx - 22)} 83" stroke="#6e4527" stroke-width="3"/>'
+    )
+    # a cheap cast, not quite square on its crate
+    o.append(f'<g transform="rotate(4 {f(cx)} 56)">')
+    o.append(
+        f'<path d="M{f(cx - 11)} 57L{f(cx - 7)} 47H{f(cx + 7)}L{f(cx + 11)} 57Z" fill="{plaster}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 8)} 17L{f(cx - 6)} 7H{f(cx + 6)}L{f(cx + 8)} 17Q{f(cx + 22)} 19 {f(cx + 27)} 27Q{f(cx + 22)} 40 {f(cx + 7)} 48'
+        f'H{f(cx - 7)}Q{f(cx - 22)} 40 {f(cx - 27)} 27Q{f(cx - 22)} 19 {f(cx - 8)} 17Z" fill="{plaster}" {s()}/>'
+    )
+    # a shoulder broken open: hollow inside, chicken wire showing
+    o.append(
+        f'<path d="M{f(cx + 27)} 27L{f(cx + 15)} 19L{f(cx + 10)} 27L{f(cx + 15)} 32L{f(cx + 10)} 38L{f(cx + 15)} 42Q{f(cx + 23)} 36 {f(cx + 27)} 27Z" fill="#3a3a42" {s(1.6)}/>'
+        f'<path d="M{f(cx + 13)} 26l9 8M{f(cx + 17)} 23l7 6M{f(cx + 13)} 35l5 4M{f(cx + 21)} 24l-8 11M{f(cx + 25)} 29l-8 10" stroke="#b5bcc2" stroke-width="1"/>'
+    )
+    o.append(f'<ellipse cx="{f(cx)}" cy="-5" rx="14" ry="16" fill="{plaster}" {s()}/>')
+    # chips off the head and chest, the nose gone, a pencilled-on brow
+    o.append(
+        f'<path d="M{f(cx + 7)} -19l5 3 2 7 -6 -2 -3 -5Z" fill="#c9c1ae" stroke="#8a8373" stroke-width="1"/>'
+        f'<path d="M{f(cx - 23)} 27l8 -3 3 6 -5 4 -3 -2Z" fill="#c9c1ae" stroke="#8a8373" stroke-width="1"/>'
+        f'<path d="M{f(cx - 3)} -4l4 -2 3 3 -2 4 -4 0Z" fill="#c9c1ae" stroke="#8a8373" stroke-width="1"/>'
+        f'<path d="M{f(cx - 9)} -9q3 -2.6 6 0M{f(cx + 3)} -9q3 -2.6 6 0M{f(cx - 4)} 5q4 2 8 0" fill="none" stroke="#6f6a5e" stroke-width="1.5" stroke-linecap="round"/>'
+    )
+    # the mould seam, and a crack down from it
+    o.append(
+        f'<path d="M{f(cx - 1)} -21Q{f(cx - 3)} -14 {f(cx - 1)} -8M{f(cx - 5)} 21L{f(cx - 1)} 30L{f(cx - 5)} 38" fill="none" stroke="#6f6a5e" stroke-width="1.3" stroke-dasharray="3 2"/>'
+    )
+    # the property master's tag
+    o.append(
+        f'<path d="M{f(cx - 6)} 11Q{f(cx - 14)} 18 {f(cx - 14)} 22" fill="none" stroke="{INK}" stroke-width="1.2"/>'
+        f'<rect x="{f(cx - 20)}" y="21" width="12" height="9" rx="1" fill="#f0d98f" {s(1.2)} transform="rotate(-10 {f(cx - 14)} 25)"/>'
+    )
+    o.append("</g>")
+    return "".join(o)
+
+
+def paper_rock(w, h):
+    cx, base = w / 2, h - 12
+    o = [shadow(cx + 2, base, 40, 9)]
+    # a boulder's lumps and flats, a little too clean for a real one
+    o.append(
+        f'<path d="M{f(cx - 38)} {base}Q{f(cx - 45)} {base - 24} {f(cx - 31)} {base - 38}L{f(cx - 24)} {base - 53}Q{f(cx - 8)} {base - 67} {f(cx + 12)} {base - 61}L{f(cx + 27)} {base - 52}Q{f(cx + 43)} {base - 36} {f(cx + 41)} {base - 14}L{f(cx + 39)} {base}Z" fill="{grad("scenic")}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 38)} {base}Q{f(cx)} {base - 18} {f(cx + 39)} {base}Z" fill="#6f6459" {s(1.8)}/>'
+    )
+    # scenic paint, slapped on in broad strokes
+    strokes = (
+        (
+            f"M{f(cx - 30)} {base - 25}Q{f(cx - 27)} {base - 40} {f(cx - 17)} {base - 50}",
+            "#e2dcd2",
+            6.4,
+        ),
+        (
+            f"M{f(cx - 6)} {base - 58}Q{f(cx + 2)} {base - 60} {f(cx + 9)} {base - 56}",
+            "#e2dcd2",
+            5,
+        ),
+        (
+            f"M{f(cx - 24)} {base - 12}Q{f(cx - 16)} {base - 24} {f(cx - 5)} {base - 25}",
+            "#c8a262",
+            6.4,
+        ),
+        (
+            f"M{f(cx + 14)} {base - 31}Q{f(cx + 26)} {base - 30} {f(cx + 35)} {base - 19}",
+            "#675b52",
+            6.4,
+        ),
+        (
+            f"M{f(cx - 16)} {base - 4}Q{f(cx)} {base - 9} {f(cx + 16)} {base - 4}",
+            "#94877a",
+            4.4,
+        ),
+    )
+    for d, colour, width in strokes:
+        o.append(
+            f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}" stroke-linecap="round" stroke-dasharray="15 2 26 3"/>'
+        )
+    # newspaper showing where the paint has torn away
+    o.append(
+        f'<path d="M{f(cx + 10)} {base - 55}L{f(cx + 26)} {base - 49}L{f(cx + 31)} {base - 39}L{f(cx + 20)} {base - 36}L{f(cx + 12)} {base - 43}Z" fill="#efe8d6" {s(1.5)}/>'
+        f'<path d="M{f(cx + 14)} {base - 50}h9M{f(cx + 14)} {base - 46.6}h13M{f(cx + 16)} {base - 43}h12M{f(cx + 18)} {base - 39.6}h8" stroke="#8a8478" stroke-width="1.1"/>'
+    )
+    # the seam where the two shells were glued, its tape coming unstuck
+    seam = f"M{f(cx - 22)} {base - 56}Q{f(cx - 12)} {base - 38} {f(cx + 2)} {base - 30}Q{f(cx + 18)} {base - 20} {f(cx + 24)} {base - 6}"
+    o.append(k.outlined(seam, "#f0e4c6", 4.4, ink_width=6.8, cap="butt"))
+    o.append(
+        f'<path d="{seam}" fill="none" stroke="#8a7a58" stroke-width="4.4" stroke-dasharray="1.2 6"/>'
+    )
+    return "".join(o)
+
+
 SKINS = {
     "directors_chair": directors_chair,
     "vanity": vanity,
@@ -492,7 +711,19 @@ SKINS = {
     "sandbag": sandbag,
     "pumpkin_coach": pumpkin_coach,
     "stage_coffin": stage_coffin,
+    "stage_rug": stage_rug,
+    "rehearsal_piano": rehearsal_piano,
+    "plaster_bust": plaster_bust,
+    "paper_rock": paper_rock,
 }
 WALLPAPERS = {"curtain_red": _curtain, "blackbox": _blackbox, "poster_brick": _posters}
-STRETCH = {"vanity", "costume_rack", "pumpkin_coach", "stage_coffin"}
-TALL = {"vanity", "spotlight", "costume_rack", "flat_tree", "sandbag"}
+STRETCH = {"vanity", "costume_rack", "pumpkin_coach", "stage_coffin", "stage_rug"}
+TALL = {
+    "vanity",
+    "spotlight",
+    "costume_rack",
+    "flat_tree",
+    "sandbag",
+    "rehearsal_piano",
+    "plaster_bust",
+}

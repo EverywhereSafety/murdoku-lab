@@ -10,6 +10,9 @@ GRADIENTS = {
     "soil": ("#7a5638", "#5c3f27"),
     "weathered": ("#dcc39a", "#b99a6a"),
     "porcelain": ("#f4f7fa", "#d6e0e8"),
+    "van-green": ("#58a873", "#2f7a52"),
+    "limestone": ("#cfcabb", "#9c9788"),
+    "wicker": ("#dcb57a", "#b88d52"),
 }
 
 
@@ -435,6 +438,236 @@ def _whitewash(pid):
     return k.face_pattern(pid, body)
 
 
+def _jute_rug(length, width):
+    jute, weave = "#dcc292", "#b4945f"
+    o = [f'<rect width="{f(length)}" height="{f(width)}" rx="9" fill="{jute}" {s(2)}/>']
+    for i, y in enumerate(k.spaced(12, width - 12, 5)):
+        o.append(
+            f'<path d="M12 {f(y)}H{f(length - 12)}" stroke="{weave}" stroke-width="1.8" stroke-dasharray="5 3" stroke-dashoffset="{4 * (i % 2)}"/>'
+        )
+    # a vine round the edge with its leaves
+    inset = 7
+    x0, y0, x1, y1 = inset, inset, length - inset, width - inset
+    leaves = []
+    nx, ny = max(2, round((x1 - x0) / 11)), max(2, round((y1 - y0) / 11))
+    for i in range(nx):
+        x = x0 + (x1 - x0) * (i + 0.5) / nx
+        leaves += [(x, y0, 20 if i % 2 else -20), (x, y1, 20 if i % 2 else -20)]
+    for i in range(ny):
+        y = y0 + (y1 - y0) * (i + 0.5) / ny
+        leaves += [(x0, y, 70 if i % 2 else 110), (x1, y, 70 if i % 2 else 110)]
+    o.append(
+        f'<rect x="{inset}" y="{inset}" width="{f(x1 - x0)}" height="{f(y1 - y0)}" rx="5" fill="none" stroke="#3f6b3a" stroke-width="1.6"/>'
+    )
+    o.append('<g fill="#6da558" stroke="#2f5a35" stroke-width="1">')
+    o.extend(
+        f'<path d="M-6.4 0Q0 -6 6.4 0Q0 6 -6.4 0Z" transform="translate({f(x)} {f(y)}) rotate({a})"/>'
+        for x, y, a in leaves
+    )
+    o.append("</g>")
+    return "".join(o)
+
+
+def jute_rug(w, h):
+    return k.rug(w, h, _jute_rug)
+
+
+def _blooms(x0, x1, y0, y1, *, r=4.6, step=9.5):
+    """A crowd of flower heads filling a box, leaves between them."""
+    colours = ("#ef7f9f", "#f6cf4e", "#fdf6ea", "#d9473a", "#b48ee0")
+    o, i = [], 0
+    for row, y in enumerate(k.spaced(y0, y1, step * 0.8)):
+        inset = step / 2 if row % 2 else 0
+        for x in k.spaced(x0 + inset, x1 - inset, step):
+            if i % 4 == 3:
+                o.append(
+                    f'<path d="M{f(x - 5)} {f(y)}Q{f(x)} {f(y - 6)} {f(x + 5)} {f(y)}Q{f(x)} {f(y + 5)} {f(x - 5)} {f(y)}Z" fill="#5d9154" stroke="#2f5a35" stroke-width=".9"/>'
+                )
+            else:
+                o.append(
+                    f'<circle cx="{f(x)}" cy="{f(y)}" r="{r}" fill="{colours[i % len(colours)]}" stroke="{INK}" stroke-width="1.1"/>'
+                    f'<circle cx="{f(x)}" cy="{f(y)}" r="1.4" fill="#a8742c"/>'
+                )
+            i += 1
+    return "".join(o)
+
+
+def _van_side(w):
+    """Facing east: the cab keeps its length and the flower box takes up any extra width."""
+    x0, x1 = 7, w - 6
+    cab = x1 - 31
+    rear, front = x0 + 21, x1 - 18
+    o = [shadow(w / 2, 88, (x1 - x0) / 2, 9)]
+    o.append(
+        f'<path d="M{f(x0)} 70V20Q{f(x0)} 13 {f(x0 + 7)} 13H{f(cab + 8)}L{f(x1 - 7)} 39Q{f(x1)} 42 {f(x1)} 52V70Z" fill="{grad("van-green")}" {s()}/>'
+    )
+    # wheel arches over the tyres
+    for x in (rear, front):
+        o.append(
+            f'<path d="M{f(x - 16)} 71A16 16 0 0 1 {f(x + 16)} 71Z" fill="#1f4a34" {s(1.8)}/>'
+        )
+        o.append(_van_wheel(x, 74, 13))
+    # cab window, door and headlamp
+    o.append(
+        f'<path d="M{f(cab + 2)} 20H{f(cab + 8)}L{f(x1 - 11)} 39H{f(cab + 2)}Z" fill="#cfe8f1" {s(1.6)}/>'
+        f'<circle cx="{f(x1 - 1)}" cy="52" r="4.6" fill="#fff3c8" {s(1.5)}/>'
+        f'<path d="M{f(x1 - 6)} 46h-4" stroke="#1f4a34" stroke-width="2.4" stroke-linecap="round"/>'
+    )
+    # the hatch with its flowers, a counter below and a striped awning above
+    hx0, hx1 = x0 + 6, cab - 3
+    o.append(
+        f'<rect x="{f(hx0)}" y="24" width="{f(hx1 - hx0)}" height="29" rx="2" fill="#2d3a2f" {s(1.8)}/>'
+    )
+    o.append(_blooms(hx0 + 5, hx1 - 3, 30, 50))
+    o.append(
+        f'<rect x="{f(hx0 - 2)}" y="52" width="{f(hx1 - hx0 + 4)}" height="5" rx="1.5" fill="#f3e6c8" {s(1.5)}/>'
+    )
+    stripes = max(2, round((hx1 - hx0) / 11))
+    span = (hx1 - hx0 + 6) / stripes
+    for i in range(stripes):
+        o.append(
+            f'<path d="M{f(hx0 - 3 + i * span)} 16H{f(hx0 - 3 + (i + 1) * span)}V26Q{f(hx0 - 3 + (i + 0.5) * span)} 30 {f(hx0 - 3 + i * span)} 26Z" '
+            f'fill="{"#fbf8ef" if i % 2 else "#d9473a"}" {s(1.3)}/>'
+        )
+    return "".join(o)
+
+
+def _van_lengthwise(w, h):
+    """Running down a column: seen from above, the cab to the south, the open back full of flowers."""
+    cx = w / 2
+    top, bottom = 6, h - 24
+    half = 29
+    cab = bottom - 46
+    body = f"M{f(cx - half)} {top + 8}Q{f(cx - half)} {top} {f(cx - half + 8)} {top}H{f(cx + half - 8)}Q{f(cx + half)} {top} {f(cx + half)} {top + 8}V{f(bottom - 6)}Q{f(cx + half)} {f(bottom)} {f(cx + half - 8)} {f(bottom)}H{f(cx - half + 8)}Q{f(cx - half)} {f(bottom)} {f(cx - half)} {f(bottom - 6)}Z"
+    o = [shadow(cx, (top + bottom) / 2 + 8, half + 4, (bottom - top) / 2, 0.26)]
+    for y in (top + 30, bottom - 22):
+        for side in (-1, 1):
+            o.append(
+                f'<rect x="{f(cx + side * (half + 1) - 5)}" y="{f(y - 11)}" width="10" height="24" rx="3" fill="#2a2a2a" {s(1.5)}/>'
+            )
+    o.append(f'<path d="{body}" transform="translate(0 9)" fill="#1f4a34" {s()}/>')
+    o.append(f'<path d="{body}" fill="{grad("van-green")}" {s()}/>')
+    # the open back, brimming
+    o.append(
+        f'<rect x="{f(cx - half + 6)}" y="{top + 6}" width="{f(2 * half - 12)}" height="{f(cab - top - 12)}" rx="3" fill="#2d3a2f" {s(1.6)}/>'
+    )
+    o.append(_blooms(cx - half + 12, cx + half - 9, top + 12, cab - 12, r=5.2, step=11))
+    # the cab roof, windscreen and lamps
+    o.append(
+        f'<rect x="{f(cx - half + 4)}" y="{f(cab + 2)}" width="{f(2 * half - 8)}" height="{f(bottom - cab - 18)}" rx="5" fill="#8fd0a0" fill-opacity=".55" {s(1.6)}/>'
+        f'<rect x="{f(cx - half + 6)}" y="{f(bottom - 13)}" width="{f(2 * half - 12)}" height="9" rx="2" fill="#cfe8f1" {s(1.5)}/>'
+    )
+    for side in (-1, 1):
+        o.append(
+            f'<circle cx="{f(cx + side * (half - 7))}" cy="{f(bottom + 5)}" r="4.4" fill="#fff3c8" {s(1.5)}/>'
+        )
+    return "".join(o)
+
+
+def delivery_van(w, h):
+    if h > w * 1.15:
+        return _van_lengthwise(w, h)
+    side = _van_side(w)
+    return side if h <= 100 else f'<g transform="translate(0 {f(h - 100)})">{side}</g>'
+
+
+def rockery_stone(w, h):
+    cx, base = w / 2, h - 12
+    o = [shadow(cx + 2, base, 40, 9)]
+    o.append(
+        f'<path d="M{f(cx - 40)} {base}Q{f(cx - 46)} {base - 20} {f(cx - 30)} {base - 30}Q{f(cx - 24)} {base - 54} {f(cx - 2)} {base - 54}Q{f(cx + 20)} {base - 62} {f(cx + 30)} {base - 40}Q{f(cx + 46)} {base - 30} {f(cx + 40)} {base}Z" fill="{grad("limestone")}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 32)} {base - 14}Q{f(cx - 14)} {base - 22} {f(cx + 6)} {base - 16}M{f(cx + 12)} {base - 26}L{f(cx + 34)} {base - 22}M{f(cx - 8)} {base - 34}l-6 12" fill="none" stroke="#7d796c" stroke-width="1.8" stroke-linecap="round"/>'
+    )
+    # a cushion of moss over the top, drooping down one side
+    o.append(
+        f'<path d="M{f(cx - 34)} {base - 27}Q{f(cx - 34)} {base - 40} {f(cx - 22)} {base - 46}Q{f(cx - 14)} {base - 60} {f(cx + 2)} {base - 57}Q{f(cx + 20)} {base - 63} {f(cx + 28)} {base - 46}'
+        f'Q{f(cx + 18)} {base - 40} {f(cx + 12)} {base - 44}Q{f(cx + 4)} {base - 34} {f(cx - 4)} {base - 40}Q{f(cx - 12)} {base - 28} {f(cx - 20)} {base - 34}Q{f(cx - 28)} {base - 22} {f(cx - 34)} {base - 27}Z" '
+        f'fill="#6f9e4f" stroke="#2f5a35" stroke-width="1.8" stroke-linejoin="round"/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 24)} {base - 40}q5 -6 10 -7M{f(cx - 6)} {base - 52}q6 -3 12 -1" fill="none" stroke="#b5d48c" stroke-width="2.6" stroke-linecap="round"/>'
+    )
+
+    def flower(x, y, colour, r=3):
+        petals = "".join(
+            f'<circle cx="{f(x + r * math.cos(math.radians(a)))}" cy="{f(y + r * math.sin(math.radians(a)))}" r="{f(r * 0.85)}"/>'
+            for a in range(-90, 270, 72)
+        )
+        return (
+            f'<g fill="{colour}" stroke="{INK}" stroke-width=".9">{petals}</g>'
+            f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r * 0.6)}" fill="#f4c94c"/>'
+        )
+
+    for x, y, colour in (
+        (cx - 17, base - 49, "#f3a6c1"),
+        (cx - 2, base - 53, "#fdf6ea"),
+        (cx + 12, base - 53, "#f3a6c1"),
+        (cx + 4, base - 44, "#7f9df0"),
+        (cx - 26, base - 38, "#fdf6ea"),
+    ):
+        o.append(flower(x, y, colour))
+    # tufts of alpine flowers at the foot
+    for x, ry in ((cx - 34, 7), (cx + 33, 6)):
+        o.append(
+            f'<ellipse cx="{f(x)}" cy="{base - 2}" rx="11" ry="{ry}" fill="#6f9e4f" stroke="#2f5a35" stroke-width="1.5"/>'
+        )
+    o.append(flower(cx - 38, base - 5, "#7f9df0", 3.4))
+    o.append(flower(cx - 29, base - 3, "#f3a6c1", 3))
+    o.append(flower(cx + 34, base - 4, "#fdf6ea", 3.4))
+    return "".join(o)
+
+
+def wicker_armchair(w, h):
+    cx, hub = w / 2, 46
+    cane, dark = grad("wicker"), "#94703f"
+
+    def fan(t):
+        return (
+            f"M{f(cx - 26 * t)} {f(hub + 4 * t)}Q{f(cx - 44 * t)} {f(hub - 36 * t)} {f(cx - 30 * t)} {f(hub - 54 * t)}"
+            f"Q{f(cx)} {f(hub - 66 * t)} {f(cx + 30 * t)} {f(hub - 54 * t)}Q{f(cx + 44 * t)} {f(hub - 36 * t)} {f(cx + 26 * t)} {f(hub + 4 * t)}"
+        )
+
+    o = [shadow(cx, h - 12, 36, 9)]
+    # a peacock back: a fan of cane rings crossed by its spokes, flaring wider than the seat
+    o.append(f'<path d="{fan(1)}Z" fill="{cane}" {s()}/>')
+    spokes = "".join(
+        f"M{f(cx)} {hub}L{f(cx + 32 * math.sin(math.radians(a)))} {f(hub - 55 * math.cos(math.radians(a)))}"
+        for a in (-64, -42, -21, 0, 21, 42, 64)
+    )
+    o.append(f'<path d="{spokes}" stroke="{dark}" stroke-width="1.3"/>')
+    for t in (0.88, 0.7, 0.52):
+        o.append(
+            f'<path d="{fan(t)}" fill="none" stroke="{dark}" stroke-width="2.4" stroke-dasharray="3.4 2.4"/>'
+        )
+    # a cushion with a garden stripe, the cane apron below it
+    o.append(
+        f'<rect x="{f(cx - 28)}" y="44" width="56" height="22" rx="9" fill="#e4efcf" {s()}/>'
+        f'<path d="M{f(cx - 16)} 46v15M{f(cx)} 46v15M{f(cx + 16)} 46v15" stroke="#8fbf6a" stroke-width="3.4"/>'
+        f'<rect x="{f(cx - 28)}" y="60" width="56" height="16" rx="5" fill="{cane}" {s()}/>'
+        f'<path d="M{f(cx - 24)} 65H{f(cx + 24)}M{f(cx - 24)} 71H{f(cx + 24)}" stroke="{dark}" stroke-width="2" stroke-dasharray="3 2.4"/>'
+    )
+    # cane wrapped round the arms
+    for side in (-1, 1):
+        ax = cx + side * 34
+        wraps = "".join(f"M{f(ax - 6)} {y}l12 -3" for y in range(46, 78, 6))
+        o.append(
+            f'<rect x="{f(ax - 8)}" y="38" width="16" height="40" rx="7" fill="{cane}" {s()}/>'
+            f'<path d="{wraps}" stroke="{dark}" stroke-width="1.6"/>'
+        )
+    o.append(legs(((cx - 26, 76), (cx + 26, 76)), 86, 5, "#8a6a3c"))
+    return "".join(o)
+
+
+def _van_wheel(x, y, r):
+    return (
+        f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r)}" fill="#2a2a2a" {s()}/>'
+        f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r * 0.5)}" fill="#e8e4d8" {s(1.3)}/>'
+        f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r * 0.16)}" fill="#a8742c"/>'
+    )
+
+
 SKINS = {
     "raised_bed": raised_bed,
     "potting_bench": potting_bench,
@@ -447,9 +680,13 @@ SKINS = {
     "fountain": fountain,
     "wardian_case": wardian_case,
     "rain_barrel": rain_barrel,
+    "jute_rug": jute_rug,
+    "delivery_van": delivery_van,
+    "rockery_stone": rockery_stone,
+    "wicker_armchair": wicker_armchair,
 }
 WALLPAPERS = {"glass_pane": _glass_pane, "trellis": _trellis, "whitewash": _whitewash}
-STRETCH = {"raised_bed", "potting_bench"}
+STRETCH = {"raised_bed", "potting_bench", "jute_rug", "delivery_van"}
 TALL = {
     "potting_bench",
     "beehive",
@@ -459,4 +696,5 @@ TALL = {
     "fountain",
     "wardian_case",
     "rain_barrel",
+    "wicker_armchair",
 }

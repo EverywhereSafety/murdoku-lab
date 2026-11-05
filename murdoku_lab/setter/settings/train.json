@@ -11,13 +11,47 @@
     "One Way Only",
     "The Night Express",
     "Change at Vienna",
-    "End of the Line"
+    "End of the Line",
+    "Death Takes the Sleeper",
+    "The Orient Connection",
+    "Night Train to Nowhere",
+    "Fare Dodger",
+    "The Final Destination",
+    "Running Late",
+    "Delayed by Murder",
+    "The Wrong Platform",
+    "All Aboard",
+    "Off the Rails",
+    "Wrong Side of the Tracks",
+    "Mind the Gap",
+    "Emergency Stop",
+    "A Missed Connection",
+    "Unscheduled Stop",
+    "First-Class Alibi",
+    "Whistle-Stop",
+    "Dead on Time",
+    "Express Delivery",
+    "Last Call",
+    "Border Crossing",
+    "Passport Control",
+    "Season Ticket",
+    "A Fatal Timetable",
+    "Tunnel Vision",
+    "Terminus"
   ],
   "blurbs": [
     "Eight passengers, one locked train and a long night with no stations.",
     "The train departed on time. Somewhere between two countries, one passenger stopped breathing.",
     "Snow on the tracks, candles at supper and a secret in every compartment.",
-    "Nobody gets off until morning, which is exactly what the killer was counting on."
+    "Nobody gets off until morning, which is exactly what the killer was counting on.",
+    "The border guards are asleep, the tea has gone cold and one compartment has gone very quiet.",
+    "A diplomat, a jewel thief and a honeymooning couple: only some of them are what they seem.",
+    "The train is running late, and one passenger has missed every stop since midnight.",
+    "Between the mountains and the sea, the express makes no stops and keeps one terrible secret.",
+    "The conductor has checked every ticket but one. That passenger has stopped answering the door.",
+    "Seven countries, three languages and one door that nobody wants to knock on.",
+    "The attendant remembers every order. Tonight, one supper came back untouched.",
+    "A delay at the frontier, a blind drawn at the wrong moment and a long wait for morning."
   ],
   "rooms": [
     {"name": "Dining Car", "suits": ["table", "chair", "flowers"], "finish": "carpet", "wallpaper": "walnut_panels"},
@@ -77,7 +111,10 @@
       "box": "hamper",
       "register": "railway_lantern",
       "boulder": "coal_heap",
-      "barrel": "milk_churn"
+      "barrel": "milk_churn",
+      "carpet": "corridor_runner",
+      "piano": "lounge_piano",
+      "statue": "founder_bust"
     }
   },
   "motives": [
@@ -85,11 +122,26 @@
     "a fortune in bearer bonds was hidden in the luggage",
     "an old betrayal at the border had finally caught up",
     "the ticket had been bought by someone who was supposed to be dead",
-    "a marriage of convenience had become very inconvenient"
+    "a marriage of convenience had become very inconvenient",
+    "a courier's case held papers worth a great deal at the next frontier",
+    "the honeymoon had been arranged to end somewhere without extradition",
+    "a stolen identity was one station from being discovered",
+    "the conductor had seen the same face on two different passports",
+    "a wartime promise had been broken in this very carriage",
+    "the inheritance depended on who reached the city first",
+    "a ransom had been paid, and the money had never arrived",
+    "an old photograph in a locket showed who had really been on the last train out",
+    "a rail crash long ago had never been anybody's fault, until now",
+    "one signature on a treaty was about to become very expensive"
   ],
   "epilogues": [
     "{murderer} and {victim} were the only two in the {area} as the train crossed the border. At the next stop there was one passenger fewer, because {motive}.",
     "Nobody else passed through the {area} after midnight. {murderer} had timed it to the minute: {motive}.",
-    "Two people were in the {area} when the lights flickered in the tunnel. {murderer} had boarded with one purpose: {motive}."
+    "Two people were in the {area} when the lights flickered in the tunnel. {murderer} had boarded with one purpose: {motive}.",
+    "The rails drowned out every sound from the {area}. {murderer} had checked the timetable twice, because {motive}.",
+    "{victim} went to the {area} for some air between stations. {murderer} had been waiting there since the last one: {motive}.",
+    "Nobody leaves a moving train, so {murderer} simply went back to bed. It had all been arranged in the {area}: {motive}.",
+    "At the frontier the guards checked every passport but asked nothing about the {area}. {murderer} had counted on it: {motive}.",
+    "The {area} was empty when the conductor came through, except for {victim}. {murderer} was three carriages away by then, and had been planning it for years: {motive}."
   ]
 }

@@ -501,6 +501,107 @@ def _bulkhead(pid):
     return k.face_pattern(pid, body)
 
 
+def _turkey_rug(length, width):
+    red, dark, navy = "#8e1a20", "#54101a", "#1f3558"
+    ochre, ivory = "#e0a93f", "#f1e4c4"
+    n = max(3, round(length / 28))
+    step = length / n
+    band = step * 0.44
+    o = [k.fringe(length, width, ivory, step=7, reach=4)]
+    o.append(
+        f'<rect width="{f(length)}" height="{f(width)}" rx="3" fill="{red}" {s(2)}/>'
+    )
+    # bands across the rug: a navy zigzag band, then a row of ivory lozenges on the red
+    for i in range(n):
+        x = step * (i + 0.5)
+        a = band * 0.26
+        zig = [
+            f"{f(x + (a if j % 2 else -a))} {f(y)}"
+            for j, y in enumerate(k.spaced(1, width - 1, 7.5))
+        ]
+        o.append(
+            f'<rect x="{f(x - band / 2)}" y="0" width="{f(band)}" height="{f(width)}" fill="{navy}"/>'
+            f'<path d="M{f(x - band / 2)} 0V{f(width)}M{f(x + band / 2)} 0V{f(width)}" stroke="{ochre}" stroke-width="1.8"/>'
+            f'<path d="M{"L".join(zig)}" fill="none" stroke="{ochre}" stroke-width="2.8"/>'
+        )
+        if i < n - 1:
+            gap_x = x + step / 2
+            for y in k.spaced(8, width - 8, 13):
+                o.append(
+                    f'<path d="M{f(gap_x - 4.4)} {f(y)}L{f(gap_x)} {f(y - 5)}L{f(gap_x + 4.4)} {f(y)}L{f(gap_x)} {f(y + 5)}Z" fill="{ivory}"/>'
+                )
+    o.append(
+        f'<rect x="2.5" y="2.5" width="{f(length - 5)}" height="{f(width - 5)}" fill="none" stroke="{dark}" stroke-width="5"/>'
+        f'<rect x="5.6" y="5.6" width="{f(length - 11.2)}" height="{f(width - 11.2)}" fill="none" stroke="{ochre}" stroke-width="1.2"/>'
+        f'<rect width="{f(length)}" height="{f(width)}" rx="3" fill="none" {s(2)}/>'
+    )
+    return "".join(o)
+
+
+def turkey_rug(w, h):
+    return k.rug(w, h, _turkey_rug)
+
+
+def ship_piano(w, h):
+    cx = w / 2
+    x0, x1 = cx - 36, cx + 36
+    paint, navy, brass = grad("lifeboat"), "#26425f", "#d8b264"
+    o = [shadow(cx, h - 12, 40, 8)]
+    for x in (x0 + 8, x1 - 8):
+        o.append(
+            f'<rect x="{f(x - 5)}" y="76" width="10" height="9" rx="1.5" fill="{paint}" {s()}/>'
+            f'<circle cx="{f(x)}" cy="86" r="3" fill="{grad("brass")}" {s(1.2)}/>'
+        )
+    o.append(
+        f'<rect x="{f(x0)}" y="-2" width="72" height="80" rx="4" fill="{paint}" {s()}/>'
+    )
+    # brass carrying handles and a fiddle rail, to ride out the swell
+    for side in (-1, 1):
+        o.append(
+            k.outlined(
+                f"M{f(cx + side * 36)} 8q{f(side * 6)} 8 0 16",
+                brass,
+                2.4,
+                ink_width=4.8,
+            )
+        )
+    o.append(
+        k.outlined(
+            f"M{f(x0 + 3)} -6V-16H{f(x1 - 3)}V-6M{f(cx)} -16V-6",
+            brass,
+            2.4,
+            ink_width=4.8,
+        )
+    )
+    o.append(
+        f'<rect x="{f(x0 - 3)}" y="-9" width="78" height="9" rx="3" fill="#fefdf8" {s(2)}/>'
+    )
+    # a porthole roundel in the upper panel
+    o.append(
+        f'<rect x="{f(x0 + 7)}" y="4" width="58" height="28" rx="2" fill="none" stroke="#b5ae9d" stroke-width="1.6"/>'
+        f'<circle cx="{f(cx)}" cy="18" r="11.5" fill="{navy}" stroke="{INK}" stroke-width="5.6"/>'
+        f'<circle cx="{f(cx)}" cy="18" r="11.5" fill="none" stroke="{brass}" stroke-width="3.2"/>'
+        f'<path d="M{f(cx - 6)} 15q3 -5 8 -5" fill="none" stroke="#ffffff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>'
+    )
+    for x, y in ((x0 + 3, 3), (x1 - 3, 3), (x0 + 3, 73), (x1 - 3, 73)):
+        o.append(f'<circle cx="{f(x)}" cy="{y}" r="2" fill="{grad("brass")}" {s(.9)}/>')
+    # navy fall and slip, so the keys stand out of the white paint
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="36" width="76" height="30" rx="2" fill="{navy}" {s()}/>'
+    )
+    o.append(k.keyboard(x0 + 1, x1 - 1, 41, 15))
+    o.append(
+        f'<path d="M{f(x0 + 3)} 61H{f(x1 - 3)}" stroke="{brass}" stroke-width="1.8" stroke-linecap="round"/>'
+    )
+    # the lower panel and brass pedals
+    o.append(
+        f'<rect x="{f(x0 + 9)}" y="68" width="54" height="7" rx="1.5" fill="none" stroke="#b5ae9d" stroke-width="1.4"/>'
+        f'<rect x="{f(cx - 8)}" y="76" width="6" height="8" rx="1.5" fill="{grad("brass")}" {s(1.2)}/>'
+        f'<rect x="{f(cx + 2)}" y="76" width="6" height="8" rx="1.5" fill="{grad("brass")}" {s(1.2)}/>'
+    )
+    return "".join(o)
+
+
 SKINS = {
     "deck_chair": deck_chair,
     "bunk": bunk,
@@ -512,6 +613,8 @@ SKINS = {
     "anchor": anchor,
     "rope_coil": rope_coil,
     "wireless_set": wireless_set,
+    "turkey_rug": turkey_rug,
+    "ship_piano": ship_piano,
 }
 WALLPAPERS = {
     "portholes": _portholes,
@@ -519,5 +622,12 @@ WALLPAPERS = {
     "deco_gold": _deco_gold,
     "bulkhead": _bulkhead,
 }
-STRETCH = {"bunk", "lifeboat"}
-TALL = {"bunk", "ship_telegraph", "figurehead", "life_ring", "wireless_set"}
+STRETCH = {"bunk", "lifeboat", "turkey_rug"}
+TALL = {
+    "bunk",
+    "ship_telegraph",
+    "figurehead",
+    "life_ring",
+    "wireless_set",
+    "ship_piano",
+}
