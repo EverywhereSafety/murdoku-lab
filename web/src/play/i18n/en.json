@@ -23,6 +23,8 @@
   "case.facts": "Scene facts",
   "case.rules": "Rules",
   "case.statement": "Statement",
+  "case.victimNote": "Alone with the murderer.",
+  "case.noStatement": "Gave no statement. The other clues will place them.",
   "case.notPlaced": "Not placed",
   "case.placedAt": "At {cell}",
   "case.reviewed": "Mark this statement as checked",

@@ -194,6 +194,22 @@ try {
     assert.equal(await page.locator(".pl-token").count(), 0, "a fresh start survives a refresh");
     checks.push("a solved training case can be played again from the start");
   }
+  // No card is blank: the victim shows the rule, and a suspect with no statement says so.
+  const quiet = fs.readdirSync(path.join(root, "cases"))
+    .filter((name) => name.endsWith(".json") && name !== "index.json")
+    .map((name) => JSON.parse(fs.readFileSync(path.join(root, "cases", name), "utf8")))
+    .find((b) => b.public.people.some((p) => !p.victim && !b.public.clues.some((c) => c.person === p.id)));
+  if (quiet) {
+    await page.goto(`${base}?case=${quiet.id}`, { waitUntil: "networkidle" });
+    assert.equal(
+      await page.evaluate(() => [...document.querySelectorAll(".pl-suspect")].filter((n) => !n.querySelector(".pl-statement, .pl-person-note")).length),
+      0,
+    );
+    assert.match(await page.locator(".pl-suspect:not(.is-victim) .pl-person-note").first().textContent(), /no statement/i);
+    assert.match(await page.locator(".pl-suspect.is-victim .pl-person-note").textContent(), /murderer/i);
+    checks.push("no suspect card is blank: the victim shows the rule, a silent suspect says so");
+  }
+
   // Regressions from the 24-person player review.
   await page.goto(`${base}?case=museum`, { waitUntil: "networkidle" });
   const museum = JSON.parse(fs.readFileSync(path.join(root, "cases/museum.json"), "utf8"));
