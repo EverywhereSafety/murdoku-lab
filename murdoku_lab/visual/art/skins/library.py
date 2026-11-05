@@ -486,6 +486,91 @@ def _crimson(pid):
     return k.face_pattern(pid, body)
 
 
+def _faded_rug(length, width):
+    ground, border, ghost, warp = "#b39c92", "#9b8983", "#c8b6a6", "#ddd0b8"
+    cx, cy = length / 2, width / 2
+    rx, ry = min(length * 0.26, 34), min(width * 0.3, 22)
+    o = [k.fringe(length, width, "#d8cdb6", step=11, reach=3)]
+    o.append(
+        f'<rect width="{f(length)}" height="{f(width)}" rx="2" fill="{ground}" {s(2)}/>'
+        f'<rect x="5" y="5" width="{f(length - 10)}" height="{f(width - 10)}" fill="none" stroke="{border}" stroke-width="4.4" stroke-dasharray="24 6 11 4"/>'
+        f'<ellipse cx="{f(cx)}" cy="{f(cy)}" rx="{f(rx)}" ry="{f(ry)}" fill="{ghost}" fill-opacity=".6" stroke="{border}" stroke-width="2" stroke-dasharray="9 4"/>'
+        f'<ellipse cx="{f(cx)}" cy="{f(cy)}" rx="{f(rx * 0.45)}" ry="{f(ry * 0.45)}" fill="{border}" fill-opacity=".45"/>'
+    )
+    # threadbare patches: the pile thinning out round a bald spot, bare threads across it
+    blob = "M-13 -2Q-9 -9 -1 -7Q8 -10 13 -3Q16 4 8 7Q0 10 -7 8Q-16 5 -13 -2Z"
+    threads = "M-8 -4v8M-4 -6v12M0 -6v13M4 -6v12M8 -4v9"
+    for fx, fy, scale, turn in (
+        (0.25, 0.72, 0.95, 10),
+        (0.74, 0.28, 1, -16),
+        (0.82, 0.8, 0.62, 24),
+        (0.19, 0.21, 0.6, -8),
+    ):
+        place = f'transform="translate({f(length * fx)} {f(width * fy)}) rotate({turn}) scale({scale})"'
+        o.append(
+            f'<g {place}><path d="{blob}" transform="scale(1.3)" fill="{ghost}" fill-opacity=".7"/>'
+            f'<path d="{blob}" fill="{warp}"/><path d="{threads}" stroke="#bfae94" stroke-width="1.2"/></g>'
+        )
+    # a split where it has finally worn right through
+    o.append(
+        f'<path d="M{f(length * 0.72)} {f(width * 0.22)}q6 1 10 6q-7 0 -10 -6Z" fill="{INK}" fill-opacity=".7"/>'
+    )
+    return "".join(o)
+
+
+def faded_rug(w, h):
+    return k.rug(w, h, _faded_rug)
+
+
+def practice_piano(w, h):
+    cx = w / 2
+    x0, x1 = cx - 36, cx + 36
+    o = [shadow(cx, h - 12, 40, 8)]
+    o.append(legs(((x0 + 8, 74), (x1 - 8, 74)), 86, 7, "#8a5a33"))
+    o.append(
+        f'<rect x="{f(x0)}" y="2" width="72" height="76" rx="3" fill="{grad("oak")}" {s()}/>'
+    )
+    # scores in a stack, a metronome beside them
+    for i, (dx, width, colour) in enumerate(
+        (
+            (-1, 34, "#7a2f3f"),
+            (1, 31, "#f3ead6"),
+            (-2, 33, "#3f5f8a"),
+            (2, 29, "#f3ead6"),
+            (0, 31, "#2f5c48"),
+        )
+    ):
+        y = -10.2 - i * 5.2
+        o.append(
+            f'<rect x="{f(x0 + 3 + dx)}" y="{f(y)}" width="{width}" height="5.2" rx="1" fill="{colour}" {s(1.3)}/>'
+        )
+    mx = x1 - 15
+    o.append(
+        f'<path d="M{f(mx - 12)} -4L{f(mx - 5)} -34H{f(mx + 5)}L{f(mx + 12)} -4Z" fill="{grad("walnut")}" {s()}/>'
+        f'<path d="M{f(mx - 6)} -8L{f(mx - 2.4)} -30H{f(mx + 2.4)}L{f(mx + 6)} -8Z" fill="#fbf6e8" stroke="{INK}" stroke-width="1"/>'
+        f'<path d="M{f(mx)} -7L{f(mx + 6)} -30" stroke="{INK}" stroke-width="1.8" stroke-linecap="round"/>'
+        f'<rect x="{f(mx + 1.4)}" y="-23" width="5" height="4" rx="1" fill="{grad("brass")}" stroke="{INK}" stroke-width="1"/>'
+    )
+    o.append(
+        f'<rect x="{f(x0 - 3)}" y="-5" width="78" height="9" rx="2.4" fill="#dcb47c" {s(2)}/>'
+    )
+    # plain panels
+    o.append(
+        f'<rect x="{f(x0 + 8)}" y="10" width="56" height="22" rx="1.5" fill="none" stroke="#a87443" stroke-width="1.7"/>'
+        f'<path d="M{f(x0 + 12)} 15H{f(x1 - 12)}" stroke="#e8c79a" stroke-width="1.4"/>'
+    )
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="36" width="76" height="24" rx="2" fill="{grad("wood-front")}" {s()}/>'
+    )
+    o.append(k.keyboard(x0 + 1, x1 - 1, 40, 15))
+    o.append(
+        f'<rect x="{f(x0 + 8)}" y="64" width="56" height="10" rx="1.5" fill="none" stroke="#a87443" stroke-width="1.5"/>'
+        f'<rect x="{f(cx - 8)}" y="77" width="6" height="7" rx="1.5" fill="{grad("brass")}" {s(1.2)}/>'
+        f'<rect x="{f(cx + 2)}" y="77" width="6" height="7" rx="1.5" fill="{grad("brass")}" {s(1.2)}/>'
+    )
+    return "".join(o)
+
+
 SKINS = {
     "chesterfield": chesterfield,
     "leather_armchair": leather_armchair,
@@ -499,6 +584,8 @@ SKINS = {
     "globe": globe,
     "telescope": telescope,
     "umbrella_stand": umbrella_stand,
+    "faded_rug": faded_rug,
+    "practice_piano": practice_piano,
 }
 WALLPAPERS = {
     "book_wall": _book_wall,
@@ -506,5 +593,12 @@ WALLPAPERS = {
     "gothic_window": _gothic_window,
     "crimson": _crimson,
 }
-STRETCH = {"chesterfield", "book_trolley", "reading_table"}
-TALL = {"grandfather_clock", "globe", "telescope", "umbrella_stand", "book_trolley"}
+STRETCH = {"chesterfield", "book_trolley", "reading_table", "faded_rug"}
+TALL = {
+    "grandfather_clock",
+    "globe",
+    "telescope",
+    "umbrella_stand",
+    "book_trolley",
+    "practice_piano",
+}

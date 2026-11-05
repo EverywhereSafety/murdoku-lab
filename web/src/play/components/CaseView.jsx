@@ -15,7 +15,7 @@ import { funnel } from "../lib/funnel.js";
 import { shareSquares, streaks } from "../engine/daily.js";
 import { CoachCard, useCoach } from "./Coach.jsx";
 import { Countdown, Flame } from "./Daily.jsx";
-import { Dossier } from "./Dossier.jsx";
+import { Dossier, personNote } from "./Dossier.jsx";
 import { Dialog, Face, Mascot, Stars, Toast, formatTime } from "./ui.jsx";
 
 const MANOR = tokens.settings.manor.frame;
@@ -128,12 +128,13 @@ function ActionBar({ snapshot, notes, onNotes, onUndo, onRedo, onHint, accuse, o
 function SuspectTray({ game, state, selected, clashes, onSelect, coached, guide }) {
   const person = selected ? game.person.get(selected) : null;
   const statement = selected ? game.clues.filter((c) => c.person === selected) : [];
+  const lines = person ? [personNote(game, person, statement), ...statement.map((c) => c.text)].filter(Boolean) : [];
   return (
     <div className="pl-tray">
       {guide ||
-        (person && statement.length > 0 && (
+        (person && lines.length > 0 && (
           <p className="pl-tray-bubble" style={{ "--accent": person.accent }}>
-            <strong>{person.name.split(" ")[0]}:</strong> {statement.map((c) => c.text).join(" ")}
+            <strong>{person.name.split(" ")[0]}:</strong> {lines.join(" ")}
           </p>
         ))}
       <div className="pl-tray-row" role="listbox" aria-label={t("case.suspects")}>

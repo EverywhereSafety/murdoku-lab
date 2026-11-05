@@ -11,13 +11,47 @@
     "Exit, Pursued",
     "A Tragedy in Three Acts",
     "The Show Must Go On",
-    "Last Bow"
+    "Last Bow",
+    "Final Curtain",
+    "Dress Rehearsal for Death",
+    "First Night Nerves",
+    "A Star Is Dead",
+    "Behind the Scenes",
+    "The Prompter's Secret",
+    "Encore",
+    "Murder at the Matinee",
+    "Method Acting",
+    "Death of a Critic",
+    "Poison in the Greasepaint",
+    "Scene Stealer",
+    "Bad Reviews",
+    "Sold Out",
+    "Standing Ovation",
+    "Intermission",
+    "Forgetting Your Lines",
+    "Lights Out",
+    "A Dramatic Exit",
+    "Typecast",
+    "Star-Crossed",
+    "The Ghost Light",
+    "The Scottish Play",
+    "Upstaged",
+    "Playing Dead",
+    "One Night Only"
   ],
   "blurbs": [
     "The house is full, the critics are in, and one member of the company will not take a bow.",
     "A new play, an old rivalry and a door that should have stayed locked.",
     "Everyone in the company knows their lines. Somebody also knew their cue.",
-    "Applause, encores and a final scene that was never in the script."
+    "Applause, encores and a final scene that was never in the script.",
+    "The leading lady is furious, the director is drunk, and the understudy has never looked happier.",
+    "Three acts, two intervals and one death that the audience mistook for the play.",
+    "Backstage, everyone has a motive. Out front, the audience is still applauding.",
+    "A revival of an old melodrama, and a cast with a history nobody wants revived.",
+    "It is the last night of the run, and somebody has decided the company is one too large.",
+    "The prompter has gone quiet, the stalls are restless, and the second act is running very long.",
+    "Everyone said the play was cursed. One of them is about to make sure of it.",
+    "A star returns to the theatre that made them. Not everyone is pleased to see them back."
   ],
   "rooms": [
     {"name": "Stage", "suits": ["chair", "table", "tree", "statue", "boulder"], "finish": "boards", "wallpaper": "curtain_red"},
@@ -75,7 +109,11 @@
       "tree": "flat_tree",
       "crate": "prop_trunk",
       "box": "wig_stand",
-      "barrel": "sandbag"
+      "barrel": "sandbag",
+      "carpet": "stage_rug",
+      "piano": "rehearsal_piano",
+      "statue": "plaster_bust",
+      "boulder": "paper_rock"
     }
   },
   "motives": [
@@ -83,11 +121,26 @@
     "a cruel review had ended a career, and its author had a long memory",
     "the script had been stolen, and the real author was in the building",
     "a forty-year-old understudy had finally run out of patience",
-    "the theatre was about to be sold and pulled down"
+    "the theatre was about to be sold and pulled down",
+    "the playwright's name on the poster belonged to somebody else's work",
+    "a contract signed years ago still owned every line anyone spoke",
+    "the understudy's letters had been going missing for months",
+    "a prop gun had once been loaded by mistake, or so the inquest was told",
+    "the company's takings had been leaving by the back door for years",
+    "a long-lost child had joined the chorus under another name",
+    "the critic's next notice would close the show for good",
+    "a rival had paid to have the lights fail on opening night",
+    "the star's famous voice had been someone else's all along",
+    "an old love letter had been used as a prop, and someone in the stalls had recognised the hand"
   ],
   "epilogues": [
     "{murderer} and {victim} were by themselves in the {area} during the second act. Only one of them made the curtain call, because {motive}.",
     "While the house applauded, {murderer} slipped into the {area} and found {victim}. The motive was hiding in plain sight: {motive}.",
-    "The {area} held two people when the lights went down. {murderer} had rehearsed the scene for years: {motive}."
+    "The {area} held two people when the lights went down. {murderer} had rehearsed the scene for years: {motive}.",
+    "The house roared at the comedy out front. In the {area}, {murderer} finished the real drama with {victim}, because {motive}.",
+    "No one misses anyone backstage until their cue. {victim} missed theirs in the {area}, and {murderer} had made sure of it: {motive}.",
+    "{murderer} has played many parts, but never better than in the {area} that night. The reason was no act: {motive}.",
+    "When the curtain fell, {victim} stayed in the {area} and {murderer} went out to take a bow. It had been a long time coming: {motive}.",
+    "{murderer} knew exactly how long the interval would last, and how quiet the {area} would be: {motive}."
   ]
 }

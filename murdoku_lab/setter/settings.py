@@ -60,6 +60,9 @@ SPATIAL_WORDS = (
     "alone",
 )
 EPILOGUE_FIELDS = {"murderer", "victim", "area", "motive"}
+# The templates and motives every pack first had. Cases built before the lists grew keep drawing
+# from these, so their closing text never changes.
+FIRST_ENDINGS = (3, 5)
 
 
 @lru_cache(maxsize=None)
@@ -83,6 +86,38 @@ def cast():
 
 def _words(text):
     return re.findall(r"[a-z]+(?:'[a-z]+)?", text.lower())
+
+
+def leaks(pack, text):
+    """What a title or blurb gives away: any room, object, person or direction it names."""
+    phrases = [r["name"].lower() for r in pack["rooms"]]
+    phrases += [v.lower() for v in pack["objects"].values()]
+    people_words = {
+        w
+        for person in list(cast()["suspects"].values()) + cast()["victims"]
+        for w in _words(person["name"])
+    }
+    lower = text.lower()
+    found = [p for p in phrases if re.search(rf"\b{re.escape(p)}\b", lower)]
+    found += sorted(set(_words(text)) & people_words)
+    found += [w for w in SPATIAL_WORDS if re.search(rf"\b{w}\b", lower)]
+    return found
+
+
+def in_season(pack, text, date):
+    """Whether a title or blurb suits an ISO `date`; text without a season always does."""
+    window = pack.get("seasons", {}).get(text)
+    if not window:
+        return True
+    start, end = window
+    day = date[5:]
+    return start <= day <= end if start <= end else day >= start or day <= end
+
+
+def bare_plural(noun):
+    """Whether a noun cannot follow "a": "mail sacks" cannot; "vase of roses" and "sarcophagus" can."""
+    head = noun.split(" of ")[0]
+    return head.endswith("s") and not head.endswith(("ss", "us"))
 
 
 def validate(pack):
@@ -127,6 +162,11 @@ def validate(pack):
     nouns = [v.lower() for v in objects.values()]
     if len(set(nouns)) != len(nouns):
         problems.append("object nouns must be distinct")
+    plural = [noun for noun in objects.values() if bare_plural(noun)]
+    if plural:
+        problems.append(
+            f"statements say 'a <noun>', so these cannot be nouns: {plural}"
+        )
     visual = pack["visual"]
     known_skins = props.all_skins()
     for kind, skin in (visual.get("skins") or {}).items():
@@ -151,19 +191,15 @@ def validate(pack):
             problems.append(f"bad colour {tint!r}")
     # Blurbs and titles are read before the case is solved: they must name no room, object,
     # person or direction, so they carry no information.
-    phrases = [n.lower() for n in names] + [v.lower() for v in objects.values()]
-    people_words = {
-        w
-        for person in list(cast()["suspects"].values()) + cast()["victims"]
-        for w in _words(person["name"])
-    }
     for blurb in pack["blurbs"] + pack["titles"]:
-        lower = blurb.lower()
-        leaks = [p for p in phrases if re.search(rf"\b{re.escape(p)}\b", lower)]
-        leaks += sorted(set(_words(blurb)) & people_words)
-        leaks += [w for w in SPATIAL_WORDS if re.search(rf"\b{w}\b", lower)]
-        if leaks:
-            problems.append(f"blurb/title {blurb!r} mentions {leaks}")
+        found = leaks(pack, blurb)
+        if found:
+            problems.append(f"blurb/title {blurb!r} mentions {found}")
+    for text, window in pack.get("seasons", {}).items():
+        if text not in pack["titles"] + pack["blurbs"]:
+            problems.append(f"season for unknown title or blurb {text!r}")
+        if len(window) != 2 or not all(re.fullmatch(r"\d\d-\d\d", d) for d in window):
+            problems.append(f"bad season for {text!r}: {window}")
     for line in pack.get("epilogues", ()):
         fields = set(re.findall(r"{(\w+)}", line))
         if not fields <= EPILOGUE_FIELDS:
@@ -213,10 +249,24 @@ def assign_rooms(case, rooms):
     return out
 
 
-def dress(case, setting_id, *, salt=""):
-    """A Theme for `case` in setting `setting_id`, with the recurring cast."""
+def dress(
+    case,
+    setting_id,
+    *,
+    salt="",
+    title=None,
+    blurb=None,
+    date=None,
+    objects=None,
+    skins=None,
+):
+    """A Theme for `case` in setting `setting_id`, with the recurring cast. `title` and `blurb`
+    replace the hashed picks; an ISO `date` keeps a hashed blurb in season; `objects` and `skins`
+    rename and redraw prop kinds for one day, such as a holiday."""
     pack = load(setting_id)
     key = f"{setting_id}|{case.content_hash()}|{salt}"
+    blurbs = [b for b in pack["blurbs"] if not date or in_season(pack, b, date)]
+    blurbs = blurbs or pack["blurbs"]
     people = cast()
     names, pronouns = {}, {}
     for symbol in case.characters:
@@ -239,9 +289,12 @@ def dress(case, setting_id, *, salt=""):
     chosen = assign_rooms(case, rooms)
     areas = tuple(rooms[chosen[a]]["name"] for a in range(case.scene.n_areas))
     present = {p.pid for p in case.scene.props}
-    objects = {k: v for k, v in pack["objects"].items() if k in present}
+    nouns = {**pack["objects"], **(objects or {})}
+    objects = {k: v for k, v in nouns.items() if k in present}
     visual = dict(pack["visual"])
     visual["setting"] = setting_id
+    if skins:
+        visual["skins"] = {**visual.get("skins", {}), **skins}
     for field, slot in (("finish", "area_finishes"), ("wallpaper", "area_wallpapers")):
         chosen_values = {
             str(a): rooms[chosen[a]][field]
@@ -252,12 +305,12 @@ def dress(case, setting_id, *, salt=""):
             visual[slot] = chosen_values
     theme = Theme(
         theme_id=f"{setting_id}-{hashlib.sha256(key.encode()).hexdigest()[:8]}",
-        title=pack["titles"][_pick(key + "|title", len(pack["titles"]))],
+        title=title or pack["titles"][_pick(key + "|title", len(pack["titles"]))],
         names=names,
         pronouns=pronouns,
         areas=areas,
         objects=objects,
-        blurb=pack["blurbs"][_pick(key + "|blurb", len(pack["blurbs"]))],
+        blurb=blurb or blurbs[_pick(key + "|blurb", len(blurbs))],
         setting_id=setting_id,
         visual=visual,
     )
@@ -339,12 +392,16 @@ def restyle(case, theme, spec):
     return out
 
 
-def epilogue(theme, case, murderer, area_id, *, salt=""):
-    """Post-solve paragraph: only ever shown after the case is closed."""
+def epilogue(theme, case, murderer, area_id, *, salt="", pool=None, motive=None):
+    """Post-solve paragraph: only ever shown after the case is closed. `pool` limits the choice to
+    the first templates and motives; `motive` replaces the hashed one."""
     pack = load(theme.setting_id)
     key = f"{theme.theme_id}|{salt}"
-    line = pack["epilogues"][_pick(key + "|epilogue", len(pack["epilogues"]))]
-    motive = pack["motives"][_pick(key + "|motive", len(pack["motives"]))]
+    templates, motives = pool or (None, None)
+    lines = pack["epilogues"][:templates]
+    reasons = pack["motives"][:motives]
+    line = lines[_pick(key + "|epilogue", len(lines))]
+    motive = motive or reasons[_pick(key + "|motive", len(reasons))]
     return line.format(
         murderer=theme.name(murderer).split()[0],
         victim=theme.name(case.victim),

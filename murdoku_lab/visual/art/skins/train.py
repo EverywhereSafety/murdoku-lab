@@ -1,5 +1,7 @@
 """The Midnight Meridian sleeper: berths, a dining car, a samovar, luggage and a coal heap."""
 
+import math
+
 from . import _kit as k
 from ._kit import INK, f, grad, legs, s, shadow
 
@@ -10,6 +12,9 @@ GRADIENTS = {
     "churn": ("#e3e7e6", "#a9b1b0"),
     "wicker": ("#dcb57a", "#b88d52"),
     "tartan": ("#3f6d5c", "#2c4f42"),
+    "deco-green": ("#2e7f62", "#154436"),
+    "chrome": ("#f5f8f9", "#98a4aa"),
+    "founder-stone": ("#b9bdb8", "#858a86"),
 }
 
 
@@ -477,6 +482,125 @@ def _green_velvet(pid):
     return k.face_pattern(pid, body)
 
 
+def _corridor_runner(length, width):
+    wine, gold, green = "#6e1f36", "#e0b95e", "#2f5c48"
+    o = [
+        f'<rect x="2" width="{f(length - 4)}" height="{f(width)}" fill="{wine}" {s(2)}/>',
+        f'<path d="M2 5.4H{f(length - 2)}M2 {f(width - 5.4)}H{f(length - 2)}" stroke="{green}" stroke-width="4"/>',
+        f'<path d="M2 9H{f(length - 2)}M2 {f(width - 9)}H{f(length - 2)}" stroke="{gold}" stroke-width="1.6"/>',
+    ]
+    cy = width / 2
+    n = max(2, round((length - 18) / 24))
+    step = (length - 18) / n
+    a, b = step * 0.42, min(width * 0.27, 13)
+    for i in range(n):
+        x = 9 + step * (i + 0.5)
+        o.append(
+            f'<path d="M{f(x - a)} {f(cy)}L{f(x)} {f(cy - b)}L{f(x + a)} {f(cy)}L{f(x)} {f(cy + b)}Z" fill="{gold}" stroke="#3b1020" stroke-width="1.2"/>'
+            f'<path d="M{f(x - a * 0.48)} {f(cy)}L{f(x)} {f(cy - b * 0.48)}L{f(x + a * 0.48)} {f(cy)}L{f(x)} {f(cy + b * 0.48)}Z" fill="{green}"/>'
+        )
+    # brass stair rods hold down both ends
+    for x in (4.5, length - 4.5):
+        o.append(k.outlined(f"M{f(x)} -5V{f(width + 5)}", "#dcb65a", 3.4, ink_width=6))
+        for y in (-6, width + 6):
+            o.append(
+                f'<circle cx="{f(x)}" cy="{f(y)}" r="3.8" fill="{grad("brass")}" {s(1.4)}/>'
+            )
+    return "".join(o)
+
+
+def corridor_runner(w, h):
+    # narrow: it keeps to the middle of its footprint, running the long way (north–south if square)
+    cy = h / 2 + 3
+    box = (10, cy - 29, w - 10, cy + 29) if w > h else (21, 8, w - 21, h - 8)
+    return k.rug(w, h, _corridor_runner, box=box)
+
+
+def lounge_piano(w, h):
+    cx = w / 2
+    x0, x1 = cx - 34, cx + 34
+    green, chrome = grad("deco-green"), grad("chrome")
+    o = [shadow(cx, h - 12, 38, 8)]
+    # tubular chrome legs
+    for x in (x0 + 9, x1 - 9):
+        o.append(
+            f'<rect x="{f(x - 2.6)}" y="76" width="5.2" height="9" fill="{chrome}" {s(1.6)}/>'
+            f'<rect x="{f(x - 6)}" y="84" width="12" height="3.6" rx="1.8" fill="{chrome}" {s(1.4)}/>'
+        )
+    # the stepped deco case, and the chrome line that follows its top
+    o.append(
+        f'<path d="M{f(x0)} 78V20Q{f(x0)} 12 {f(x0 + 8)} 12H{f(cx - 22)}V4H{f(cx - 12)}V-4H{f(cx + 12)}V4H{f(cx + 22)}V12H{f(x1 - 8)}Q{f(x1)} 12 {f(x1)} 20V78Z" fill="{green}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(x0 + 4)} 24V21Q{f(x0 + 4)} 16 {f(x0 + 9)} 16H{f(cx - 18)}V8H{f(cx - 8)}V0H{f(cx + 8)}V8H{f(cx + 18)}V16H{f(x1 - 9)}Q{f(x1 - 4)} 16 {f(x1 - 4)} 21V24" fill="none" stroke="#dfe6e8" stroke-width="2"/>'
+    )
+    # a chrome sunburst flanked by speed lines
+    rays = "".join(
+        f"M{f(cx)} 36L{f(cx + 16 * math.sin(math.radians(a)))} {f(36 - 26 * math.cos(math.radians(a)))}"
+        for a in (-60, -30, 0, 30, 60)
+    )
+    o.append(
+        f'<path d="{rays}" stroke="#dfe6e8" stroke-width="2" stroke-linecap="round"/>'
+        f'<path d="M{f(cx - 7)} 36A7 7 0 0 1 {f(cx + 7)} 36Z" fill="{chrome}" {s(1.2)}/>'
+    )
+    for y in (24, 30, 36):
+        o.append(
+            f'<path d="M{f(x0 + 5)} {y}H{f(cx - 20)}M{f(cx + 20)} {y}H{f(x1 - 5)}" stroke="#dfe6e8" stroke-width="2"/>'
+        )
+    o.append(k.keyboard(x0 + 2, x1 - 2, 41, 14))
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="54" width="72" height="5.4" rx="2.4" fill="{chrome}" {s(1.5)}/>'
+    )
+    # polish on the lower panel, a chrome kick plate under it
+    o.append(k.highlight(f"M{f(x0 + 7)} 73L{f(x0 + 21)} 62", 0.45, 3))
+    o.append(k.highlight(f"M{f(x0 + 16)} 73L{f(x0 + 26)} 65", 0.3, 2))
+    o.append(k.highlight(f"M{f(x0 + 7)} 21V24", 0.4, 2))
+    o.append(
+        f'<rect x="{f(x0 + 2)}" y="73" width="64" height="5" fill="{chrome}" {s(1.3)}/>'
+    )
+    return "".join(o)
+
+
+def founder_bust(w, h):
+    cx = w / 2
+    stone, whisker = grad("founder-stone"), "#7b817d"
+    o = [shadow(cx, h - 12, 22, 7)]
+    # a mahogany post with a small bracket, plated in brass
+    o.append(
+        f'<rect x="{f(cx - 15)}" y="81" width="30" height="7" rx="2" fill="{grad("mahogany")}" {s()}/>'
+        f'<rect x="{f(cx - 8)}" y="56" width="16" height="26" fill="{grad("mahogany")}" {s()}/>'
+        f'<path d="M{f(cx - 25)} 37H{f(cx + 25)}Q{f(cx + 24)} 52 {f(cx + 10)} 54Q{f(cx + 8)} 57 {f(cx + 8)} 60H{f(cx - 8)}Q{f(cx - 8)} 57 {f(cx - 10)} 54Q{f(cx - 24)} 52 {f(cx - 25)} 37Z" fill="{grad("mahogany")}" {s()}/>'
+    )
+    o.append(
+        f'<rect x="{f(cx - 28)}" y="32" width="56" height="7" rx="2" fill="{grad("brass")}" {s()}/>'
+        f'<rect x="{f(cx - 15)}" y="41" width="30" height="11" rx="1.4" fill="{grad("brass")}" {s(1.4)}/>'
+        f'<path d="M{f(cx - 10)} 45h20M{f(cx - 8)} 48.4h16" stroke="#7a5a1c" stroke-width="1.2"/>'
+    )
+    # frock-coated shoulders: lapels, wing collar, bow tie
+    o.append(
+        f'<path d="M{f(cx - 24)} 33Q{f(cx - 27)} 15 {f(cx - 11)} 11L{f(cx - 6)} 5H{f(cx + 6)}L{f(cx + 11)} 11Q{f(cx + 27)} 15 {f(cx + 24)} 33Z" fill="{stone}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 7)} 11L{f(cx - 1)} 33M{f(cx + 7)} 11L{f(cx + 1)} 33M{f(cx - 15)} 15L{f(cx - 7)} 26M{f(cx + 15)} 15L{f(cx + 7)} 26" fill="none" stroke="#5f6461" stroke-width="1.6" stroke-linecap="round"/>'
+        f'<path d="M{f(cx - 7)} 9L{f(cx)} 13L{f(cx + 7)} 9L{f(cx + 7)} 16L{f(cx)} 13L{f(cx - 7)} 16Z" fill="#8d928e" {s(1.2)}/>'
+    )
+    # the head, balding, and those whiskers: mutton chops running into a moustache
+    o.append(f'<ellipse cx="{f(cx)}" cy="-11" rx="14" ry="16.5" fill="{stone}" {s()}/>')
+    o.append(
+        f'<path d="M{f(cx - 14)} -14Q{f(cx - 18.5)} -3 {f(cx - 12)} 5Q{f(cx - 7)} 3 {f(cx - 7)} -1Q{f(cx - 3)} 1 {f(cx)} -2.6Q{f(cx + 3)} 1 {f(cx + 7)} -1Q{f(cx + 7)} 3 {f(cx + 12)} 5Q{f(cx + 18.5)} -3 {f(cx + 14)} -14Q{f(cx + 11)} -7 {f(cx + 7)} -5.4Q{f(cx)} -7.6 {f(cx - 7)} -5.4Q{f(cx - 11)} -7 {f(cx - 14)} -14Z" fill="{whisker}" {s(1.6)}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 14)} -3q2.4 1 3.4 3M{f(cx + 14)} -3q-2.4 1 -3.4 3M{f(cx - 13)} -8q1.6 1 2.4 2.4M{f(cx + 13)} -8q-1.6 1 -2.4 2.4" fill="none" stroke="#454a47" stroke-width="1.2" stroke-linecap="round"/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 9)} -15q3.4 -2.6 7 0M{f(cx + 2)} -15q3.4 -2.6 7 0" fill="none" stroke="#3f4441" stroke-width="2.2" stroke-linecap="round"/>'
+        f'<circle cx="{f(cx - 5.4)}" cy="-11.5" r="1.3" fill="#3f4441"/><circle cx="{f(cx + 5.4)}" cy="-11.5" r="1.3" fill="#3f4441"/>'
+        f'<path d="M{f(cx)} -11l-1.8 4.6h3" fill="none" stroke="#3f4441" stroke-width="1.3" stroke-linejoin="round"/>'
+    )
+    o.append(k.highlight(f"M{f(cx - 8)} -24Q{f(cx - 3)} -27 {f(cx + 3)} -26", 0.5, 2.2))
+    return "".join(o)
+
+
 SKINS = {
     "berth": berth,
     "compartment_seat": compartment_seat,
@@ -489,13 +613,22 @@ SKINS = {
     "railway_lantern": railway_lantern,
     "coal_heap": coal_heap,
     "milk_churn": milk_churn,
+    "corridor_runner": corridor_runner,
+    "lounge_piano": lounge_piano,
+    "founder_bust": founder_bust,
 }
 WALLPAPERS = {
     "walnut_panels": _walnut_panels,
     "night_window": _night_window,
     "green_velvet": _green_velvet,
 }
-STRETCH = {"berth", "dining_car_table", "luggage_rack", "luggage_trolley"}
+STRETCH = {
+    "berth",
+    "dining_car_table",
+    "luggage_rack",
+    "luggage_trolley",
+    "corridor_runner",
+}
 TALL = {
     "berth",
     "compartment_seat",
@@ -503,4 +636,6 @@ TALL = {
     "luggage_rack",
     "railway_lantern",
     "coal_heap",
+    "lounge_piano",
+    "founder_bust",
 }

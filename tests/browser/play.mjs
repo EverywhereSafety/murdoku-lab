@@ -194,6 +194,22 @@ try {
     assert.equal(await page.locator(".pl-token").count(), 0, "a fresh start survives a refresh");
     checks.push("a solved training case can be played again from the start");
   }
+  // No card is blank: the victim shows the rule, and a suspect with no statement says so.
+  const quiet = fs.readdirSync(path.join(root, "cases"))
+    .filter((name) => name.endsWith(".json") && name !== "index.json")
+    .map((name) => JSON.parse(fs.readFileSync(path.join(root, "cases", name), "utf8")))
+    .find((b) => b.public.people.some((p) => !p.victim && !b.public.clues.some((c) => c.person === p.id)));
+  if (quiet) {
+    await page.goto(`${base}?case=${quiet.id}`, { waitUntil: "networkidle" });
+    assert.equal(
+      await page.evaluate(() => [...document.querySelectorAll(".pl-suspect")].filter((n) => !n.querySelector(".pl-statement, .pl-person-note")).length),
+      0,
+    );
+    assert.match(await page.locator(".pl-suspect:not(.is-victim) .pl-person-note").first().textContent(), /no statement/i);
+    assert.match(await page.locator(".pl-suspect.is-victim .pl-person-note").textContent(), /murderer/i);
+    checks.push("no suspect card is blank: the victim shows the rule, a silent suspect says so");
+  }
+
   // Regressions from the 24-person player review.
   await page.goto(`${base}?case=museum`, { waitUntil: "networkidle" });
   const museum = JSON.parse(fs.readFileSync(path.join(root, "cases/museum.json"), "utf8"));
@@ -236,24 +252,25 @@ try {
     const day = manifest.days[Math.min(3, manifest.days.length - 1)];
     const later = manifest.days.find((d) => d.date > day.date);
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    // Real local midnight updates both the library and an already-open locked route.
-    const clockContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    // Midnight UTC updates both the library and an already-open locked route, in any time zone.
+    const timezoneId = "America/Los_Angeles";
+    const clockContext = await browser.newContext({ timezoneId, viewport: { width: 1440, height: 900 } });
     const rollover = await clockContext.newPage();
     watch(rollover, "midnight");
     const nextDay = manifest.days.find((d) => d.n === day.n + 1);
     if (nextDay) {
-      await rollover.clock.install({ time: new Date(`${day.date}T23:59:59`) });
+      await rollover.clock.install({ time: new Date(`${day.date}T23:59:59Z`) });
       await rollover.goto(base, { waitUntil: "networkidle" });
-      await rollover.clock.pauseAt(new Date(`${day.date}T23:59:59.900`));
+      await rollover.clock.pauseAt(new Date(`${day.date}T23:59:59.900Z`));
       await rollover.clock.runFor(2000);
       await rollover.waitForFunction((n) => document.querySelector(".pl-card.is-today .pl-card-setting")?.textContent.includes(`#${n} ·`), nextDay.n);
       assert.equal(await rollover.locator(`.pl-day[title^="#${nextDay.n} ·"]`).isEnabled(), true);
       await rollover.close();
       await clockContext.close();
-      const lockedContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      const lockedContext = await browser.newContext({ timezoneId, viewport: { width: 1440, height: 900 } });
       const lockedPage = await lockedContext.newPage();
       watch(lockedPage, "locked-midnight");
-      await lockedPage.clock.install({ time: new Date(`${day.date}T23:59:58`) });
+      await lockedPage.clock.install({ time: new Date(`${day.date}T23:59:58Z`) });
       await lockedPage.goto(`${base}?d=${nextDay.n}`, { waitUntil: "networkidle" });
       await lockedPage.locator(".pl-empty h2").waitFor();
       await lockedPage.clock.fastForward(4000);

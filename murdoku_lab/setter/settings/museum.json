@@ -11,13 +11,47 @@
     "The Missing Exhibit",
     "Black Tie, Red Herring",
     "Dust and Diamonds",
-    "The Last Private View"
+    "The Last Private View",
+    "Exhibit A",
+    "The Forger's Gambit",
+    "Relics and Revenge",
+    "A Private Collection",
+    "Death Among the Antiquities",
+    "The Pharaoh's Secret",
+    "Priceless",
+    "The Vanishing Curator",
+    "Not for Sale",
+    "Please Do Not Touch",
+    "Museum Piece",
+    "On Permanent Loan",
+    "A Question of Provenance",
+    "Fakes and Fortunes",
+    "Handle with Care",
+    "Open Late",
+    "The Art of Murder",
+    "The Mummy's Alibi",
+    "Buried Treasure",
+    "Period Piece",
+    "Old Masters, New Murders",
+    "A Stroke of Genius",
+    "Uncatalogued",
+    "The Trustees' Dinner",
+    "Ancient History",
+    "Last Admission"
   ],
   "blurbs": [
     "Champagne, speeches, and a priceless collection that someone was willing to kill for.",
     "The doors were locked at midnight. When they opened again, the guest list was one name shorter.",
     "Every artefact has a story. Tonight one of the guests became part of the collection.",
-    "A gala for the new wing, a family feud and a curator with a secret."
+    "A gala for the new wing, a family feud and a curator with a secret.",
+    "A new exhibition, a priceless jewel on loan and a guest who will not see it go home.",
+    "The lights dim for the speeches. When they come up again, one of the patrons is dead.",
+    "Every object here was stolen once. Tonight, someone stole a life.",
+    "The trustees are toasting a record donation. The donor will not live to enjoy it.",
+    "The alarm was switched off for the party. Someone knew exactly how long the party would last.",
+    "A new acquisition, an old scandal and a trustee who asked one question too many.",
+    "Visitors are asked not to touch the exhibits. Nobody said anything about the guests.",
+    "Behind every label is a lie, and behind tonight's speeches is a motive."
   ],
   "rooms": [
     {"name": "Great Hall", "suits": ["statue", "carpet", "flowers", "palm"], "finish": "marble", "wallpaper": "marble_wall"},
@@ -47,7 +81,7 @@
     "shelf": "specimen cabinet",
     "plant": "potted fern",
     "tree": "ornamental tree",
-    "flowers": "gala flowers",
+    "flowers": "gala bouquet",
     "shrub": "flowering shrub",
     "crate": "shipping crate",
     "box": "archive box",
@@ -76,7 +110,9 @@
       "bear": "dino_skull",
       "statue": "classical_statue",
       "boulder": "meteorite",
-      "barrel": "amphora"
+      "barrel": "amphora",
+      "carpet": "red_carpet",
+      "piano": "pianola"
     }
   },
   "motives": [
@@ -84,11 +120,26 @@
     "a donor wanted their gift back, and was refused",
     "the catalogue listed an artefact that had never left the family",
     "the new wing was about to be named after the wrong person",
-    "an expedition diary told a very different story from the official one"
+    "an expedition diary told a very different story from the official one",
+    "the provenance papers had been written last spring, in a suspiciously modern ink",
+    "a rival museum had been promised the whole collection",
+    "an unpaid assistant had made the discovery the director took credit for",
+    "a crate from the last expedition had never been opened, and should not have been",
+    "the insurance valuation was about to be checked by someone honest",
+    "a family heirloom had turned up behind glass with someone else's name on it",
+    "the restorer had found a signature under the varnish",
+    "the director's doctorate turned out to be as genuine as the Roman coins",
+    "the gala's record donation was stolen money with a very long memory",
+    "a letter in the files named the real owner of the collection"
   ],
   "epilogues": [
     "{murderer} found {victim} in the {area} after the speeches, with nobody else about. Only one of them came back to the party, because {motive}.",
     "The {area} was closed to guests, which suited {murderer} perfectly: {motive}.",
-    "Two people were in the {area} when the lights dimmed: {victim} and {murderer}. The reason had been in the catalogue all along: {motive}."
+    "Two people were in the {area} when the lights dimmed: {victim} and {murderer}. The reason had been in the catalogue all along: {motive}.",
+    "The guards' round passes the {area} every hour. {murderer} needed only ten minutes with {victim}, because {motive}.",
+    "Among all those priceless things, nobody looks at the people. {murderer} and {victim} had the {area} to themselves: {motive}.",
+    "By the time the last toast was drunk, {murderer} was back among the guests and {victim} was still in the {area}. The catalogue would need a new entry: {motive}.",
+    "{murderer} knew the {area} would be empty during the speeches. {victim} did not, and {murderer} had good reason to keep it so: {motive}.",
+    "Exhibits do not talk, which made the {area} ideal. {murderer} had waited a long time to see {victim} there: {motive}."
   ]
 }

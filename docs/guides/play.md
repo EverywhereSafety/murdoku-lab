@@ -27,7 +27,7 @@ npm run release:local
 ```
 
 This prepares the complete release from versioned inputs: 24 frozen themed cases, five
-classics, one training case and 14 locked daily cases, plus the brand assets and a
+classics and one training case, any daily cases in `data/daily/`, the brand assets and a
 design-token check. It then builds the web app and serves everything on one port.
 The release does not generate new puzzles or re-theme existing release cases, and it
 does not depend on an `outputs/showcase/` directory.
@@ -67,7 +67,7 @@ python scripts/package_preview.py --site https://example.org/murdoku-preview/ \
 ```
 
 Replace the example address with your preview host. This prepares the current frozen
-collection and locked daily cases, then writes `outputs/site/murdoku-preview/`.
+collection and any daily cases in `data/daily/`, then writes `outputs/site/murdoku-preview/`.
 Share links and preview images point at the preview address, every page carries
 `noindex`, and `lab/` links to the explicit `--lab` destination. This package is for
 temporary previews; the public `/murdoku/exp/` address remains a redirect to the canonical
@@ -81,7 +81,7 @@ The player's saves (`murdoku:v1:*` in local storage) do not touch the Lab's
 The homepage opens with the workshop introduction and main generated-case action on the
 left, explaining the focus on unique solutions, discovery rhythm and varied worlds. The
 daily case appears on the right, with previous/next date controls, a **Today** reset and
-a native range slider for browsing the published season. Future cases remain locked.
+a native range slider for browsing the released cases. A case stays locked until its date.
 Daily statistics and an expandable season calendar appear farther down the page.
 Project and Blog links stay in the header; the full resource navigation stays in the footer.
 
@@ -143,9 +143,9 @@ python -m murdoku_lab.visual.play_export
 ```
 
 For a complete release, `npm run release:local` and `scripts/build_play.py` share
-`scripts.release_local.prepare_assets()`: each build prepares this library, the 14 locked
-daily cases with share links for its base URL, the brand assets and the design-token check
-before invoking Vite. These commands read the frozen inputs each time; previous files in
+`scripts.release_local.prepare_assets()`: each build prepares this library, the brand assets
+and the design-token check before invoking Vite. The local release adds any daily cases in
+`data/daily/`, with share links for its base URL; the production build leaves daily cases out. These commands read the frozen inputs each time; previous files in
 `outputs/showcase/` are not release inputs.
 
 ### Generate a custom collection
@@ -227,8 +227,9 @@ npm ci
 python scripts/build_play.py --site-url https://everywheresafety.github.io/murdoku/play/
 ```
 
-Copy the contents of `dist/` into the website checkout's `murdoku/play/`
-(`../site/murdoku/play/` in the paired checkout). Existing Play links in the project
+Copy the contents of `dist/` over the website checkout's `murdoku/play/`
+(`../site/murdoku/play/` in the paired checkout), keeping its `daily/`, `og/` and `d/` folders,
+which the website's [daily job](daily.md#daily-release) maintains. Existing Play links in the project
 and blog then open the new player, and its Research Lab link opens `lab/` beneath it.
 The old `/murdoku/exp/` address is kept as a redirect that preserves query parameters
 and fragments. The build command itself does not publish.

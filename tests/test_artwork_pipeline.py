@@ -4,6 +4,10 @@ Records exported before the casebook existed carry no style and keep the legacy 
 so published datasets render exactly as they did.
 """
 
+import os
+import subprocess
+import sys
+
 import pytest
 
 from murdoku_lab.environment.queries import make_record
@@ -58,3 +62,29 @@ def test_casebook_rasterises_with_bundled_fonts_only():
     info = renderer_info(CASEBOOK)
     assert info["style"] == CASEBOOK and len(info["font_sha256"]) == 64
     assert renderer_info("classic")["fonts"] == "system"
+
+
+def test_casebook_scenes_do_not_depend_on_the_hash_seed():
+    """Set order follows PYTHONHASHSEED, so a scene that lists its floors from a set would make
+    every daily build write different files."""
+    script = (
+        "from murdoku_lab.environment.state import Scratchpad\n"
+        "from murdoku_lab.setter import settings\n"
+        "from murdoku_lab.visual.art import casebook\n"
+        "from murdoku_lab.visual.demos import glasshouse\n"
+        "from murdoku_lab.visual.projection import public_observation\n"
+        "case = glasshouse().case\n"
+        "obs = public_observation(Scratchpad(case, settings.dress(case, 'manor')))\n"
+        "print(casebook.scene_svg(obs))\n"
+    )
+    scenes = {
+        subprocess.run(
+            [sys.executable, "-c", script],
+            env={**os.environ, "PYTHONHASHSEED": seed},
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        for seed in ("1", "2")
+    }
+    assert len(scenes) == 1

@@ -53,6 +53,7 @@ Eight packs ship in `murdoku_lab/setter/settings/`:
 | ----------- | --------------------------------------------------------------------------------------- |
 | `name`, `eyebrow` | Setting name on cards and the line above a case title                              |
 | `titles`, `blurbs` | Read before the case is solved, so they must carry no information (see checks)   |
+| `seasons`   | Optional: title or blurb → `["MM-DD", "MM-DD"]`, the dates it suits. A season may wrap the new year; text without one suits any date |
 | `rooms`     | At least nine. `suits` lists the prop kinds a room fits; `finish` and `wallpaper` dress it |
 | `objects`   | A distinct noun for each of the 20 classic prop kinds                                   |
 | `visual.accent` | Page accent while the case is open, also used for cards                             |
@@ -64,14 +65,15 @@ Eight packs ship in `murdoku_lab/setter/settings/`:
 
 ## Dressing a case
 
-`settings.dress(case, setting_id, salt="")` returns a `Theme`:
+`settings.dress(case, setting_id, salt="", title=None, blurb=None, date=None)` returns a `Theme`:
 
 - **Rooms**: a maximum-weight matching gives each area the room that best suits the props
   inside it, so a piano lands in the music room. Ties follow the pack's order.
 - **Cast**: suspects A–H are the recurring cast in `murdoku_lab/resources/cast.json`, with
   the same name and face in every case. The victim is always a member of the Vane family.
 - **Title, blurb, epilogue**: chosen by hashing the setting, the case's content hash and the
-  salt. The daily lock tries other salts to avoid repeating a title or a recent victim.
+  salt, unless `title` or `blurb` is given; a `date` keeps the hashed blurb in season. The daily
+  lock schedules the title for each date and tries other salts to avoid a recent victim.
 - **Look**: the pack's `visual`, plus each area's finish and wallpaper from its room.
 
 ## Restyling a case that has its own theme
@@ -99,9 +101,11 @@ of the same name; the Lab keeps drawing it as written.
 - schema, required fields, at least nine distinct room names;
 - room `suits` name real prop kinds; finishes, wallpapers, floor variants, skins and the
   frame all exist; colours are `#rrggbb`;
-- every classic prop kind has a noun, and nouns are distinct;
+- every classic prop kind has a noun, and nouns are distinct and can follow "a" in a
+  statement: "vase of roses", not "roses";
 - titles and blurbs mention no room, object, cast member or spatial word (north, left,
   beside, corner, row, alone, …);
+- `seasons` name real titles or blurbs and use `MM-DD` dates;
 - epilogues use only the four known fields.
 
 ## Adding a pack

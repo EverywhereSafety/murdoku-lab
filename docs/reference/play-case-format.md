@@ -51,8 +51,8 @@ including its progress stamp, without loading a case.
 ]}
 ```
 
-The manifest lists the whole locked season, so the calendar can show future days as
-locked. The app decides which days open from the player's local date.
+The manifest lists the days released so far, up to two days ahead, and the calendar shows
+those future days as locked. The app decides which days open from the current UTC date.
 
 ## Case bundle: `murdoku.play_case/1`
 

@@ -158,7 +158,7 @@ def scene_svg(
         materials.hatch_pattern("#3b2418"),
         tokens.clip_defs(),
     ]
-    for style in {(s["finish"], s["variant"]) for s in styles.values()}:
+    for style in sorted({(s["finish"], s["variant"]) for s in styles.values()}):
         defs.append(materials.floor_pattern(*style))
     for wp in sorted({s["wallpaper"] for s in styles.values()}):
         defs.append(materials.wallpaper_pattern(wp))

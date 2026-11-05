@@ -14,6 +14,8 @@ Preview switches for the player: ?date=YYYY-MM-DD plays as if it were that day,
 """
 
 import argparse
+import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -40,10 +42,23 @@ def run(*command):
     subprocess.run(command, check=True, cwd=ROOT)
 
 
-def prepare_assets(site_url):
-    """Rebuild public assets from versioned content, without generating new puzzles."""
+def has_daily_cases():
+    """Whether this checkout holds a local copy of the private daily dataset."""
+    base = Path(os.environ.get("MURDOKU_DAILY_DIR") or ROOT / "data" / "daily")
+    return any(base.glob("*/days/*.json"))
+
+
+def prepare_assets(site_url, with_daily=True):
+    """Rebuild public assets from versioned content, without generating new puzzles. Daily cases
+    come from the local copy of the private dataset, when there is one. A production build leaves
+    them out, because the website's daily job releases them one day at a time."""
     run(PYTHON, "-m", "murdoku_lab.visual.play_export")
-    run(PYTHON, "-m", "murdoku_lab.setter.daily", "build", "--site-url", site_url)
+    if with_daily and has_daily_cases():
+        run(PYTHON, "-m", "murdoku_lab.setter.daily", "build", "--site-url", site_url)
+    else:
+        for name in ("daily", "og", "d"):
+            shutil.rmtree(ROOT / "web" / "public" / name, ignore_errors=True)
+        print("Building without daily cases.", flush=True)
     run(PYTHON, "scripts/build_brand_assets.py")
     run(PYTHON, "-m", "murdoku_lab.visual.art.design_tokens", "--check")
 

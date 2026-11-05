@@ -11,6 +11,7 @@ GRADIENTS = {
     "snowmobile": ("#e2523f", "#b23424"),
     "plaid": ("#c43b3f", "#9a2a2f"),
     "bark": ("#9a6a43", "#6f4a2c"),
+    "pine": ("#ecc98f", "#cf9f62"),
 }
 
 
@@ -515,6 +516,222 @@ def _tartan(pid):
     return k.face_pattern(pid, body)
 
 
+def upright_piano(w, h):
+    cx = w / 2
+    x0, x1 = cx - 31, cx + 31
+    pine, seam = grad("pine"), "#b07a45"
+    o = [shadow(cx, h - 12, 38, 8)]
+    o.append(legs(((x0 + 7, 74), (x1 - 7, 74)), 86, 7.4, "#a8723f"))
+    o.append(
+        f'<rect x="{f(x0)}" y="-3" width="62" height="81" rx="2" fill="{pine}" {s()}/>'
+    )
+    planks = "".join(f"M{f(x0 + i * 62 / 5)} -2V38" for i in range(1, 5))
+    o.append(f'<path d="{planks}" stroke="{seam}" stroke-width="1.3"/>')
+    # knots in the pine, a heart cut out of it
+    for x, y, rx in (
+        (x0 + 8, 6, 2.6),
+        (x1 - 10, 28, 2.8),
+        (x0 + 14, 70, 2.6),
+        (x1 - 12, 68, 2),
+    ):
+        o.append(
+            f'<ellipse cx="{f(x)}" cy="{y}" rx="{rx}" ry="{f(rx * 0.7)}" fill="#8a5a33"/>'
+            f'<ellipse cx="{f(x)}" cy="{y}" rx="{f(rx + 2)}" ry="{f(rx * 0.7 + 1.6)}" fill="none" stroke="{seam}" stroke-width=".9"/>'
+        )
+    o.append(
+        f'<path d="M{f(cx)} 28C{f(cx - 16)} 16 {f(cx - 11)} 4 {f(cx)} 10C{f(cx + 11)} 4 {f(cx + 16)} 16 {f(cx)} 28Z" fill="#4a2c1d" {s(1.6)}/>'
+    )
+    o.append(
+        f'<rect x="{f(x0 - 3)}" y="-10" width="68" height="9" rx="1.5" fill="#dfb06f" {s(2)}/>'
+    )
+    # candle sconces swing out either side
+    for side in (-1, 1):
+        x = cx + side * 39
+        o.append(
+            k.outlined(
+                f"M{f(cx + side * 31)} 28Q{f(x)} 28 {f(x)} 15",
+                "#d8b264",
+                2.6,
+                ink_width=5,
+            )
+        )
+        o.append(
+            f'<circle cx="{f(x)}" cy="-14" r="8" fill="#ffd56b" fill-opacity=".35"/>'
+            f'<ellipse cx="{f(x)}" cy="15" rx="7" ry="2.6" fill="{grad("brass")}" {s(1.3)}/>'
+            f'<rect x="{f(x - 3)}" y="-6" width="6" height="20" rx="1" fill="#fbf3dc" {s(1.5)}/>'
+            f'<path d="M{f(x)} -7q4.6 -5 0 -11q-4.6 6 0 11Z" fill="#f6a62c" stroke="#b5521c" stroke-width="1"/>'
+        )
+    o.append(
+        f'<rect x="{f(x0 - 2)}" y="37" width="66" height="24" rx="2" fill="#c08a52" {s()}/>'
+    )
+    o.append(k.keyboard(x0 + 1, x1 - 1, 41, 15, keys=10))
+    planks = "".join(f"M{f(x0 + i * 62 / 4)} 62V77" for i in range(1, 4))
+    o.append(f'<path d="{planks}" stroke="{seam}" stroke-width="1.3"/>')
+    return "".join(o)
+
+
+def stone_bust(w, h):
+    cx = w / 2
+    granite = grad("granite")
+    o = [shadow(cx, h - 12, 30, 8)]
+    # a log stood on end
+    o.append(
+        f'<path d="M{f(cx - 26)} 52V80Q{f(cx)} 94 {f(cx + 26)} 80V52Z" fill="{grad("bark")}" {s()}/>'
+        f'<path d="M{f(cx - 18)} 60v22M{f(cx - 6)} 64v22M{f(cx + 8)} 62v22M{f(cx + 19)} 58v22" stroke="#4f3420" stroke-width="2" stroke-linecap="round"/>'
+        f'<ellipse cx="{f(cx)}" cy="52" rx="26" ry="9" fill="#e3b985" {s()}/>'
+        f'<ellipse cx="{f(cx)}" cy="52" rx="17" ry="5.6" fill="none" stroke="#b9895a" stroke-width="1.2"/>'
+    )
+    # rough-hewn shoulders and head, all flats and corners
+    o.append(
+        f'<path d="M{f(cx - 16)} 53L{f(cx - 26)} 42L{f(cx - 25)} 26L{f(cx - 13)} 18L{f(cx - 7)} 16L{f(cx - 7)} 7H{f(cx + 7)}L{f(cx + 7)} 16L{f(cx + 14)} 18L{f(cx + 26)} 27L{f(cx + 24)} 43L{f(cx + 15)} 53Z" fill="{granite}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx - 13)} 8L{f(cx - 16)} -8L{f(cx - 12)} -22L{f(cx + 1)} -27L{f(cx + 12)} -21L{f(cx + 16)} -7L{f(cx + 12)} 8L{f(cx + 4)} 13H{f(cx - 5)}Z" fill="{granite}" {s()}/>'
+    )
+    o.append(
+        f'<path d="M{f(cx + 6)} 18L{f(cx + 11)} 30L{f(cx + 5)} 48M{f(cx - 11)} 24L{f(cx - 5)} 36" fill="none" stroke="#6f746e" stroke-width="1.6" stroke-linecap="round"/>'
+    )
+    specks = "".join(
+        f'<circle cx="{f(cx + x)}" cy="{y}" r="1.1"/>'
+        for x, y in (
+            (-18, 32),
+            (-12, 44),
+            (-3, 28),
+            (15, 36),
+            (20, 30),
+            (6, 42),
+            (-8, 6),
+            (9, 4),
+            (-11, -14),
+        )
+    )
+    o.append(f'<g fill="#6f746e">{specks}</g>')
+    # a heavy chiselled brow, a blunt nose
+    o.append(
+        f'<path d="M{f(cx - 11)} -9L{f(cx - 2)} -6M{f(cx + 11)} -9L{f(cx + 2)} -6" stroke="#4f5450" stroke-width="2.6" stroke-linecap="round"/>'
+        f'<path d="M{f(cx - 1)} -6L{f(cx - 3)} 2H{f(cx + 3)}L{f(cx + 1)} -6" fill="#a9aca5" stroke="#4f5450" stroke-width="1.3" stroke-linejoin="round"/>'
+        f'<path d="M{f(cx - 5)} 7H{f(cx + 5)}" stroke="#4f5450" stroke-width="1.8" stroke-linecap="round"/>'
+    )
+    # a little snow settled on the head
+    o.append(
+        f'<path d="M{f(cx - 14)} -15Q{f(cx - 14)} -28 {f(cx + 1)} -31Q{f(cx + 15)} -29 {f(cx + 15)} -14Q{f(cx + 10)} -10 {f(cx + 7)} -15Q{f(cx + 3)} -10 {f(cx - 2)} -15Q{f(cx - 8)} -11 {f(cx - 14)} -15Z" fill="#fbfdff" {s(1.8)}/>'
+    )
+    return "".join(o)
+
+
+def feather_bed(w, h):
+    frame, light = grad("pine"), "#f4d9a6"
+    linen = dict(sheet="#fbf8f1", blanket="#fbf8f1", band="#fbf8f1", pillow="#fffdf8")
+    if w > h * 1.15:
+        x0, x1 = 8, w - 8
+        return "".join(
+            (
+                k.bed(w, h, frame=frame, frame_light=light, **linen),
+                _duvet(x0 + 50, 18, x1 - 12, 62, head="west"),
+                _alpine_heart(x0 + 10, 14),
+            )
+        )
+    x0, x1 = 10, w - 10
+    return "".join(
+        (
+            k.bed(w, h, frame=frame, frame_light=light, foot=False, **linen),
+            _duvet(x0 - 1, 46, x1 + 1, h - 20, head="north"),
+            f'<rect x="{f(x0)}" y="{f(h - 25)}" width="{f(x1 - x0)}" height="13" rx="4" fill="{frame}" {s()}/>',
+            _alpine_heart(w / 2, 8),
+        )
+    )
+
+
+def _alpine_heart(cx, cy):
+    return (
+        f'<path d="M{f(cx)} {f(cy + 9)}C{f(cx - 11)} {f(cy + 1)} {f(cx - 7)} {f(cy - 7)} {f(cx)} {f(cy - 3)}'
+        f'C{f(cx + 7)} {f(cy - 7)} {f(cx + 11)} {f(cy + 1)} {f(cx)} {f(cy + 9)}Z" fill="#c4302b" {s(1.5)}/>'
+    )
+
+
+def cider_keg(w, h):
+    cx = w / 2
+    y, x0, x1 = 50, cx - 22, cx + 30
+    o = [shadow(cx, h - 12, 34, 8)]
+    # the cradle: a rail and two crossed trestles
+    o.append(k.outlined(f"M{f(cx - 34)} 84H{f(cx + 36)}", "#7a4d33", 4.4, cap="butt"))
+    for x in (cx - 20, cx + 22):
+        o.append(
+            k.outlined(f"M{f(x - 13)} 84L{f(x + 13)} 54", "#9a6a43", 4.6)
+            + k.outlined(f"M{f(x + 13)} 84L{f(x - 13)} 54", "#b9824f", 4.6)
+        )
+    # the keg on its side, showing its head to the left
+    o.append(
+        f'<path d="M{f(x0)} {y - 20}Q{f(cx + 4)} {y - 33} {f(x1)} {y - 20}Q{f(x1 + 9)} {y} {f(x1)} {y + 20}Q{f(cx + 4)} {y + 33} {f(x0)} {y + 20}Z" fill="{grad("bark")}" {s()}/>'
+    )
+    for dy in (-14, -5, 5, 14):
+        o.append(
+            f'<path d="M{f(x0 + 2)} {y + dy}Q{f(cx + 4)} {f(y + dy * 1.5)} {f(x1 + 3)} {y + dy}" fill="none" stroke="#4f3420" stroke-width="1.3"/>'
+        )
+    for x, bulge in ((x0 + 9, 25), (x1 - 8, 24.5)):
+        o.append(
+            f'<path d="M{f(x)} {f(y - bulge)}Q{f(x + 5)} {y} {f(x)} {f(y + bulge)}" fill="none" stroke="#2f2b28" stroke-width="4.6"/>'
+        )
+    # a red apple stamped on the flank
+    o.append(
+        f'<path d="M{f(cx + 9)} {y - 4}C{f(cx + 3)} {y - 10} {f(cx - 3)} {y - 4} {f(cx)} {y + 3}C{f(cx + 2)} {y + 9} {f(cx + 7)} {y + 9} {f(cx + 9)} {y + 7}C{f(cx + 11)} {y + 9} {f(cx + 16)} {y + 9} {f(cx + 18)} {y + 3}C{f(cx + 21)} {y - 4} {f(cx + 15)} {y - 10} {f(cx + 9)} {y - 4}Z" fill="#d9372f" {s(1.4)}/>'
+        f'<path d="M{f(cx + 9)} {y - 4}q0 -4 3 -6" fill="none" stroke="{INK}" stroke-width="1.6" stroke-linecap="round"/>'
+    )
+    o.append(
+        f'<ellipse cx="{f(x0)}" cy="{y}" rx="9.6" ry="20.4" fill="#d9a06a" {s()}/>'
+        f'<path d="M{f(x0 - 5)} {y - 14}V{y + 14}M{f(x0)} {y - 19}V{y + 19}M{f(x0 + 5)} {y - 14}V{y + 14}" stroke="#b07a48" stroke-width="1.2"/>'
+    )
+    # the brass tap
+    o.append(
+        f'<rect x="{f(x0 - 15)}" y="{y + 3}" width="17" height="6" rx="2" fill="{grad("brass")}" {s(1.4)}/>'
+        f'<path d="M{f(x0 - 13)} {y + 9}v8h5v-8Z" fill="{grad("brass")}" {s(1.3)}/>'
+        f'<path d="M{f(x0 - 10)} {y + 3}v-7" stroke="{INK}" stroke-width="4.4" stroke-linecap="round"/>'
+        f'<path d="M{f(x0 - 10)} {y + 3}v-7" stroke="#d8b264" stroke-width="2.2" stroke-linecap="round"/>'
+    )
+    return "".join(o)
+
+
+def _duvet(x0, y0, x1, y1, *, head):
+    """A plump quilted duvet with a scalloped outline, its red-check top turned back at the head."""
+    nx, ny = max(2, round((x1 - x0) / 25)), max(2, round((y1 - y0) / 16))
+    dx, dy = (x1 - x0) / nx, (y1 - y0) / ny
+    outline = (
+        "".join(f"q{f(dx / 2)} -8 {f(dx)} 0" for _ in range(nx))
+        + "".join(f"q8 {f(dy / 2)} 0 {f(dy)}" for _ in range(ny))
+        + "".join(f"q{f(-dx / 2)} 8 {f(-dx)} 0" for _ in range(nx))
+        + "".join(f"q-8 {f(-dy / 2)} 0 {f(-dy)}" for _ in range(ny))
+    )
+    o = [f'<path d="M{f(x0)} {f(y0)}{outline}Z" fill="#fffdf8" {s()}/>']
+    # soft creases where the quilting dips in
+    creases = "".join(
+        f"M{f(x0 + (i + 0.5) * dx - 7)} {f(y0 + j * dy)}q7 4 14 0"
+        for i in range(nx)
+        for j in range(1, ny + 1)
+    )
+    o.append(
+        f'<path d="{creases}" fill="none" stroke="#cfc3ad" stroke-width="2" stroke-linecap="round"/>'
+    )
+    fold = 13
+    if head == "north":
+        rx0, ry0, rw, rh = x0 - 2, y0 - 5, x1 - x0 + 4, fold
+        rows = "".join(
+            f'<path d="M{f(rx0 + 1)} {f(ry0 + 3.2 + r * 3.3)}H{f(rx0 + rw - 1)}" stroke-dashoffset="{3.3 * (r % 2)}"/>'
+            for r in range(3)
+        )
+    else:
+        rx0, ry0, rw, rh = x0 - 3, y0 - 3, fold, y1 - y0 + 6
+        rows = "".join(
+            f'<path d="M{f(rx0 + 3.2 + r * 3.3)} {f(ry0 + 1)}V{f(ry0 + rh - 1)}" stroke-dashoffset="{3.3 * (r % 2)}"/>'
+            for r in range(3)
+        )
+    o.append(
+        f'<rect x="{f(rx0)}" y="{f(ry0)}" width="{f(rw)}" height="{f(rh)}" rx="4" fill="#fbf3e4" {s(1.8)}/>'
+        f'<g fill="none" stroke="#c4302b" stroke-width="3.3" stroke-dasharray="3.3 3.3">{rows}</g>'
+        f'<rect x="{f(rx0)}" y="{f(ry0)}" width="{f(rw)}" height="{f(rh)}" rx="4" fill="none" {s(1.8)}/>'
+    )
+    return "".join(o)
+
+
 SKINS = {
     "rocking_chair": rocking_chair,
     "sheepskin": sheepskin,
@@ -528,9 +745,13 @@ SKINS = {
     "cuckoo_clock": cuckoo_clock,
     "curling_stone": curling_stone,
     "coat_stand": coat_stand,
+    "upright_piano": upright_piano,
+    "stone_bust": stone_bust,
+    "feather_bed": feather_bed,
+    "cider_keg": cider_keg,
 }
 WALLPAPERS = {"log_wall": _log_wall, "knotty_pine": _knotty_pine, "tartan": _tartan}
-STRETCH = {"sheepskin", "snowmobile", "ski_rack"}
+STRETCH = {"sheepskin", "snowmobile", "ski_rack", "feather_bed"}
 TALL = {
     "rocking_chair",
     "stone_fireplace",
@@ -538,4 +759,7 @@ TALL = {
     "fir_tree",
     "cuckoo_clock",
     "coat_stand",
+    "upright_piano",
+    "stone_bust",
+    "feather_bed",
 }

@@ -64,7 +64,7 @@ The homepage connects generated cases with the project's work on puzzle quality.
 Players can filter the collection and continue to a distinct unsolved case after each solve.
 The workshop introduction and main generated-case action sit on the left of the opening
 section, with the daily case and its date picker on the right. Previous/next controls,
-**Today** and a date slider browse the published season; future cases remain locked.
+**Today** and a date slider browse the released cases; a case stays locked until its date.
 Daily statistics and an expandable season calendar appear below.
 
 | Feature | What it does |
@@ -72,7 +72,7 @@ Daily statistics and an expandable season calendar appear below.
 | Board | Pick a suspect and tap a square; rows, columns and clashes update at once; notes, undo, drag and keyboard play |
 | Training case | A coach walks a first case one deduction at a time |
 | Hints | Three levels, from a nudge to the square itself, from solver data computed offline |
-| Daily case | Cases unlock by date from the published season; 14 locked cases in the current release, with streaks and a spoiler-free share line |
+| Daily case | A new case at 00:00 UTC, released a day at a time from a private dataset, with holiday cases, streaks and a spoiler-free share line |
 | Settings | Eight illustrated settings, from a manor and an ocean liner to a night train and a college library |
 | Large classics | The 16 × 16 estate and 24 × 24 museum, drawn in their own themes |
 | Results | The reveal, a closing paragraph, stars and a share card |
@@ -91,7 +91,7 @@ Daily statistics and an expandable season calendar appear below.
   plaques and a frame for each setting. Touching rooms get floors far enough apart in
   colour to tell them apart.
 - **Furniture and objects.** Each prop kind has a base drawing (`art/props.py`, 27 kinds),
-  and setting packs add skins (`art/skins/<setting>.py`, 77 so far): deck chairs and a
+  and setting packs add skins (`art/skins/<setting>.py`, 102 so far): deck chairs and a
   lifeboat aboard the liner, a sarcophagus and a meteorite in the museum, a snowmobile at
   the chalet. All follow one recipe, drawn in the footprint's frame with light from the
   upper left, 2.2 px ink outlines and a soft shadow, with tall pieces rising up to 36 px
@@ -113,6 +113,9 @@ Daily statistics and an expandable season calendar appear below.
   with. A restyle (`setter/restyles/`) only picks drawings that still show each noun in
   the setting's manner (the museum's "bed" is an antique four-poster, never a
   sarcophagus) and a floor and wallpaper for each room by name.
+- **Holiday cases.** A season's `calendar` gives chosen dates their own setting, title,
+  blurb, closing paragraph and objects (`art/skins/holiday_*.py`, 37 so far), so Christmas
+  Day has its tree on the board. See [the daily case](docs/guides/daily.md#a-season).
 - **Share cards** put the same drawings in a sticker style (`art/cards.py`) and show
   public facts only.
 - **Checks.** `scripts/check_vision_legibility.py` gates the art: text contrast, colour
@@ -126,9 +129,10 @@ a setting of its own rather than one shared look.
 
 Try it locally with `npm run release:local`, or build a zip for testers with
 `npm run package:preview`. Default releases use versioned content: the 24 frozen themed
-bundles in `content/showcase/player-bundles.jsonl`, five classics, one training case and
-14 locked daily cases. They rebuild the artwork and web assets without generating or
-re-theming the release puzzles, and do not require `outputs/showcase/`.
+bundles in `content/showcase/player-bundles.jsonl`, five classics and one training case, plus
+daily cases when `data/daily/` holds a local copy of the private dataset. They rebuild the
+artwork and web assets without generating or re-theming the release puzzles, and do not
+require `outputs/showcase/`.
 `npm run export:cases` rebuilds just the 30-case library from those same inputs.
 
 Build the production player and its standalone Research Lab with:
@@ -137,9 +141,10 @@ Build the production player and its standalone Research Lab with:
 python scripts/build_play.py --site-url https://everywheresafety.github.io/murdoku/play/
 ```
 
-This prepares `dist/` with daily share links for the production URL and the Lab at
-`lab/`. Copy the contents of `dist/` to the website checkout's `murdoku/play/`
-(`../site/murdoku/play/` in the paired checkout). The build itself does not publish.
+This prepares `dist/` with the player and the Lab at `lab/`. Copy the contents of `dist/` over
+the website checkout's `murdoku/play/` (`../site/murdoku/play/` in the paired checkout),
+keeping its `daily/`, `og/` and `d/` folders, which the website's
+[daily job](docs/guides/daily.md#daily-release) maintains. The build itself does not publish.
 `package_preview.py --site` remains available for temporary previews; set its `--lab`
 to `https://everywheresafety.github.io/murdoku/play/lab/`. The former `/murdoku/exp/`
 address is retained as a redirect, rather than hosting another player build.
@@ -212,9 +217,9 @@ npm ci
 npm run release:local
 ```
 
-Open **http://127.0.0.1:4173/** for the player (30 library cases and the published daily
-season) and **/lab/** for the research Lab. Each default build prepares the full library,
-locked daily cases, brand assets and design-token check from the source checkout.
+Open **http://127.0.0.1:4173/** for the player (30 library cases, plus daily cases if
+`data/daily/` holds them) and **/lab/** for the research Lab. Each default build prepares the
+full library, brand assets and design-token check from the source checkout.
 To play your own cases in the Lab:
 
 ```bash

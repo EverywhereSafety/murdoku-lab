@@ -67,8 +67,15 @@ export function ClueText({ text, refs, onRef }) {
   return parts;
 }
 
+// What a card says beyond the statements: the victim's rule, or why a suspect has nothing to read.
+export function personNote(game, person, clues) {
+  if (person.victim && game.goalType === "murderer") return t("case.victimNote");
+  return clues.length ? null : t("case.noStatement");
+}
+
 function SuspectCard({ game, person, index, state, selected, clashing, clues, refs, onSelect, onRef, onReview, hinted, coached }) {
   const where = state.placed[person.id];
+  const note = personNote(game, person, clues);
   const ref = useRef(null);
   const pointedAt = coached === person.id || clues.some((clue) => clue.id === hinted);
   useEffect(() => {
@@ -98,6 +105,7 @@ function SuspectCard({ game, person, index, state, selected, clashing, clues, re
           <span className="pl-where">{where ? t("case.placedAt", { cell: where.toUpperCase() }) : t("case.notPlaced")}</span>
         </header>
         {person.tags?.length > 0 && <p className="pl-person-tags">{person.tags.join(" · ")}</p>}
+        {note && <p className="pl-person-note">{note}</p>}
         {clues.map((clue) => (
           <p
             key={clue.id}
