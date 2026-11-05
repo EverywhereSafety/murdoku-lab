@@ -662,16 +662,29 @@ def build(spec, out=None, site_url="", through=None):
     return index
 
 
+def _through_date(through):
+    try:
+        return dt.date.fromisoformat(through).isoformat()
+    except (TypeError, ValueError):
+        raise SystemExit(f"invalid release date {through!r}; use YYYY-MM-DD") from None
+
+
 def fetch(spec, through):
     """Download the locked days due by ISO `through` from the private dataset, and nothing later.
     Uses the `hf` command, which logs in by itself on GitHub Actions (see the daily guide).
     """
+    through = _through_date(through)
     source = spec["dataset"]
     files = [
         f"{spec['season']}/days/{day['date']}.json"
         for day in plan(spec)
         if day["date"] <= through
     ]
+    if not files:
+        # With no filenames, `hf download` would fetch the entire private dataset.
+        raise SystemExit(
+            f"no daily cases due by {through}; season starts on {spec['start']}"
+        )
     subprocess.run(
         [
             str(Path(sys.executable).with_name("hf")),

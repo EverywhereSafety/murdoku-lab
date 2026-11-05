@@ -353,6 +353,18 @@ def test_fetch_downloads_only_the_days_due(spec, monkeypatch):
     assert command[command.index("--revision") + 1] == spec["dataset"]["revision"]
 
 
+@pytest.mark.parametrize("through", ["2026-10-11", "not-a-date", "2026-02-30"])
+def test_fetch_rejects_dates_with_no_due_cases_before_downloading(
+    spec, through, monkeypatch
+):
+    def forbidden(*args, **kwargs):
+        pytest.fail("an empty filename list would download the entire private dataset")
+
+    monkeypatch.setattr(daily.subprocess, "run", forbidden)
+    with pytest.raises(SystemExit):
+        daily.fetch(spec, through)
+
+
 def test_release_builds_through_two_days_ahead_and_says_what_is_left(
     spec, monkeypatch, capsys
 ):
