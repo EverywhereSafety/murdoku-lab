@@ -72,7 +72,7 @@ Daily statistics and an expandable season calendar appear below.
 | Board | Pick a suspect and tap a square; rows, columns and clashes update at once; notes, undo, drag and keyboard play |
 | Training case | A coach walks a first case one deduction at a time |
 | Hints | Three levels, from a nudge to the square itself, from solver data computed offline |
-| Daily case | Cases unlock by date and reach the site a day at a time from a private dataset, with streaks and a spoiler-free share line |
+| Daily case | A new case at 00:00 UTC, released a day at a time from a private dataset, with holiday cases, streaks and a spoiler-free share line |
 | Settings | Eight illustrated settings, from a manor and an ocean liner to a night train and a college library |
 | Large classics | The 16 × 16 estate and 24 × 24 museum, drawn in their own themes |
 | Results | The reveal, a closing paragraph, stars and a share card |
@@ -113,6 +113,9 @@ Daily statistics and an expandable season calendar appear below.
   with. A restyle (`setter/restyles/`) only picks drawings that still show each noun in
   the setting's manner (the museum's "bed" is an antique four-poster, never a
   sarcophagus) and a floor and wallpaper for each room by name.
+- **Holiday cases.** A season's `calendar` gives chosen dates their own setting, title,
+  blurb, closing paragraph and objects, drawn in `art/skins/holiday_*.py`, so Christmas Day
+  has its tree on the board. See [the daily case](docs/guides/daily.md#a-season).
 - **Share cards** put the same drawings in a sticker style (`art/cards.py`) and show
   public facts only.
 - **Checks.** `scripts/check_vision_legibility.py` gates the art: text contrast, colour

@@ -35,7 +35,7 @@ Python code lives in the installable `murdoku_lab` package.
 Paths above are relative to `murdoku_lab/`. Repository-level directories contain:
 
 - `config/`: user-facing endpoint examples, scene specifications and daily seasons.
-- `content/`: the training case and the locked daily cases.
+- `content/`: the training case, the frozen showcase and the content hashes of the daily cases, which live in a private dataset.
 - `scripts/`: data download, query preparation, rendering, showcase and local-release commands.
 - `web/src/`: the Lab (React), the player app (`web/src/play/`) and shared helpers.
 - `requirements/`: installation shortcuts and optional dependency groups.

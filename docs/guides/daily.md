@@ -218,7 +218,8 @@ Locked cases stay private until they are due. The website repository's scheduled
 **Timing.** A case unlocks at midnight UTC for every player, whatever their time zone. GitHub can
 delay or drop scheduled runs, so each run releases through two days ahead and one missed run leaves
 no gap. The player keeps a case locked until its date, so the time the job runs does not change when
-players see a case. Run the workflow by hand to catch up, or to release through a chosen date.
+players see a case. Run the workflow by hand to catch up. Leave its `through` input empty unless you
+mean to publish further ahead: the site is public, so anyone can read a released case early.
 
 **Failures.** The job fails if the dataset lacks a day that is due, or if the cases end within the
 two days it releases ahead, and GitHub emails whoever last edited the workflow. A failed run
