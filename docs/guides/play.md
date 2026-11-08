@@ -304,3 +304,11 @@ the Lab. Set `MURDOKU_TEST_URL` for another port. The proxy check works with bun
 cases; to also check a generated query gallery, supply that bundle to the server and set
 `MURDOKU_TEST_REVIEW_COUNT` to its case count. The browser checks use Playwright's
 Chromium, or another Chrome set with `MURDOKU_BROWSER_PATH`.
+
+## Hosted-site analytics
+
+The player and Lab HTML entry points include Everywhere Safety's shared
+Analytics loader. It runs only on `everywheresafety.github.io` in top-level
+pages; local previews and deployments on other hosts do not send site traffic.
+The production GA4 web stream uses Enhanced Measurement's browser-history page
+views for player navigation. There is no second manual `page_view` handler.
